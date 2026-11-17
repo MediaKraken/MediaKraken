@@ -17,22 +17,22 @@ pub async fn metadata_movie_lookup(
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
     let metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
 
-/*
-    // determine provider id's from nfo/xml if they exist
-    (nfo_data, xml_data) = metadata_nfo_xml.nfo_xml_file(dl_row.get("mdq_path"));
-    (imdb_id, tmdb_id) = metadata_nfo_xml.nfo_xml_id_lookup(nfo_data, xml_data);
-    // if same as last, return last id and save lookup
-    if (imdb_id != None && imdb_id == metadata_movie_lookup.metadata_last_imdb)
-        || (tmdb_id != None && tmdb_id == metadata_movie_lookup.metadata_last_tmdb) {
-        // don"t need to set last......since they are equal
+    /*
+        // determine provider id's from nfo/xml if they exist
+        (nfo_data, xml_data) = metadata_nfo_xml.nfo_xml_file(dl_row.get("mdq_path"));
+        (imdb_id, tmdb_id) = metadata_nfo_xml.nfo_xml_id_lookup(nfo_data, xml_data);
+        // if same as last, return last id and save lookup
+        if (imdb_id != None && imdb_id == metadata_movie_lookup.metadata_last_imdb)
+            || (tmdb_id != None && tmdb_id == metadata_movie_lookup.metadata_last_tmdb) {
+            // don"t need to set last......since they are equal
         return metadata_movie_lookup.metadata_last_id;
     }
     // doesn't match last id"s so continue lookup
-    // if ids from nfo/xml, query local db to see if exist
-    if tmdb_id != None {
-        let metadata_uuid = db_connection.db_meta_guid_by_tmdb(tmdb_id);
-    }
-    // keep these separate just in case imdb is there but tmdb isn"t
+        // if ids from nfo/xml, query local db to see if exist
+        if tmdb_id != None {
+            let metadata_uuid = db_connection.db_meta_guid_by_tmdb(tmdb_id);
+        }
+        // keep these separate just in case imdb is there but tmdb isn"t
     if imdb_id != None && metadata_uuid == None {
         let metadata_uuid = db_connection.db_meta_guid_by_imdb(imdb_id);
     }
@@ -84,16 +84,16 @@ pub async fn metadata_movie_lookup(
         db_connection.db_download_update(guid = dl_row.get("mdq_id"),
                                          status = "Search");
         // set provider last so it"s not picked up by the wrong thread
-        db_connection.db_download_update_provider("themoviedb", dl_row.get("mdq_id"));
-        db_connection.db_commit();
+            db_connection.db_download_update_provider("themoviedb", dl_row.get("mdq_id"));
+            db_connection.db_commit();
+        }
+        // set last values to negate lookups for same title/show
+        metadata_movie_lookup.metadata_last_id = metadata_uuid;
+        metadata_movie_lookup.metadata_last_imdb = imdb_id;
+        metadata_movie_lookup.metadata_last_tmdb = tmdb_id;
+        Ok(metadata_uuid)
     }
-    // set last values to negate lookups for same title/show
-    metadata_movie_lookup.metadata_last_id = metadata_uuid;
-    metadata_movie_lookup.metadata_last_imdb = imdb_id;
-    metadata_movie_lookup.metadata_last_tmdb = tmdb_id;
-    Ok(metadata_uuid)
-}
 
-*/
+    */
     Ok(metadata_uuid)
 }

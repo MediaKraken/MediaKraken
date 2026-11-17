@@ -11,13 +11,13 @@ panic = "abort"        # Removes unwinding infrastructure, reducing binary size 
 strip = true           # Removes debug symbols from the binary to reduce size (optional)
 
 [dependencies]
-mk_lib_common = { version = "0.0.253", registry = "kellnr" }
-mk_lib_database = { version = "0.0.286", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.254", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.265", registry = "kellnr" }
-mk_lib_network = { version = "0.0.253", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.258", registry = "kellnr" }
-mk_lib_share = { version = "0.0.262", registry = "kellnr" }
+mk_lib_common = { version = "0.0.254", registry = "kellnr" }
+mk_lib_database = { version = "0.0.287", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.255", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.266", registry = "kellnr" }
+mk_lib_network = { version = "0.0.254", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.259", registry = "kellnr" }
+mk_lib_share = { version = "0.0.263", registry = "kellnr" }
 
 askama = "0.16.0"
 askama_axum = "0.4.0"
