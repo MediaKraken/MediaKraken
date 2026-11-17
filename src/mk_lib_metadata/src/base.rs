@@ -243,6 +243,8 @@ pub async fn metadata_search(
         // }
     } else if provider_name == "tv_intros" || provider_name == "twitch" {
         lookup_halt = true;
+    } else if provider_name == "Z" {
+
     }
     Ok(())
 }

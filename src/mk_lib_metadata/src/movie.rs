@@ -10,18 +10,14 @@ pub struct MetadataMovieLastLookup {
 }
 
 pub async fn metadata_movie_lookup(
-    _sqlx_pool: &sqlx::PgPool,
-    _download_data: &DBDownloadQueueByProviderList,
-    _file_name: Metadata,
+    sqlx_pool: &sqlx::PgPool,
+    download_data: &DBDownloadQueueByProviderList,
+    file_name: Metadata,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
     let metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
-    Ok(metadata_uuid)
-}
 
 /*
-pub async fn metadata_movie_lookup(sqlx_pool: &sqlx::PgPool, dl_row, guessit_data) {
-
     // determine provider id's from nfo/xml if they exist
     (nfo_data, xml_data) = metadata_nfo_xml.nfo_xml_file(dl_row.get("mdq_path"));
     (imdb_id, tmdb_id) = metadata_nfo_xml.nfo_xml_id_lookup(nfo_data, xml_data);
@@ -97,4 +93,7 @@ pub async fn metadata_movie_lookup(sqlx_pool: &sqlx::PgPool, dl_row, guessit_dat
     metadata_movie_lookup.metadata_last_tmdb = tmdb_id;
     Ok(metadata_uuid)
 }
+
 */
+    Ok(metadata_uuid)
+}
