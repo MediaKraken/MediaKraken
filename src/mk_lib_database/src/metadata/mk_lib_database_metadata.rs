@@ -49,26 +49,6 @@ pub async fn mk_lib_database_metadata_genre_count(
     Ok(row.0)
 }
 
-/// Fetch the movie metadata record for a movie media id.
-///
-/// NOTE: the Python original also had a collection branch
-/// (`mm_metadata_collection_media_ids->>$1 = $2`) that passed a single bind
-/// for two placeholders, with unclear key/value semantics; not ported.
-pub async fn mk_lib_database_metadata_fetch_media_id_json(
-    sqlx_pool: &sqlx::PgPool,
-    media_id: i32,
-) -> Result<Option<(uuid::Uuid, i32)>, sqlx::Error> {
-    let row: Option<(uuid::Uuid, i32)> = sqlx::query_as(
-        r#"select mm_metadata_movie_guid, mm_metadata_movie_media_id
-        from mm_metadata_movie
-        where mm_metadata_movie_media_id = $1"#,
-    )
-    .bind(media_id)
-    .fetch_optional(sqlx_pool)
-    .await?;
-    Ok(row)
-}
-
 /// Lookup a movie metadata guid by name (and release year, when given).
 ///
 /// With a year, matches on `name` or `original_title` against the

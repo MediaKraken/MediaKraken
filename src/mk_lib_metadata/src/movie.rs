@@ -74,14 +74,11 @@ pub async fn metadata_movie_lookup(
 
     // doesn't match last id's so continue lookup
     // if ids from nfo/xml, query local db to see if exist
-    // NOTE: mk_lib_database_metadata_movie_guid_by_tmdb can't be used as-is:
-    // it binds a Uuid to the integer media id column and selects a column
-    // that doesn't exist, so the working media-id lookup is used instead.
     // A non-numeric tmdb id is treated as "not found locally".
     if let Some(tmdb_id) = tmdb_id.as_deref()
         && let Ok(tmdb_id_num) = tmdb_id.parse::<i32>()
-        && let Some((guid, _media_id)) =
-            mk_lib_database::database_metadata::mk_lib_database_metadata::mk_lib_database_metadata_fetch_media_id_json(
+        && let Some(guid) =
+            mk_lib_database::database_metadata::mk_lib_database_metadata::mk_lib_database_metadata_movie_guid_by_tmdb(
                 sqlx_pool,
                 tmdb_id_num,
             )
