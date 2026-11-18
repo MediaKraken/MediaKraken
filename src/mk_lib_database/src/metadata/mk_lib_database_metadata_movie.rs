@@ -304,14 +304,14 @@ pub async fn mk_lib_database_metadata_movie_insert(
 pub async fn mk_lib_database_metadata_movie_guid_by_tmdb(
     sqlx_pool: &sqlx::PgPool,
     media_id: i32,
-) -> Result<uuid::Uuid, sqlx::Error> {
-    let row: (uuid::Uuid,) = sqlx::query_as(
+) -> Result<Option<uuid::Uuid>, sqlx::Error> {
+    let row: Option<(uuid::Uuid,)> = sqlx::query_as(
         r#"select mm_metadata_movie_guid from mm_metadata_movie where mm_metadata_movie_media_id = $1"#,
     )
     .bind(media_id)
-    .fetch_one(sqlx_pool)
+    .fetch_optional(sqlx_pool)
     .await?;
-    Ok(row.0)
+    Ok(row.map(|row| row.0))
 }
 
 #[derive(Debug, FromRow, Deserialize, Serialize)]

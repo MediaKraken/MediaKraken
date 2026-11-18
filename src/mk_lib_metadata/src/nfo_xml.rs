@@ -283,18 +283,32 @@ pub async fn nfo_xml_id_lookup(
 /// nfo has no `<episodedetails>` (show-level `tvshow.nfo` files) the
 /// `<tvshow>` element is used instead.
 pub async fn nfo_id_lookup_tv(nfo_data: Option<&Value>) -> (Option<String>, Option<String>) {
+    let (imdb_id, _tvdb_id, tmdb_id) = nfo_id_lookup_tv_full(nfo_data).await;
+    (imdb_id, tmdb_id)
+}
+
+/// Look up all provider id's in nfo/xml for tv
+///
+/// Returns `(imdb_id, tvdb_id, tmdb_id)` from the `<episodedetails>` element.
+/// When the nfo has no `<episodedetails>` (show-level `tvshow.nfo` files) the
+/// `<tvshow>` element is used instead.
+pub async fn nfo_id_lookup_tv_full(
+    nfo_data: Option<&Value>,
+) -> (Option<String>, Option<String>, Option<String>) {
     let mut imdb_id = None;
+    let mut tvdb_id = None;
     let mut tmdb_id = None;
-    // load both fields for more data in media_id_json on db
+    // load all fields for more data in media_id_json on db
     if let Some(nfo_data) = nfo_data {
         let tv_node = first_named_node(nfo_data, "episodedetails")
             .or_else(|| first_named_node(nfo_data, "tvshow"));
         if let Some(tv_node) = tv_node {
             tmdb_id = find_provider_id(tv_node, "tmdbid", "tmdb");
             imdb_id = find_provider_id(tv_node, "imdbid", "imdb");
+            tvdb_id = find_provider_id(tv_node, "tvdbid", "tvdb");
         }
     }
-    (imdb_id, tmdb_id)
+    (imdb_id, tvdb_id, tmdb_id)
 }
 
 /// Returns the first top-level element named `name` inside `value`,
@@ -533,6 +547,20 @@ mod tests {
         let (imdb_id, tmdb_id) = nfo_id_lookup_tv(Some(&nfo)).await;
         assert_eq!(imdb_id, None);
         assert_eq!(tmdb_id, None);
+    }
+
+    #[tokio::test]
+    async fn test_tv_id_lookup_full_includes_tvdb() {
+        let nfo = parse(
+            "<episodedetails><title>Foo</title>\
+             <uniqueid type=\"imdb\">tt9601584</uniqueid>\
+             <uniqueid type=\"tmdb\" default=\"true\">1830976</uniqueid>\
+             <uniqueid type=\"tvdb\">8042515</uniqueid></episodedetails>",
+        );
+        let (imdb_id, tvdb_id, tmdb_id) = nfo_id_lookup_tv_full(Some(&nfo)).await;
+        assert_eq!(imdb_id.as_deref(), Some("tt9601584"));
+        assert_eq!(tvdb_id.as_deref(), Some("8042515"));
+        assert_eq!(tmdb_id.as_deref(), Some("1830976"));
     }
 
     #[tokio::test]

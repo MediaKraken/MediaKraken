@@ -78,7 +78,7 @@ pub async fn metadata_movie_lookup(
     if let Some(tmdb_id) = tmdb_id.as_deref()
         && let Ok(tmdb_id_num) = tmdb_id.parse::<i32>()
         && let Some(guid) =
-            mk_lib_database::database_metadata::mk_lib_database_metadata::mk_lib_database_metadata_movie_guid_by_tmdb(
+            mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_guid_by_tmdb(
                 sqlx_pool,
                 tmdb_id_num,
             )
