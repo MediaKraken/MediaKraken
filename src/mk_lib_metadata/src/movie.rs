@@ -1,12 +1,48 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 use std::error::Error;
+use std::sync::Mutex;
 use torrent_name_parser::Metadata;
 
-use crate::metadata_provider::tmdb as provider_tmdb;
+use crate::nfo_xml;
 
+/// Last lookup state for movies.
+///
+/// The Python original kept these values as class attributes on the
+/// `metadata_movie_lookup` function, so they are process-wide here as well:
+/// repeated lookups for the same ids within a worker run resolve without
+/// re-hitting the database.
 pub struct MetadataMovieLastLookup {
     metadata_last_id: uuid::Uuid,
-    metadata_last_tmdb: String,
+    metadata_last_imdb: Option<String>,
+    metadata_last_tmdb: Option<String>,
+}
+
+impl MetadataMovieLastLookup {
+    const fn new() -> Self {
+        Self {
+            metadata_last_id: uuid::Uuid::nil(),
+            metadata_last_imdb: None,
+            metadata_last_tmdb: None,
+        }
+    }
+}
+
+impl Default for MetadataMovieLastLookup {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+static MOVIE_LAST_LOOKUP: Mutex<MetadataMovieLastLookup> =
+    Mutex::new(MetadataMovieLastLookup::new());
+
+/// Locks the last lookup state, recovering from a poisoned mutex so one
+/// panicking thread doesn't wedge the lookup for the rest of the process.
+/// Callers must not hold the guard across an await.
+fn movie_last_lookup() -> std::sync::MutexGuard<'static, MetadataMovieLastLookup> {
+    MOVIE_LAST_LOOKUP
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
 pub async fn metadata_movie_lookup(
@@ -15,28 +51,51 @@ pub async fn metadata_movie_lookup(
     file_name: Metadata,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
-    let metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
+    let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
+
+    // determine provider id's from nfo/xml if they exist
+    let mut imdb_id: Option<String> = None;
+    let mut tmdb_id: Option<String> = None;
+    if let Some(download_path) = download_data.mm_download_path.as_ref() {
+        let (nfo_data, xml_data) = nfo_xml::nfo_xml_file(download_path).await;
+        (imdb_id, tmdb_id) = nfo_xml::nfo_xml_id_lookup(nfo_data.as_ref(), xml_data.as_ref()).await;
+    }
+
+    // if same as last, return last id and save lookup
+    {
+        let last = movie_last_lookup();
+        if (imdb_id.is_some() && imdb_id.as_deref() == last.metadata_last_imdb.as_deref())
+            || (tmdb_id.is_some() && tmdb_id.as_deref() == last.metadata_last_tmdb.as_deref())
+        {
+            // don't need to set last......since they are equal
+            return Ok(last.metadata_last_id);
+        }
+    }
+
+    // doesn't match last id's so continue lookup
+    // if ids from nfo/xml, query local db to see if exist
+    // NOTE: mk_lib_database_metadata_movie_guid_by_tmdb can't be used as-is:
+    // it binds a Uuid to the integer media id column and selects a column
+    // that doesn't exist, so the working media-id lookup is used instead.
+    // A non-numeric tmdb id is treated as "not found locally".
+    if let Some(tmdb_id) = tmdb_id.as_deref()
+        && let Ok(tmdb_id_num) = tmdb_id.parse::<i32>()
+        && let Some((guid, _media_id)) =
+            mk_lib_database::database_metadata::mk_lib_database_metadata::mk_lib_database_metadata_fetch_media_id_json(
+                sqlx_pool,
+                tmdb_id_num,
+            )
+            .await?
+    {
+        metadata_uuid = guid;
+    }
 
     /*
-        // determine provider id's from nfo/xml if they exist
-        (nfo_data, xml_data) = metadata_nfo_xml.nfo_xml_file(dl_row.get("mdq_path"));
-        (imdb_id, tmdb_id) = metadata_nfo_xml.nfo_xml_id_lookup(nfo_data, xml_data);
-        // if same as last, return last id and save lookup
-        if (imdb_id != None && imdb_id == metadata_movie_lookup.metadata_last_imdb)
-            || (tmdb_id != None && tmdb_id == metadata_movie_lookup.metadata_last_tmdb) {
-            // don"t need to set last......since they are equal
-        return metadata_movie_lookup.metadata_last_id;
-    }
-    // doesn't match last id"s so continue lookup
-        // if ids from nfo/xml, query local db to see if exist
-        if tmdb_id != None {
-            let metadata_uuid = db_connection.db_meta_guid_by_tmdb(tmdb_id);
-        }
-        // keep these separate just in case imdb is there but tmdb isn"t
-    if imdb_id != None && metadata_uuid == None {
-        let metadata_uuid = db_connection.db_meta_guid_by_imdb(imdb_id);
-    }
-    // if ids from nfo/xml on local db
+    // not ported: the "Fetch" update below also stores the provider id in
+    // mm_download_provider_id and no mk_lib_database function updates that
+    // column on an existing queue row yet. Setting the status to "Fetch"
+    // without it would make the Fetch worker fail on a missing provider_id,
+    // so the whole branch stays off until the db helper exists.
     if metadata_uuid == None {
         // check to see if id is known from nfo/xml but not in db yet so fetch data
         if tmdb_id != None || imdb_id != None {
@@ -64,36 +123,47 @@ pub async fn metadata_movie_lookup(
             }
         }
     }
+    */
+
     // leave this AFTER the dl check as it looks at tmdbid and imdb for values!
-    if metadata_uuid == None {
+    if metadata_uuid == uuid::Uuid::nil() {
         // no ids found on the local database so begin name/year searches
         // db lookup by name and year (if available)
-        if "year" in file_name {
-            let metadata_uuid = db_connection.db_find_metadata_guid(file_name["title"],
-            file_name["year"]); }
-        else {
-            let metadata_uuid = db_connection.db_find_metadata_guid(file_name["title"], None);
-        }
+        metadata_uuid =
+            mk_lib_database::database_metadata::mk_lib_database_metadata::mk_lib_database_metadata_find_guid(
+                sqlx_pool,
+                file_name.title(),
+                file_name.year(),
+            )
+            .await?
+            .unwrap_or(uuid::Uuid::nil());
     }
-    if metadata_uuid == None {
-        let metadata_uuid = dl_row.get("mdq_new_uuid");
+
+    if metadata_uuid == uuid::Uuid::nil() {
+        metadata_uuid = download_data.mm_download_new_uuid;
         // no matches by name/year on local database
         // search themoviedb since not matched above via DB or nfo/xml
         // save the updated status
-        db_connection.db_begin();
-        db_connection.db_download_update(guid = dl_row.get("mdq_id"),
-                                         status = "Search");
-        // set provider last so it"s not picked up by the wrong thread
-            db_connection.db_download_update_provider("themoviedb", dl_row.get("mdq_id"));
-            db_connection.db_commit();
-        }
-        // set last values to negate lookups for same title/show
-        metadata_movie_lookup.metadata_last_id = metadata_uuid;
-        metadata_movie_lookup.metadata_last_imdb = imdb_id;
-        metadata_movie_lookup.metadata_last_tmdb = tmdb_id;
-        Ok(metadata_uuid)
+        mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_status_update(
+            sqlx_pool,
+            download_data.mm_download_guid,
+            "Search".to_string(),
+        )
+        .await?;
+        // set provider last so it's not picked up by the wrong thread
+        mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(
+            sqlx_pool,
+            "themoviedb".to_string(),
+            download_data.mm_download_guid,
+        )
+        .await?;
     }
 
-    */
+    // set last values to negate lookups for same title/show
+    let mut last = movie_last_lookup();
+    last.metadata_last_id = metadata_uuid;
+    last.metadata_last_imdb = imdb_id;
+    last.metadata_last_tmdb = tmdb_id;
+
     Ok(metadata_uuid)
 }

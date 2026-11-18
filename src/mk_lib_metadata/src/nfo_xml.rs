@@ -203,6 +203,33 @@ pub async fn nfo_file_tv(media_file_path: &str) -> Option<Value> {
     None
 }
 
+/// Find and load nfo and xml file(s) if they exist (movies)
+///
+/// Checks the directory of the media file for `movie.nfo` and `movie.xml`
+/// and returns `(nfo_data, xml_data)`. Either entry is `None` when the file
+/// is missing, unreadable or not valid XML.
+pub async fn nfo_xml_file(media_file_path: &str) -> (Option<Value>, Option<Value>) {
+    let Some(media_dir) = Path::new(media_file_path).parent() else {
+        return (None, None);
+    };
+
+    let nfo_file = media_dir.join("movie.nfo");
+    let nfo_data = if nfo_file.is_file() {
+        nfo_file_load(&nfo_file)
+    } else {
+        None
+    };
+
+    let xml_file = media_dir.join("movie.xml");
+    let xml_data = if xml_file.is_file() {
+        nfo_file_load(&xml_file)
+    } else {
+        None
+    };
+
+    (nfo_data, xml_data)
+}
+
 /// Lookup by id's in nfo/xml files
 ///
 /// Returns `(imdb_id, tmdb_id)`. Both the legacy direct `<imdbid>` /
@@ -606,6 +633,48 @@ mod tests {
 
         let nfo_data = nfo_file_tv(dir.join("show.mkv").to_str().unwrap()).await;
         assert_eq!(nfo_data, None);
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[tokio::test]
+    async fn test_nfo_xml_file_finds_movie_nfo_and_xml() {
+        let dir =
+            std::env::temp_dir().join(format!("mk_nfo_xml_test_movie_{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(
+            dir.join("movie.nfo"),
+            "<movie><uniqueid type=\"imdb\">tt6856242</uniqueid>\
+             <uniqueid type=\"tmdb\" default=\"true\">476669</uniqueid></movie>",
+        )
+        .unwrap();
+        std::fs::write(
+            dir.join("movie.xml"),
+            "<Title><Name>Foo</Name><IMDB>tt1234567</IMDB><TMDbId>54321</TMDbId></Title>",
+        )
+        .unwrap();
+
+        let media_path = dir.join("movie.mkv");
+        let (nfo_data, xml_data) = nfo_xml_file(media_path.to_str().unwrap()).await;
+        let (imdb_id, tmdb_id) = nfo_xml_id_lookup(nfo_data.as_ref(), xml_data.as_ref()).await;
+        // nfo ids take priority over the xml ones
+        assert_eq!(imdb_id.as_deref(), Some("tt6856242"));
+        assert_eq!(tmdb_id.as_deref(), Some("476669"));
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[tokio::test]
+    async fn test_nfo_xml_file_missing_returns_none_pair() {
+        let dir = std::env::temp_dir().join(format!(
+            "mk_nfo_xml_test_movie_empty_{}",
+            std::process::id()
+        ));
+        std::fs::create_dir_all(&dir).unwrap();
+
+        let (nfo_data, xml_data) = nfo_xml_file(dir.join("movie.mkv").to_str().unwrap()).await;
+        assert_eq!(nfo_data, None);
+        assert_eq!(xml_data, None);
 
         let _ = std::fs::remove_dir_all(&dir);
     }
