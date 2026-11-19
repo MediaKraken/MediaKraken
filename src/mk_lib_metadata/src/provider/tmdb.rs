@@ -5,11 +5,13 @@ use mk_lib_common::mk_lib_common_enum_media_type;
 use mk_lib_database;
 use mk_lib_image;
 use mk_lib_network::mk_lib_network;
+use parse_torrent_title::ParsedTitle;
 use serde_json::json;
 use sqlx::types::Uuid;
 use std::env;
 use tokio::time::{Duration, sleep};
-use torrent_name_parser::Metadata;
+
+use crate::guessit::parsed_year;
 
 const TMDB_RATE_LIMIT_STATUS_CODE: i64 = 25;
 const TMDB_RATE_LIMIT_RETRY_ATTEMPTS: u8 = 5;
@@ -363,9 +365,9 @@ pub async fn provider_tmdb_meta_info_build(
     Ok(image_json)
 }
 
-pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_api_key: &str) {
+pub async fn provider_tmdb_search(guessit_data: ParsedTitle, media_type: i16, tmdb_api_key: &str) {
     let mut raw_query = guessit_data.title().to_string();
-    if let Some(year) = guessit_data.year() {
+    if let Some(year) = parsed_year(&guessit_data) {
         raw_query.push(' ');
         raw_query.push_str(&year.to_string());
     }
@@ -429,7 +431,7 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
     let Some(results) = url_result.get("results").and_then(|v| v.as_array()) else {
         return;
     };
-    let Some(media_year) = guessit_data.year() else {
+    let Some(media_year) = parsed_year(&guessit_data) else {
         return;
     };
 
@@ -452,7 +454,7 @@ pub async fn provider_tmdb_search(guessit_data: Metadata, media_type: i16, tmdb_
         }
         // Python matched the release year against media_year ± 3
         // (the Python `type(media_year) is not list` guard no longer applies
-        // because guessit_data.year() is a single Option<i32>).
+        // because parsed_year() is a single Option<i32>).
         let year_match = release_year
             .parse::<i64>()
             .is_ok_and(|year| ((media_year as i64 - 3)..=(media_year as i64 + 3)).contains(&year));

@@ -1,10 +1,10 @@
 use crate::guessit;
 use mk_lib_common::mk_lib_common_enum_media_type;
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use parse_torrent_title::ParsedTitle;
 use serde_json::json;
 use std::env;
 use std::error::Error;
-use torrent_name_parser::Metadata;
 
 use super::adult as metadata_adult;
 use super::anime as metadata_anime;
@@ -82,7 +82,7 @@ pub async fn metadata_search(
     let mut set_fetch: bool = false;
     let mut lookup_halt: bool = false;
     let _update_provider = String::new();
-    let guessit_data: Metadata;
+    let guessit_data: ParsedTitle;
     if provider_name == "anidb" {
         guessit_data = guessit::metadata_guessit(
             sqlx_pool,

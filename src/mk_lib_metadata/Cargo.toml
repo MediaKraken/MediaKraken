@@ -24,7 +24,8 @@ id3 = "1.17.1"
 #lib-mal = "0.5.1"  # myanimelist
 mangadex = "0.1.2"
 # musicbrainz_rs = { version = "0.5.0", features = ["async"] }
-quick-xml = "0.41.0"
+parse-torrent-title = "2.0.10"
+quick-xml = "0.42.0"
 rand = "0.10.2"
 reqwest = "0.13.4"
 # rusty_ytdl = "0.6.2"  # breaks sscache
@@ -42,7 +43,6 @@ soundcloud = "0.4.0"
 tokio = "1.53.1"
 tokio-util = { version = "0.7.19", features = ["compat"] }
 url = "2.5"
-torrent-name-parser = "0.12.1"
 uuid = { version = "1.25.0", features = ["serde", "v4"] }
 
 [features]

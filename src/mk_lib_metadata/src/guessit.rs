@@ -1,7 +1,7 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use parse_torrent_title::{ParsedTitle, Value};
 use std::error::Error;
 use std::path::Path;
-use torrent_name_parser::Metadata;
 
 pub async fn metadata_guessit(
     sqlx_pool: &sqlx::PgPool,
@@ -9,7 +9,7 @@ pub async fn metadata_guessit(
     mut metadata_last_title: String,
     mut metadata_last_year: i32,
     mut metadata_last_uuid: uuid::Uuid,
-) -> Result<Metadata, Box<dyn Error>> {
+) -> Result<ParsedTitle, Box<dyn Error>> {
     let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
     // check for dupes by name/year
     let download_path = download_data
@@ -22,12 +22,15 @@ pub async fn metadata_guessit(
         .to_str()
         .ok_or("download path is not valid UTF-8")?
         .to_string();
-    let guessit_data: Metadata = Metadata::from(&file_name)
-        .map_err(|e| format!("torrent_name_parser failed on {}: {:?}", file_name, e))?;
+    // parse() never fails; a name with no parseable title yields an empty
+    // title(), which is handled by the else branch below like the old
+    // torrent_name_parser error path did.
+    let guessit_data: ParsedTitle = parse_torrent_title::parse(&file_name);
     if !guessit_data.title().is_empty() {
-        if guessit_data.year().is_some() {
+        if parsed_year(&guessit_data).is_some() {
             if guessit_data.title().to_lowercase() == metadata_last_title
-                && guessit_data.year().ok_or("year is_some but not a value")? == metadata_last_year
+                && parsed_year(&guessit_data).ok_or("year is_some but not a value")?
+                    == metadata_last_year
             {
                 // matches last media scanned, so set with that metadata id
                 metadata_uuid = metadata_last_uuid;
@@ -39,8 +42,9 @@ pub async fn metadata_guessit(
         // allow none to be set so unmatched stuff can work for skipping
         metadata_last_uuid = metadata_uuid;
         metadata_last_title = guessit_data.title().to_lowercase();
-        if guessit_data.year().is_some() {
-            metadata_last_year = guessit_data.year().ok_or("year is_some but not a value")?;
+        if parsed_year(&guessit_data).is_some() {
+            metadata_last_year =
+                parsed_year(&guessit_data).ok_or("year is_some but not a value")?;
         } else {
             metadata_last_year = 0;
         }
@@ -54,6 +58,18 @@ pub async fn metadata_guessit(
     }
     //Ok((metadata_uuid, guessit_data))
     Ok(guessit_data)
+}
+
+/// The single year of a parsed title, if any.
+///
+/// `ParsedTitle::year` may be a year range (e.g. "2010-2012"); only a plain
+/// integer year is returned, mirroring the old `torrent_name_parser`
+/// `year() -> Option<i32>` behavior.
+pub(crate) fn parsed_year(parsed: &ParsedTitle) -> Option<i32> {
+    parsed
+        .year()
+        .and_then(Value::as_int)
+        .map(|year| year as i32)
 }
 
 // Cross-platform by construction: treats both '/' and '\\' as separators and
@@ -192,26 +208,28 @@ mod tests {
     }
 
     #[test]
-    fn test_torrent_name_parser_basic() {
-        let metadata = Metadata::from("The.Matrix.1999.1080pBluRay.x264").unwrap();
+    fn test_parse_torrent_title_basic() {
+        let metadata = parse_torrent_title::parse("The.Matrix.1999.1080pBluRay.x264");
         assert_eq!(metadata.title(), "The Matrix");
     }
 
     #[test]
-    fn test_torrent_name_parser_with_year() {
-        let metadata = Metadata::from("Movie.Name.2020.720p.Webrip").unwrap();
+    fn test_parse_torrent_title_with_year() {
+        let metadata = parse_torrent_title::parse("Movie.Name.2020.720p.Webrip");
         assert_eq!(metadata.title(), "Movie Name");
+        assert_eq!(parsed_year(&metadata), Some(2020));
     }
 
     #[test]
-    fn test_torrent_name_parser_spongebob() {
-        let metadata = Metadata::from("SpongeBob.SquarePants.S01E01").unwrap();
+    fn test_parse_torrent_title_spongebob() {
+        let metadata = parse_torrent_title::parse("SpongeBob.SquarePants.S01E01");
         assert_eq!(metadata.title(), "SpongeBob SquarePants");
     }
 
     #[test]
-    fn test_torrent_name_parser_invalid() {
-        let result = Metadata::from("");
-        assert!(result.is_err());
+    fn test_parse_torrent_title_invalid() {
+        // parse() never fails; an unparseable name yields an empty title
+        let metadata = parse_torrent_title::parse("");
+        assert!(metadata.title().is_empty());
     }
 }

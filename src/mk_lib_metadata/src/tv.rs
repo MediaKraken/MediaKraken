@@ -1,8 +1,8 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use parse_torrent_title::ParsedTitle;
 use serde_json::json;
 use std::error::Error;
 use std::sync::Mutex;
-use torrent_name_parser::Metadata;
 
 use crate::nfo_xml;
 
@@ -50,7 +50,7 @@ fn tv_last_lookup() -> std::sync::MutexGuard<'static, MetadataTVLastLookup> {
 pub async fn metadata_tv_lookup(
     sqlx_pool: &sqlx::PgPool,
     download_data: &DBDownloadQueueByProviderList,
-    file_name: Metadata,
+    file_name: ParsedTitle,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later

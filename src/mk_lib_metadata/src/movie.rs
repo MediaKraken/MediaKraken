@@ -1,8 +1,9 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use parse_torrent_title::ParsedTitle;
 use std::error::Error;
 use std::sync::Mutex;
-use torrent_name_parser::Metadata;
 
+use crate::guessit::parsed_year;
 use crate::nfo_xml;
 
 /// Last lookup state for movies.
@@ -48,7 +49,7 @@ fn movie_last_lookup() -> std::sync::MutexGuard<'static, MetadataMovieLastLookup
 pub async fn metadata_movie_lookup(
     sqlx_pool: &sqlx::PgPool,
     download_data: &DBDownloadQueueByProviderList,
-    file_name: Metadata,
+    file_name: ParsedTitle,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
     // don't bother checking title/year as the main_server_metadata_api_worker does it already
     let mut metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
@@ -130,7 +131,7 @@ pub async fn metadata_movie_lookup(
             mk_lib_database::database_metadata::mk_lib_database_metadata::mk_lib_database_metadata_find_guid(
                 sqlx_pool,
                 file_name.title(),
-                file_name.year(),
+                parsed_year(&file_name),
             )
             .await?
             .unwrap_or(uuid::Uuid::nil());

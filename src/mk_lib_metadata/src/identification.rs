@@ -9,15 +9,15 @@ use crate::music_video;
 use crate::sports;
 use crate::tv;
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use parse_torrent_title::ParsedTitle;
 use std::error::Error;
-use torrent_name_parser::Metadata;
 
 pub async fn metadata_identification(
     sqlx_pool: &sqlx::PgPool,
     dl_row: &DBDownloadQueueByProviderList,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
     let mut metadata_uuid: uuid::Uuid = uuid::Uuid::nil();
-    let guessit_data: Metadata;
+    let guessit_data: ParsedTitle;
     println!("typeL {}", dl_row.mm_download_que_type);
     match dl_row.mm_download_que_type {
         mk_lib_common::mk_lib_common_enum_media_type::DLMediaType::ADULT

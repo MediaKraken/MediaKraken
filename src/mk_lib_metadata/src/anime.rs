@@ -1,6 +1,6 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
+use parse_torrent_title::ParsedTitle;
 use std::error::Error;
-use torrent_name_parser::Metadata;
 
 use crate::metadata_provider::anidb as provider_anidb;
 use crate::metadata_provider::tmdb as provider_tmdb;
@@ -14,7 +14,7 @@ pub struct MetadataAnimeLastLookup {
 pub async fn metadata_anime_lookup(
     _sqlx_pool: &sqlx::PgPool,
     _download_data: &DBDownloadQueueByProviderList,
-    _file_name: Metadata,
+    _file_name: ParsedTitle,
 ) -> Result<uuid::Uuid, Box<dyn Error>> {
     let metadata_uuid = uuid::Uuid::nil(); // so not found checks verify later
     Ok(metadata_uuid)
