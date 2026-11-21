@@ -108,15 +108,11 @@ pub fn nfo_xml_parse(xml: &str) -> Result<Value, Box<dyn Error>> {
     loop {
         match reader.read_event_into(&mut buf) {
             Ok(Event::Start(start)) => {
-                let name = std::str::from_utf8(start.local_name().as_ref())
-                    .map(str::to_string)
-                    .map_err(|_| "invalid utf-8 in nfo element name")?;
+                let name = start.local_name().as_ref().to_string();
                 let mut attrs = Vec::new();
                 for attr in start.attributes() {
                     let attr = attr?;
-                    let key = std::str::from_utf8(attr.key.local_name().as_ref())
-                        .map_err(|_| "invalid utf-8 in nfo attribute name")?
-                        .to_string();
+                    let key = attr.key.local_name().as_ref().to_string();
                     let value = attr.normalized_value(XmlVersion::Implicit1_0)?.into_owned();
                     attrs.push((key, value));
                 }
@@ -139,21 +135,20 @@ pub fn nfo_xml_parse(xml: &str) -> Result<Value, Box<dyn Error>> {
             }
             Ok(Event::Text(text)) => {
                 if let Some(parent) = stack.last_mut() {
-                    let decoded = text.decode()?;
-                    let unescaped = quick_xml::escape::unescape(&decoded)?;
+                    let unescaped = quick_xml::escape::unescape(&text)?;
                     parent.text.push_str(&unescaped);
                 }
             }
             Ok(Event::CData(cdata)) => {
                 if let Some(parent) = stack.last_mut() {
-                    parent.text.push_str(&cdata.decode()?);
+                    parent.text.push_str(&cdata);
                 }
             }
             // entity references: quick-xml emits every `&name;` / `&#nn;`
             // reference as its own event, so expand it here
             Ok(Event::GeneralRef(reference)) => {
                 if let Some(parent) = stack.last_mut() {
-                    let name = reference.decode()?;
+                    let name: &str = &reference;
                     let entity = format!("&{name};");
                     let expanded = quick_xml::escape::unescape(&entity)?.into_owned();
                     parent.text.push_str(&expanded);

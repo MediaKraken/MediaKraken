@@ -102,6 +102,17 @@ async fn run_provider_loop(
             Ok(items) => items,
             Err(err) => {
                 eprintln!("mkmetadata: {provider} queue read failed ({err})");
+                if debug
+                    && let Err(push_err) = mk_logging_loki_push(json!({
+                        "Type": "QueueReadError",
+                        "Module": std::module_path!(),
+                        "Provider": provider,
+                        "Error": err.to_string(),
+                    }))
+                    .await
+                {
+                    eprintln!("mkmetadata: {provider} loki push failed ({push_err})");
+                }
                 Vec::new()
             }
         };

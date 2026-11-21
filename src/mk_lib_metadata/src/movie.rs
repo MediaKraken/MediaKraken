@@ -1,8 +1,10 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 use parse_torrent_title::ParsedTitle;
+use serde_json::json;
 use std::error::Error;
 use std::sync::Mutex;
 
+use crate::base::metadata_debug_log;
 use crate::guessit::parsed_year;
 use crate::nfo_xml;
 
@@ -61,16 +63,34 @@ pub async fn metadata_movie_lookup(
         let (nfo_data, xml_data) = nfo_xml::nfo_xml_file(download_path).await;
         (imdb_id, tmdb_id) = nfo_xml::nfo_xml_id_lookup(nfo_data.as_ref(), xml_data.as_ref()).await;
     }
+    metadata_debug_log(json!({
+        "Type": "MovieLookupNfo",
+        "Module": std::module_path!(),
+        "DL Guid": download_data.mm_download_guid,
+        "ImdbId": imdb_id,
+        "TmdbId": tmdb_id,
+    }))
+    .await;
 
-    // if same as last, return last id and save lookup
-    {
+    // if same as last, return last id and save lookup. The guard's scope
+    // ends before any await: a std MutexGuard is !Send.
+    let cached_id = {
         let last = movie_last_lookup();
-        if (imdb_id.is_some() && imdb_id.as_deref() == last.metadata_last_imdb.as_deref())
-            || (tmdb_id.is_some() && tmdb_id.as_deref() == last.metadata_last_tmdb.as_deref())
-        {
-            // don't need to set last......since they are equal
-            return Ok(last.metadata_last_id);
-        }
+        let is_last = (imdb_id.is_some()
+            && imdb_id.as_deref() == last.metadata_last_imdb.as_deref())
+            || (tmdb_id.is_some() && tmdb_id.as_deref() == last.metadata_last_tmdb.as_deref());
+        is_last.then(|| last.metadata_last_id)
+    };
+    if let Some(cached_id) = cached_id {
+        // don't need to set last......since they are equal
+        metadata_debug_log(json!({
+            "Type": "MovieLookupCacheHit",
+            "Module": std::module_path!(),
+            "DL Guid": download_data.mm_download_guid,
+            "MetadataUuid": cached_id,
+        }))
+        .await;
+        return Ok(cached_id);
     }
 
     // doesn't match last id's so continue lookup
@@ -86,6 +106,14 @@ pub async fn metadata_movie_lookup(
             .await?
     {
         metadata_uuid = guid;
+        metadata_debug_log(json!({
+            "Type": "MovieLookupDbTmdbId",
+            "Module": std::module_path!(),
+            "DL Guid": download_data.mm_download_guid,
+            "TmdbId": tmdb_id_num,
+            "MetadataUuid": guid,
+        }))
+        .await;
     }
 
     /*
@@ -135,10 +163,32 @@ pub async fn metadata_movie_lookup(
             )
             .await?
             .unwrap_or(uuid::Uuid::nil());
+        if metadata_uuid != uuid::Uuid::nil() {
+            metadata_debug_log(json!({
+                "Type": "MovieLookupDbNameYear",
+                "Module": std::module_path!(),
+                "DL Guid": download_data.mm_download_guid,
+                "Title": file_name.title(),
+                "Year": parsed_year(&file_name),
+                "MetadataUuid": metadata_uuid,
+            }))
+            .await;
+        }
     }
 
     if metadata_uuid == uuid::Uuid::nil() {
         metadata_uuid = download_data.mm_download_new_uuid;
+        metadata_debug_log(json!({
+            "Type": "MovieLookupNoLocalMatch",
+            "Module": std::module_path!(),
+            "DL Guid": download_data.mm_download_guid,
+            "Title": file_name.title(),
+            "Year": parsed_year(&file_name),
+            "ImdbId": imdb_id,
+            "TmdbId": tmdb_id,
+            "Note": "row re-pointed at themoviedb for the remote search",
+        }))
+        .await;
         // no matches by name/year on local database
         // search themoviedb since not matched above via DB or nfo/xml
         // save the updated status
@@ -157,11 +207,17 @@ pub async fn metadata_movie_lookup(
         .await?;
     }
 
-    // set last values to negate lookups for same title/show
-    let mut last = movie_last_lookup();
-    last.metadata_last_id = metadata_uuid;
-    last.metadata_last_imdb = imdb_id;
-    last.metadata_last_tmdb = tmdb_id;
+    // set last values to negate lookups for same title/show. A miss
+    // must not be cached: on a miss metadata_uuid is this row's
+    // mm_download_new_uuid placeholder, and caching it would make a
+    // later file with the same NFO id resolve to a media guid that may
+    // never become a metadata record.
+    if metadata_uuid != uuid::Uuid::nil() && metadata_uuid != download_data.mm_download_new_uuid {
+        let mut last = movie_last_lookup();
+        last.metadata_last_id = metadata_uuid;
+        last.metadata_last_imdb = imdb_id;
+        last.metadata_last_tmdb = tmdb_id;
+    }
 
     Ok(metadata_uuid)
 }

@@ -11,8 +11,8 @@ panic = "abort"        # Removes unwinding infrastructure, reducing binary size 
 strip = true           # Removes debug symbols from the binary to reduce size (optional)
 
 [dependencies]
-mk_lib_hardware = { version = "0.0.262", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.261", registry = "kellnr" }
+mk_lib_hardware = { version = "0.0.266", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.265", registry = "kellnr" }
 
 serde_json = "1.0.150"
 tokio = { version = "1.53.1", features = ["full"] }

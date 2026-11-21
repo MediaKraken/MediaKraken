@@ -44,29 +44,35 @@ async fn tmdb_fetch_json_with_retry(
     Err("TMDB rate limit persisted after retries".into())
 }
 
+/// Fetches a movie by TMDB id and inserts the metadata record.
+///
+/// Returns `Ok(true)` only when the metadata record was inserted; a
+/// TMDB error status (or a missing record) skips the insert and returns
+/// `Ok(false)` so the caller does not link the media row to a guid that
+/// does not exist.
 pub async fn provider_tmdb_movie_fetch(
     sqlx_pool: &sqlx::PgPool,
     tmdb_id: i32,
     metadata_uuid: Uuid,
     tmdb_api_key: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<bool, Box<dyn std::error::Error>> {
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_movie_fetch_by_id(tmdb_id, tmdb_api_key).await?;
     if let Some(status) = result_json.get("status_code").and_then(|v| v.as_i64())
         && status != 0
     {
         println!("Skip Movie: {}", tmdb_id);
-        return Ok(());
+        return Ok(false);
     }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await?;
-    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(
+    mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_insert(
         sqlx_pool,
         metadata_uuid,
         tmdb_id,
         &result_json,
         image_json,
     )
-    .await;
+    .await?;
     if result_json.get("credits").is_some() {
         // cast/crew doesn't exist on all media
         if result_json["credits"].get("cast").is_some() {
@@ -88,15 +94,17 @@ pub async fn provider_tmdb_movie_fetch(
     if result_json.get("belongs to collection").is_some() {
         // TODO check for and insert collections fetch record
     }
-    Ok(())
+    Ok(true)
 }
 
+/// Fetches a person by TMDB id and inserts the metadata record.
+/// See [`provider_tmdb_movie_fetch`] for the `bool` contract.
 pub async fn provider_tmdb_person_fetch(
     sqlx_pool: &sqlx::PgPool,
     tmdb_id: i32,
     metadata_uuid: Uuid,
     tmdb_api_key: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<bool, Box<dyn std::error::Error>> {
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_person_fetch_by_id(tmdb_id, tmdb_api_key).await?;
     if debug_logging_enabled() {
@@ -109,7 +117,7 @@ pub async fn provider_tmdb_person_fetch(
         && status != 0
     {
         println!("Skip Person: {}", tmdb_id);
-        return Ok(());
+        return Ok(false);
     }
     if debug_logging_enabled() {
         mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
@@ -118,40 +126,42 @@ pub async fn provider_tmdb_person_fetch(
         .await?;
     }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await?;
-    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert(
+    mk_lib_database::database_metadata::mk_lib_database_metadata_person::mk_lib_database_metadata_person_insert(
         sqlx_pool,
         metadata_uuid,
         tmdb_id,
         &result_json,
         image_json,
     )
-    .await;
-    Ok(())
+    .await?;
+    Ok(true)
 }
 
+/// Fetches a TV show by TMDB id and inserts the metadata record.
+/// See [`provider_tmdb_movie_fetch`] for the `bool` contract.
 pub async fn provider_tmdb_tv_fetch(
     sqlx_pool: &sqlx::PgPool,
     tmdb_id: i32,
     metadata_uuid: Uuid,
     tmdb_api_key: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<bool, Box<dyn std::error::Error>> {
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_tv_fetch_by_id(tmdb_id, tmdb_api_key).await?;
     if let Some(status) = result_json.get("status_code").and_then(|v| v.as_i64())
         && status != 0
     {
         println!("Skip TV: {}", tmdb_id);
-        return Ok(());
+        return Ok(false);
     }
     let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await?;
-    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
+    mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_insert(
         sqlx_pool,
         metadata_uuid,
         tmdb_id,
         &result_json,
         image_json,
     )
-    .await;
+    .await?;
     if result_json.get("credits").is_some() {
         // cast/crew doesn't exist on all media
         if result_json["credits"].get("cast").is_some() {
@@ -170,22 +180,26 @@ pub async fn provider_tmdb_tv_fetch(
             .await;
         }
     }
-    Ok(())
+    Ok(true)
 }
 
+/// Fetches a collection by TMDB id.
+///
+/// The metadata insert is not ported yet, so this always reports
+/// `Ok(false)` and the caller must not link a media row to it.
 pub async fn provider_tmdb_collection_fetch(
     _sqlx_pool: &sqlx::PgPool,
     tmdb_id: i32,
     _metadata_uuid: Uuid,
     tmdb_api_key: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<bool, Box<dyn std::error::Error>> {
     // fetch and save json data via tmdb id
     let result_json = provider_tmdb_collection_fetch_by_id(tmdb_id, tmdb_api_key).await?;
     if let Some(status) = result_json.get("status_code").and_then(|v| v.as_i64())
         && status != 0
     {
         println!("Skip Collection: {}", tmdb_id);
-        return Ok(());
+        return Ok(false);
     }
     // let image_json: serde_json::Value = provider_tmdb_meta_info_build(&result_json).await.unwrap();
     // let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_collection::mk_lib_database_meta_collection_insert(
@@ -196,7 +210,7 @@ pub async fn provider_tmdb_collection_fetch(
     //     image_json,
     // )
     // .await;
-    Ok(())
+    Ok(false)
 }
 
 pub async fn provider_tmdb_movie_id_max(
@@ -365,7 +379,14 @@ pub async fn provider_tmdb_meta_info_build(
     Ok(image_json)
 }
 
-pub async fn provider_tmdb_search(guessit_data: ParsedTitle, media_type: i16, tmdb_api_key: &str) {
+/// Searches TMDB by title/year and returns the first result whose release
+/// year matches within ±3, or `None` when the search fails, yields no
+/// results, or nothing matches the year.
+pub async fn provider_tmdb_search(
+    guessit_data: ParsedTitle,
+    media_type: i16,
+    tmdb_api_key: &str,
+) -> Option<i32> {
     let mut raw_query = guessit_data.title().to_string();
     if let Some(year) = parsed_year(&guessit_data) {
         raw_query.push(' ');
@@ -417,23 +438,17 @@ pub async fn provider_tmdb_search(guessit_data: ParsedTitle, media_type: i16, tm
     // Result handling ported from the Python `com_tmdb_search` tail.
     // ES logging (common_logging_elasticsearch_httpx) is replaced with
     // loki push, matching the rest of this crate.
-    let Some(url_result) = url_result else {
-        return;
-    };
+    let url_result = url_result?;
     if url_result
         .get("total_results")
         .and_then(|v| v.as_i64())
         .unwrap_or(0)
         <= 0
     {
-        return;
+        return None;
     }
-    let Some(results) = url_result.get("results").and_then(|v| v.as_array()) else {
-        return;
-    };
-    let Some(media_year) = parsed_year(&guessit_data) else {
-        return;
-    };
+    let results = url_result.get("results").and_then(|v| v.as_array())?;
+    let media_year = parsed_year(&guessit_data)?;
 
     for res in results {
         // Python: res['release_date'].split('-', 1)[0]
@@ -469,13 +484,13 @@ pub async fn provider_tmdb_search(guessit_data: ParsedTitle, media_type: i16, tm
             {
                 eprintln!("provider_tmdb_search loki push failed: {error}");
             }
-            // Python returned ('idonly', res['id']) or
-            // ('info', self.com_tmdb_metadata_by_id(res['id'])) here.
-            // The converted signature returns (); extend when the lookup
-            // callers (movie_search_tmdb / metadata_movie_lookup) are ported.
-            return;
+            // Python returned ('idonly', res['id']) here: the TMDB id is
+            // what the queue row needs as its provider id for the Fetch
+            // stage.
+            return res.get("id").and_then(|v| v.as_i64()).map(|id| id as i32);
         }
     }
+    None
 }
 
 /*

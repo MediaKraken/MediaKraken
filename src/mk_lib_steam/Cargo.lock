@@ -681,7 +681,7 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_steam"
-version = "0.0.20"
+version = "0.0.24"
 dependencies = [
  "reqwest",
  "rsteam",

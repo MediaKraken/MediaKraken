@@ -1,7 +1,10 @@
 use mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::DBDownloadQueueByProviderList;
 use parse_torrent_title::{ParsedTitle, Value};
+use serde_json::json;
 use std::error::Error;
 use std::path::Path;
+
+use crate::base::metadata_debug_log;
 
 pub async fn metadata_guessit(
     sqlx_pool: &sqlx::PgPool,
@@ -27,6 +30,15 @@ pub async fn metadata_guessit(
     // torrent_name_parser error path did.
     let guessit_data: ParsedTitle = parse_torrent_title::parse(&file_name);
     if !guessit_data.title().is_empty() {
+        metadata_debug_log(json!({
+            "Type": "Guessit",
+            "Module": std::module_path!(),
+            "DL Guid": download_data.mm_download_guid,
+            "FileName": file_name,
+            "Title": guessit_data.title(),
+            "Year": parsed_year(&guessit_data),
+        }))
+        .await;
         if parsed_year(&guessit_data).is_some() {
             if guessit_data.title().to_lowercase() == metadata_last_title
                 && parsed_year(&guessit_data).ok_or("year is_some but not a value")?
@@ -49,6 +61,14 @@ pub async fn metadata_guessit(
             metadata_last_year = 0;
         }
     } else {
+        metadata_debug_log(json!({
+            "Type": "GuessitEmpty",
+            "Module": std::module_path!(),
+            "DL Guid": download_data.mm_download_guid,
+            "FileName": file_name,
+            "Note": "no parseable title; row dead-lettered to ZZ",
+        }))
+        .await;
         mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_update_provider(
             sqlx_pool,
             "ZZ".to_string(),

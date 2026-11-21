@@ -130,6 +130,35 @@ pub async fn mk_lib_database_metadata_download_queue_insert(
     Ok(())
 }
 
+/// Transitions a queue row to "Fetch" for the given provider and id.
+///
+/// The provider, provider id, and status are set in a single UPDATE so a
+/// provider poll loop can never observe an intermediate state (e.g. status
+/// "Fetch" still under the old provider, which would make the old provider's
+/// worker delete the row without doing the fetch).
+pub async fn mk_lib_database_metadata_download_queue_set_fetch(
+    sqlx_pool: &sqlx::PgPool,
+    metadata_queue_uuid: Uuid,
+    metadata_provider: String,
+    metadata_provider_id: i32,
+) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        r#"update mm_metadata_download_que
+        set mm_download_provider = $1,
+        mm_download_provider_id = $2,
+        mm_download_status = 'Fetch'
+        where mm_download_guid = $3"#,
+    )
+    .bind(metadata_provider)
+    .bind(metadata_provider_id)
+    .bind(metadata_queue_uuid)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
 pub async fn mk_lib_database_metadata_download_status_update(
     sqlx_pool: &sqlx::PgPool,
     metadata_download_uuid: Uuid,

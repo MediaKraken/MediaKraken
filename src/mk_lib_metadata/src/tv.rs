@@ -4,6 +4,8 @@ use serde_json::json;
 use std::error::Error;
 use std::sync::Mutex;
 
+use crate::base::metadata_debug_log;
+use crate::guessit::parsed_year;
 use crate::nfo_xml;
 
 /// Last lookup state for TV shows.
@@ -63,18 +65,37 @@ pub async fn metadata_tv_lookup(
         let nfo_data = nfo_xml::nfo_file_tv(download_path).await;
         (imdb_id, tvdb_id, tmdb_id) = nfo_xml::nfo_id_lookup_tv_full(nfo_data.as_ref()).await;
     }
+    metadata_debug_log(json!({
+        "Type": "TvLookupNfo",
+        "Module": std::module_path!(),
+        "DL Guid": download_data.mm_download_guid,
+        "ImdbId": imdb_id,
+        "TvdbId": tvdb_id,
+        "TmdbId": tmdb_id,
+    }))
+    .await;
 
     // if same as last, return last id and save lookup
     // check these dupes as the nfo/xml files might not exist to pull the metadata id from
-    {
+    // The guard's scope ends before any await: a std MutexGuard is !Send.
+    let cached_id = {
         let last = tv_last_lookup();
-        if (imdb_id.is_some() && imdb_id.as_deref() == last.metadata_last_imdb.as_deref())
+        let is_last = (imdb_id.is_some()
+            && imdb_id.as_deref() == last.metadata_last_imdb.as_deref())
             || (tvdb_id.is_some() && tvdb_id.as_deref() == last.metadata_last_tvdb.as_deref())
-            || (tmdb_id.is_some() && tmdb_id.as_deref() == last.metadata_last_tmdb.as_deref())
-        {
-            // don't need to set last......since they are equal
-            return Ok(last.metadata_last_id);
-        }
+            || (tmdb_id.is_some() && tmdb_id.as_deref() == last.metadata_last_tmdb.as_deref());
+        is_last.then(|| last.metadata_last_id)
+    };
+    if let Some(cached_id) = cached_id {
+        // don't need to set last......since they are equal
+        metadata_debug_log(json!({
+            "Type": "TvLookupCacheHit",
+            "Module": std::module_path!(),
+            "DL Guid": download_data.mm_download_guid,
+            "MetadataUuid": cached_id,
+        }))
+        .await;
+        return Ok(cached_id);
     }
 
     // doesn't match last id's so continue lookup
@@ -143,9 +164,13 @@ pub async fn metadata_tv_lookup(
 
     if metadata_uuid == uuid::Uuid::nil() {
         // no ids found on the local database so begin name/year searches
-        let _ = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
-            json!({ "stuff": "tv db lookup", "file": file_name.title() }),
-        )
+        metadata_debug_log(json!({
+            "Type": "TvLookupStart",
+            "Module": std::module_path!(),
+            "DL Guid": download_data.mm_download_guid,
+            "Title": file_name.title(),
+            "Year": parsed_year(&file_name),
+        }))
         .await;
         /*
         // not ported: no TV show name/year lookup exists in the published
@@ -160,14 +185,20 @@ pub async fn metadata_tv_lookup(
             metadata_uuid = await db_connection.db_metatv_guid_by_tvshow_name(file_name['title'],
                                                                                None)
         */
-        let tv_db_meta = (metadata_uuid != uuid::Uuid::nil()).then_some(metadata_uuid);
-        let _ = mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(
-            json!({ "tv db meta": tv_db_meta }),
-        )
-        .await;
-
         if metadata_uuid == uuid::Uuid::nil() {
             metadata_uuid = download_data.mm_download_new_uuid;
+            metadata_debug_log(json!({
+                "Type": "TvLookupNoLocalMatch",
+                "Module": std::module_path!(),
+                "DL Guid": download_data.mm_download_guid,
+                "Title": file_name.title(),
+                "Year": parsed_year(&file_name),
+                "ImdbId": imdb_id,
+                "TvdbId": tvdb_id,
+                "TmdbId": tmdb_id,
+                "Note": "row re-pointed at themoviedb for the remote search",
+            }))
+            .await;
             // no matches by name/year
             // search themoviedb since not matched above via DB or nfo/xml
             // save the updated status
@@ -187,12 +218,18 @@ pub async fn metadata_tv_lookup(
         }
     }
 
-    // set last values to negate lookups for same show
-    let mut last = tv_last_lookup();
-    last.metadata_last_id = metadata_uuid;
-    last.metadata_last_imdb = imdb_id;
-    last.metadata_last_tvdb = tvdb_id;
-    last.metadata_last_tmdb = tmdb_id;
+    // set last values to negate lookups for same show. A miss must not
+    // be cached: on a miss metadata_uuid is this row's
+    // mm_download_new_uuid placeholder, and caching it would make a
+    // later file with the same NFO id resolve to a media guid that may
+    // never become a metadata record.
+    if metadata_uuid != uuid::Uuid::nil() && metadata_uuid != download_data.mm_download_new_uuid {
+        let mut last = tv_last_lookup();
+        last.metadata_last_id = metadata_uuid;
+        last.metadata_last_imdb = imdb_id;
+        last.metadata_last_tvdb = tvdb_id;
+        last.metadata_last_tmdb = tmdb_id;
+    }
 
     Ok(metadata_uuid)
 }

@@ -5,7 +5,7 @@ use sqlx::types::Uuid;
 
 pub async fn mk_lib_database_media_update_metadata_guid(
     sqlx_pool: &sqlx::PgPool,
-    mm_media_guid: &i32,
+    mm_media_guid: Uuid,
     mm_metadata_guid: Uuid,
     mm_download_uuid: &Uuid,
 ) -> Result<(), sqlx::Error> {
