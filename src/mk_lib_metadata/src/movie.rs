@@ -116,40 +116,61 @@ pub async fn metadata_movie_lookup(
         .await;
     }
 
-    /*
-    // not ported: the "Fetch" update below also stores the provider id in
-    // mm_download_provider_id and no mk_lib_database function updates that
-    // column on an existing queue row yet. Setting the status to "Fetch"
-    // without it would make the Fetch worker fail on a missing provider_id,
-    // so the whole branch stays off until the db helper exists.
-    if metadata_uuid == None {
-        // check to see if id is known from nfo/xml but not in db yet so fetch data
-        if tmdb_id != None || imdb_id != None {
-            if tmdb_id != None {
-                provider_id = str(tmdb_id);
-            } else {
-                provider_id = imdb_id;
-            }
-            dl_meta = db_connection.db_download_que_exists(dl_row.get("mdq_id"),
-                                                           common_global.DLMediaType.Movie.value,
-                                                           "themoviedb",
-                                                           provider_id);
-            if dl_meta == None {
-                let metadata_uuid = dl_row.get("mdq_new_uuid");
-                db_connection.db_begin();
-                db_connection.db_download_update(guid = dl_row.get("mdq_id"),
-                                                 status = "Fetch",
-                                                 provider_guid = provider_id);
-                // set provider last so it's not picked up by the wrong thread too early
-                db_connection.db_download_update_provider("themoviedb",
-                                                          dl_row.get("mdq_id"));
-                db_connection.db_commit();
-            } else {
-                let metadata_uuid = dl_meta;
-            }
+    // NFO tmdb id known but not in the local db yet: fetch the data
+    // directly from that id instead of name/year searching (Python
+    // "id known but not in db" branch). The original also handled an
+    // NFO imdb id here; the queue stores provider ids as i32 and the
+    // themoviedb fetch path resolves tmdb ids only, so the imdb case
+    // stays unported.
+    if metadata_uuid == uuid::Uuid::nil()
+        && let Some(tmdb_id) = tmdb_id.as_deref()
+        && let Ok(tmdb_id_num) = tmdb_id.parse::<i32>()
+    {
+        let already_queued =
+            mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(
+                sqlx_pool,
+                "themoviedb".to_string(),
+                download_data.mm_download_que_type,
+                tmdb_id_num,
+            )
+            .await?;
+        if already_queued {
+            // A row is already past "Search" for this id: leave this
+            // row queued (the not-found placeholder skips the name/year
+            // search below) and re-check next cycle; once that row's
+            // fetch inserts the record, the tmdb-id check above links
+            // this row to it.
+            metadata_uuid = download_data.mm_download_new_uuid;
+            metadata_debug_log(json!({
+                "Type": "MovieLookupNfoIdQueued",
+                "Module": std::module_path!(),
+                "DL Guid": download_data.mm_download_guid,
+                "TmdbId": tmdb_id_num,
+            }))
+            .await;
+        } else {
+            metadata_uuid = download_data.mm_download_new_uuid;
+            metadata_debug_log(json!({
+                "Type": "MovieLookupNfoIdSetFetch",
+                "Module": std::module_path!(),
+                "DL Guid": download_data.mm_download_guid,
+                "TmdbId": tmdb_id_num,
+            }))
+            .await;
+            // provider + id + status in one UPDATE so a poll loop can
+            // never observe an intermediate state (e.g. status "Fetch"
+            // still under the old provider, which would make the old
+            // provider's worker delete the row without doing the
+            // fetch).
+            mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_set_fetch(
+                sqlx_pool,
+                download_data.mm_download_guid,
+                "themoviedb".to_string(),
+                tmdb_id_num,
+            )
+            .await?;
         }
     }
-    */
 
     // leave this AFTER the dl check as it looks at tmdbid and imdb for values!
     if metadata_uuid == uuid::Uuid::nil() {

@@ -188,10 +188,14 @@ pub async fn metadata_search(
     } else if provider_name == "theaudiodb" || provider_name == "thegamesdb" {
         lookup_halt = true;
     } else if provider_name == "themoviedb" || provider_name == "Z" {
-        // "Z" is the scanner's catch-all provider: it runs the same
-        // local-db search as themoviedb. A hit links the metadata guid
-        // into the media record below; a miss re-points the row at
-        // "themoviedb" inside the movie/tv lookups.
+        // "Z" is the scanner's catch-all provider: it runs the
+        // local-db search. A hit links the metadata guid into the
+        // media record below; a movie/tv miss re-points the row at
+        // "themoviedb" inside the lookups. Movie/tv rows already under
+        // "themoviedb" got that local search on the Z pass (or are a
+        // re-poll of it), so skip the re-lookup and go straight to the
+        // provider API search below, which re-checks the db for the
+        // returned id.
         guessit_data = guessit::metadata_guessit(
             sqlx_pool,
             &download_data,
@@ -200,43 +204,52 @@ pub async fn metadata_search(
             metadata_uuid,
         )
         .await?;
-        if download_data.mm_download_que_type == mk_lib_common_enum_media_type::DLMediaType::MOVIE {
-            if metadata_uuid == uuid::Uuid::nil() {
-                metadata_uuid = metadata_movie::metadata_movie_lookup(
-                    sqlx_pool,
-                    &download_data,
-                    guessit_data.clone(),
-                )
-                .await?;
-            }
-        } else if download_data.mm_download_que_type
-            == mk_lib_common_enum_media_type::DLMediaType::TV
-        {
-            if metadata_uuid == uuid::Uuid::nil() {
-                metadata_uuid = metadata_tv::metadata_tv_lookup(
-                    sqlx_pool,
-                    &download_data,
-                    guessit_data.clone(),
-                )
-                .await?;
-            }
-        } else if download_data.mm_download_que_type
-            == mk_lib_common_enum_media_type::DLMediaType::PERSON
-        {
-            if metadata_uuid == uuid::Uuid::nil() {
-                metadata_uuid = metadata_person::metadata_person_lookup(
-                    sqlx_pool,
-                    &download_data,
-                    guessit_data.clone(),
-                )
-                .await?;
-            }
-        } else {
-            // this will hit from type 0's (trailers, etc)
-            if metadata_uuid == uuid::Uuid::nil() {
-                lookup_halt = true;
-            } else if metadata_uuid != uuid::Uuid::nil() {
-                set_fetch = true;
+        let run_local_lookup = provider_name == "Z"
+            || !(download_data.mm_download_que_type
+                == mk_lib_common_enum_media_type::DLMediaType::MOVIE
+                || download_data.mm_download_que_type
+                    == mk_lib_common_enum_media_type::DLMediaType::TV);
+        if run_local_lookup {
+            if download_data.mm_download_que_type
+                == mk_lib_common_enum_media_type::DLMediaType::MOVIE
+            {
+                if metadata_uuid == uuid::Uuid::nil() {
+                    metadata_uuid = metadata_movie::metadata_movie_lookup(
+                        sqlx_pool,
+                        &download_data,
+                        guessit_data.clone(),
+                    )
+                    .await?;
+                }
+            } else if download_data.mm_download_que_type
+                == mk_lib_common_enum_media_type::DLMediaType::TV
+            {
+                if metadata_uuid == uuid::Uuid::nil() {
+                    metadata_uuid = metadata_tv::metadata_tv_lookup(
+                        sqlx_pool,
+                        &download_data,
+                        guessit_data.clone(),
+                    )
+                    .await?;
+                }
+            } else if download_data.mm_download_que_type
+                == mk_lib_common_enum_media_type::DLMediaType::PERSON
+            {
+                if metadata_uuid == uuid::Uuid::nil() {
+                    metadata_uuid = metadata_person::metadata_person_lookup(
+                        sqlx_pool,
+                        &download_data,
+                        guessit_data.clone(),
+                    )
+                    .await?;
+                }
+            } else {
+                // this will hit from type 0's (trailers, etc)
+                if metadata_uuid == uuid::Uuid::nil() {
+                    lookup_halt = true;
+                } else if metadata_uuid != uuid::Uuid::nil() {
+                    set_fetch = true;
+                }
             }
         }
         // The movie/tv lookups return mm_download_new_uuid as their
@@ -299,29 +312,79 @@ pub async fn metadata_search(
                 .await
                 {
                     Some(tmdb_id) => {
-                        // If another row is already past "Search" for this
-                        // id, leave the row queued and re-check next cycle
-                        // once that row finishes.
-                        let already_queued =
-                            mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(
-                                sqlx_pool,
-                                "themoviedb".to_string(),
-                                download_data.mm_download_que_type,
-                                tmdb_id,
-                            )
-                            .await?;
-                        if already_queued {
+                        // "DB record for ID returned?": if a metadata
+                        // record for this id already exists, link the
+                        // media row to it and delete the DL row instead
+                        // of re-fetching. Without this check the Fetch
+                        // stage would insert a second row for the same
+                        // id. Tmdb ids for movies and tv share the same
+                        // id space, so each type is checked against its
+                        // own table only.
+                        let mut existing_guid: Option<uuid::Uuid> = None;
+                        if download_data.mm_download_que_type
+                            == mk_lib_common_enum_media_type::DLMediaType::MOVIE
+                        {
+                            existing_guid =
+                                mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_guid_by_tmdb(
+                                    sqlx_pool,
+                                    tmdb_id,
+                                )
+                                .await?;
+                        } else if download_data.mm_download_que_type
+                            == mk_lib_common_enum_media_type::DLMediaType::TV
+                        {
+                            existing_guid =
+                                mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_guid_by_tmdb(
+                                    sqlx_pool,
+                                    tmdb_id,
+                                )
+                                .await?;
+                        }
+                        if let Some(guid) = existing_guid {
+                            metadata_uuid = guid;
+                            matched_local_db = true;
                             metadata_debug_log(json!({
-                                "Type": "SearchDuplicate",
+                                "Type": "SearchExistingRecord",
                                 "Module": std::module_path!(),
                                 "DL Guid": download_data.mm_download_guid,
                                 "QueType": download_data.mm_download_que_type,
                                 "TmdbId": tmdb_id,
+                                "MetadataUuid": guid,
                             }))
                             .await;
+                            mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_update_metadata_guid(
+                                sqlx_pool,
+                                download_data.mm_download_new_uuid,
+                                guid,
+                                &download_data.mm_download_guid,
+                            )
+                            .await?;
                         } else {
-                            matched_tmdb_id = Some(tmdb_id);
-                            set_fetch = true;
+                            // If another row is already past "Search"
+                            // for this id, leave the row queued and
+                            // re-check next cycle once that row
+                            // finishes.
+                            let already_queued =
+                                mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(
+                                    sqlx_pool,
+                                    "themoviedb".to_string(),
+                                    download_data.mm_download_que_type,
+                                    tmdb_id,
+                                )
+                                .await?;
+                            if already_queued {
+                                metadata_debug_log(json!({
+                                    "Type": "SearchDuplicate",
+                                    "Module": std::module_path!(),
+                                    "DL Guid": download_data.mm_download_guid,
+                                    "QueType": download_data.mm_download_que_type,
+                                    "TmdbId": tmdb_id,
+                                }))
+                                .await;
+                            } else {
+                                matched_tmdb_id = Some(tmdb_id);
+                                set_fetch = true;
+                            }
                         }
                     }
                     None => {
@@ -606,22 +669,17 @@ pub async fn metadata_fetch(
     //     .await
     //     .map_err(|e| e)?;
     // }
-    let _result = mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
-        sqlx_pool,
-        download_data.mm_download_guid,
-    )
-    .await;
     if fetched {
         // The fetch inserted the metadata record using
         // mm_download_new_uuid as its guid — the same uuid the scanner
         // stored as the media row's guid — so point the media row at it.
-        // The queue row was already deleted above, so pass a nil
-        // download uuid.
+        // Passing the DL guid makes the link and the queue-row delete
+        // run in one transaction.
         mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_update_metadata_guid(
             sqlx_pool,
             download_data.mm_download_new_uuid,
             download_data.mm_download_new_uuid,
-            &uuid::Uuid::nil(),
+            &download_data.mm_download_guid,
         )
         .await?;
         metadata_debug_log(json!({
@@ -633,6 +691,28 @@ pub async fn metadata_fetch(
             "MetadataGuid": download_data.mm_download_new_uuid,
         }))
         .await;
+    } else if provider_name == "themoviedb" {
+        // The fetch did not insert a metadata record (TMDB error status
+        // or API failure): leave the queue row in place so the next
+        // poll retries the fetch instead of dropping the row and
+        // leaving the media unmatched.
+        metadata_debug_log(json!({
+            "Type": "FetchSkipped",
+            "Module": std::module_path!(),
+            "Stage": "Fetch",
+            "DL Guid": download_data.mm_download_guid,
+            "MediaGuid": download_data.mm_download_new_uuid,
+        }))
+        .await;
+    } else {
+        // Other providers don't track fetch success here, so keep the
+        // consume-once behavior.
+        let _result =
+            mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_download_queue_delete(
+                sqlx_pool,
+                download_data.mm_download_guid,
+            )
+            .await;
     }
     Ok(())
 }

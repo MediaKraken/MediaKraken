@@ -100,67 +100,83 @@ pub async fn metadata_tv_lookup(
 
     // doesn't match last id's so continue lookup
     // if ids from nfo/xml, query local db to see if exist
-    /*
-    // not ported: no TV id lookups exist in the published mk_lib_database
-    // yet. Add these and wire them in here:
-    // - tmdb: select mm_metadata_tvshow_guid from mm_metadata_tvshow
-    //   where mm_metadata_media_tvshow_id = $1
-    // - tvdb / imdb: match on the id keys in mm_metadata_tvshow_json
-    if tmdb_id != None {
-        metadata_uuid = await db_connection.db_metatv_guid_by_tmdb(tmdb_id)
+    // A non-numeric tmdb id is treated as "not found locally".
+    if let Some(tmdb_id) = tmdb_id.as_deref()
+        && let Ok(tmdb_id_num) = tmdb_id.parse::<i32>()
+        && let Some(guid) =
+            mk_lib_database::database_metadata::mk_lib_database_metadata_tv::mk_lib_database_metadata_tv_guid_by_tmdb(
+                sqlx_pool,
+                tmdb_id_num,
+            )
+            .await?
+    {
+        metadata_uuid = guid;
+        metadata_debug_log(json!({
+            "Type": "TvLookupDbTmdbId",
+            "Module": std::module_path!(),
+            "DL Guid": download_data.mm_download_guid,
+            "TmdbId": tmdb_id_num,
+            "MetadataUuid": guid,
+        }))
+        .await;
     }
-    // keep these separate just in case imdb is there but tmdb isn't
-    if tvdb_id != None and metadata_uuid is None:
-        metadata_uuid = await db_connection.db_metatv_guid_by_tvdb(tvdb_id)
-    if imdb_id != None and metadata_uuid is None:
-        metadata_uuid = await db_connection.db_metatv_guid_by_imdb(imdb_id)
-    */
-    /*
-    // not ported: the "Fetch" update below also stores the provider id in
-    // mm_download_provider_id and no mk_lib_database function updates that
-    // column on an existing queue row yet. Setting the status to "Fetch"
-    // without it would make the Fetch worker fail on a missing provider_id
-    // (metadata_fetch reads download_data.mm_download_provider_id), so the
-    // whole branch stays off until the db helper exists.
-    // if ids from nfo/xml on local db
-    if metadata_uuid is None:
-        // id is known from nfo/xml but not in db yet so fetch data
-        if tmdb_id != None or imdb_id != None:
-            if tmdb_id != None:
-                provider_id = str(tmdb_id)
-            else:
-                provider_id = imdb_id
-            dl_meta = await db_connection.db_download_que_exists(download_data['mdq_id'],
-                                                                 common_global.DLMediaType.TV.value,
-                                                                 'themoviedb', provider_id)
-            if dl_meta is None:
-                metadata_uuid = download_data['mdq_new_uuid']
-                await db_connection.db_begin()
-                await db_connection.db_download_update(guid=download_data['mdq_id'],
-                                                       status='Fetch',
-                                                       provider_guid=provider_id)
-                // set provider last so it's not picked up by the wrong thread too early
-                await db_connection.db_download_update_provider('themoviedb',
-                                                                download_data['mdq_id'])
-                await db_connection.db_commit()
-            else:
-                metadata_uuid = dl_meta
-        else if tvdb_id != None:
-            dl_meta = await db_connection.db_download_que_exists(download_data['mdq_id'],
-                                                                 common_global.DLMediaType.TV.value,
-                                                                 'thetvdb', str(tvdb_id))
-            if dl_meta is None:
-                metadata_uuid = download_data['mdq_new_uuid']
-                await db_connection.db_begin()
-                await db_connection.db_download_update(guid=download_data['mdq_id'],
-                                                       status='Fetch',
-                                                       provider_guid=tvdb_id)
-                // set provider last so it's not picked up by the wrong thread too early
-                await db_connection.db_download_update_provider('thetvdb', download_data['mdq_id'])
-                await db_connection.db_commit()
-            else:
-                metadata_uuid = dl_meta
-    */
+
+    // NFO tmdb id known but not in the local db yet: fetch the data
+    // directly from that id instead of name/year searching (Python
+    // "id known but not in db" branch). The original also handled an NFO
+    // imdb id here via themoviedb and a tvdb id via thetvdb; the queue
+    // stores provider ids as i32 and the themoviedb fetch path resolves
+    // tmdb ids only, and no thetvdb worker exists in the Rust code, so
+    // those cases stay unported.
+    if metadata_uuid == uuid::Uuid::nil()
+        && let Some(tmdb_id) = tmdb_id.as_deref()
+        && let Ok(tmdb_id_num) = tmdb_id.parse::<i32>()
+    {
+        let already_queued =
+            mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_exists(
+                sqlx_pool,
+                "themoviedb".to_string(),
+                download_data.mm_download_que_type,
+                tmdb_id_num,
+            )
+            .await?;
+        if already_queued {
+            // A row is already past "Search" for this id: leave this
+            // row queued (the not-found placeholder skips the name/year
+            // search below) and re-check next cycle; once that row's
+            // fetch inserts the record, the tmdb-id check above links
+            // this row to it.
+            metadata_uuid = download_data.mm_download_new_uuid;
+            metadata_debug_log(json!({
+                "Type": "TvLookupNfoIdQueued",
+                "Module": std::module_path!(),
+                "DL Guid": download_data.mm_download_guid,
+                "TmdbId": tmdb_id_num,
+            }))
+            .await;
+        } else {
+            metadata_uuid = download_data.mm_download_new_uuid;
+            metadata_debug_log(json!({
+                "Type": "TvLookupNfoIdSetFetch",
+                "Module": std::module_path!(),
+                "DL Guid": download_data.mm_download_guid,
+                "TmdbId": tmdb_id_num,
+            }))
+            .await;
+            // provider + id + status in one UPDATE so a poll loop can
+            // never observe an intermediate state (e.g. status "Fetch"
+            // still under the old provider, which would make the old
+            // provider's worker delete the row without doing the
+            // fetch).
+            mk_lib_database::database_metadata::mk_lib_database_metadata_download_queue::mk_lib_database_metadata_download_queue_set_fetch(
+                sqlx_pool,
+                download_data.mm_download_guid,
+                "themoviedb".to_string(),
+                tmdb_id_num,
+            )
+            .await?;
+        }
+    }
 
     if metadata_uuid == uuid::Uuid::nil() {
         // no ids found on the local database so begin name/year searches

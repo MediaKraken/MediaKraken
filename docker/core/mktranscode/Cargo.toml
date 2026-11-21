@@ -11,12 +11,12 @@ panic = "abort"        # Removes unwinding infrastructure, reducing binary size 
 strip = true           # Removes debug symbols from the binary to reduce size (optional)
 
 [dependencies]
-mk_lib_common = { version = "0.0.260", registry = "kellnr" }
-mk_lib_compression = { version = "0.0.259", registry = "kellnr" }
-mk_lib_database = { version = "0.0.293", registry = "kellnr" }
-mk_lib_file = { version = "0.0.270", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.261", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.265", registry = "kellnr" }
+mk_lib_common = { version = "0.0.263", registry = "kellnr" }
+mk_lib_compression = { version = "0.0.262", registry = "kellnr" }
+mk_lib_database = { version = "0.0.297", registry = "kellnr" }
+mk_lib_file = { version = "0.0.273", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.264", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.268", registry = "kellnr" }
 
 chrono = { version = "0.4.45", features = ["serde"] }
 reqwest = { version = "0.13.4", default-features = false, features = [

@@ -11,9 +11,9 @@ panic = "abort"        # Removes unwinding infrastructure, reducing binary size 
 strip = true           # Removes debug symbols from the binary to reduce size (optional)
 
 [dependencies]
-mk_lib_database = { version = "0.0.293", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.261", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.265", registry = "kellnr" }
+mk_lib_database = { version = "0.0.297", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.264", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.268", registry = "kellnr" }
 
 chrono = { version = "0.4.45", features = ["serde"] }
 serde_json = "1.0.150"

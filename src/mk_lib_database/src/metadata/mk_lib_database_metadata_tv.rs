@@ -119,6 +119,19 @@ pub async fn mk_lib_database_metadata_tv_insert(
     Ok(())
 }
 
+pub async fn mk_lib_database_metadata_tv_guid_by_tmdb(
+    sqlx_pool: &sqlx::PgPool,
+    media_id: i32,
+) -> Result<Option<Uuid>, sqlx::Error> {
+    let row: Option<(Uuid,)> = sqlx::query_as(
+        r#"select mm_metadata_tvshow_guid from mm_metadata_tvshow where mm_metadata_media_tvshow_id = $1"#,
+    )
+    .bind(media_id)
+    .fetch_optional(sqlx_pool)
+    .await?;
+    Ok(row.map(|row| row.0))
+}
+
 pub async fn mk_lib_database_metadata_tv_status(
     sqlx_pool: &sqlx::PgPool,
     uuid_id: Uuid,
