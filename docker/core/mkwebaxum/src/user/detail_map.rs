@@ -172,25 +172,6 @@ pub fn book(blob: &Value, cover_path: &str) -> Value {
     })
 }
 
-/// Movie (TMDB movie JSON) blob -> contract. `title` prefers the indexed
-/// column; the blob supplies the rest.
-pub fn movie(blob: &Value, name: &str, cover_path: &str) -> Value {
-    json!({
-        "mm_metadata_json": {
-            "title": if name.is_empty() {
-                str_at(blob, "title")
-            } else {
-                Value::from(name)
-            },
-            "original_title": str_at(blob, "original_title"),
-            "overview": str_at(blob, "overview"),
-            "tagline": str_at(blob, "tagline"),
-            "release_date": str_at(blob, "release_date"),
-            "poster": cover_url(cover_path),
-        }
-    })
-}
-
 /// Game (MAME machine XML) blob -> contract. `name` / `platform` come from
 /// indexed columns / the system join; the blob supplies the rest.
 pub fn game(blob: &Value, name: &str, platform: &str, cover_path: &str) -> Value {

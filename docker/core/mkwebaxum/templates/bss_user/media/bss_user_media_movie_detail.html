@@ -1,125 +1,260 @@
 {% extends "layouts/base_user.html" %}
 
 {% block content %}
-<div>
-        <div class="container">
-            <div class="row">
-                <div class="col-xl-12">
-                    <div class="row">
-                        <div class="col-xl-3"><img class="img-fluid" src="{{ template_poster }}" alt="Movie poster"
-                                width="200" height="300"></div>
-                        <div class="col-xl-9">
-                            <div class="mt-6 overflow-hidden rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
-                                <div class="p-6 pb-0">
-                                    <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Media</p>
-                                    <h2 class="mt-2 text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Media Version(s)</h2>
-                                </div>
-                                {% if template_media_files.len() > 0 %}
-                                <div class="overflow-x-auto p-6 pt-4">
-                                    <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
-                                        <thead class="bg-zinc-50 dark:bg-zinc-800">
-                                            <tr>
-                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">File</th>
-                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Resolution</th>
-                                                <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Runtime</th>
-                                                <th scope="col" class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Playback</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800 bg-white dark:bg-zinc-900">
-                                            {% for file in template_media_files %}
-                                            <tr>
-                                                <td class="px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100">{{ file.file_name }}</td>
-                                                <td class="px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100">{{ file.resolution }}</td>
-                                                <td class="px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100">{{ file.runtime }}</td>
-                                                <td class="px-4 py-3 text-right">
-                                                    <a href="/user/playback/video?media={{ file.mm_media_guid }}"
-                                                        aria-label="Play {{ file.file_name }}"
-                                                        class="inline-flex items-center rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">
-                                                        Play
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                {% else %}
-                                <p class="p-6 pt-4 text-sm text-zinc-600 dark:text-zinc-400">No media files are linked to this movie yet.</p>
-                                {% endif %}
-                            </div>
-                            <div class="row">
-                                <div class="col-xl-7"><span>Title:
-                                        {{template_data["mm_metadata_json"]["title"].as_str().unwrap_or_default()}}</span>
-                                </div>
-                                <div class="col"><span class="text-right">Release Date:
-                                        {{template_data["mm_metadata_json"]["release_date"].as_str().unwrap_or_default()}}</span></div>
-                            </div>
-                            <div class="row">
-                                <div class="col">
-                                    <p>Tagline: {{template_data["mm_metadata_json"]["tagline"].as_str().unwrap_or_default()}}<br><br></p>
-                                </div>
-                            </div>
-                            {% if template_data["mm_metadata_json"]["title"] !=
-                            template_data["mm_metadata_json"]["original_title"] %}
-                            <div class="row">
-                                <div class="col">
-                                    <p>Alternate Title: {{template_data["mm_metadata_json"]["original_title"].as_str().unwrap_or_default()}}<br><br>
-                                    </p>
-                                </div>
-                            </div>
-                            {% endif %}
-                            <div class="row">
-                                <div class="col">
-                                    <p>rating icon............clickable genre buttons<br><br></p>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col">
-                                    <p>star rating image........cast, crew, reviewws, homepage</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<section class="max-w-6xl mx-auto px-4 py-6 sm:px-6" x-data="moviePage()">
+
+    <!-- HEADER -->
+    <div class="grid gap-6 lg:grid-cols-[260px_1fr]">
+
+        <!-- Poster -->
+        <div class="aspect-[2/3] overflow-hidden rounded-2xl bg-zinc-200 shadow-sm dark:bg-zinc-800">
+            {% if template_metadata_poster == "/static/image/Movie-icon.png" %}
+            <img src="/static/image/Movie-icon.png?v=1" alt="Poster for {{ template_data_json["title"].as_str().unwrap_or_default() }}"
+                loading="lazy" decoding="async" @load="loaded = true" @error="loaded = true"
+                x-init="$nextTick(() => { loaded = $el.complete })"
+                class="h-full w-full object-cover transition-opacity duration-500"
+                :class="loaded ? 'opacity-100' : 'opacity-0'" />
+            {% else %}
+            <img src="/metadata{{template_metadata_poster|safe}}?v={{template_metadata_photo_updated.timestamp()}}"
+                alt="Poster for {{ template_data_json["title"].as_str().unwrap_or_default() }}" loading="lazy" decoding="async"
+                @load="loaded = true" @error="loaded = true" x-init="$nextTick(() => { loaded = $el.complete })"
+                class="h-full w-full object-cover transition-opacity duration-500"
+                :class="loaded ? 'opacity-100' : 'opacity-0'" />
+            {% endif %}
+        </div>
+
+        <!-- Info -->
+        <div class="space-y-5">
+
+            <div>
+                {% if let Some(title) = template_data_json["title"].as_str() %}
+                <h1 class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">{{ title }}</h1>
+                {% else %}
+                <h1 class="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Unknown Title</h1>
+                {% endif %}
+                {% if let Some(original_title) = template_data_json["original_title"].as_str() %}
+                {% if !original_title.is_empty() %}
+                <p class="italic text-zinc-500 dark:text-zinc-400">{{ original_title }}</p>
+                {% endif %}
+                {% endif %}
+                {% if let Some(alt_name) = template_metadata_tagline %}
+                {% if alt_name != "" %}
+                <p class="mt-1 text-sm italic text-zinc-600 dark:text-zinc-400">
+                    {{ alt_name }}
+                </p>
+                {% endif %}
+                {% endif %}
             </div>
-            <div class="row">
-                <div class="col">
-                    <p>Overview: {{template_data["mm_metadata_json"]["overview"].as_str().unwrap_or_default()}}</p>
-                </div>
+
+            <div class="flex flex-wrap gap-2">
+                {% for genre in template_metadata_genre %}
+                <span
+                    class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                    {{ genre.name }}
+                </span>
+                {% endfor %}
             </div>
-            <div class="row">
-                <div class="col">
-                    <div>
-                        <div>
-                            {#{% if data_json_media_chapters %}
-                            <div class="row">
-                                <div class="card">
-                                    <div class="card-header">
-                                        Chapters
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="card-text">
-                                        <div class="grid">
-                                            {% for chapter_info in data_json_media_chapters %}
-                                            <div class="col-1-4">
-                                                <a
-                                                    href="/user/media/playback/hls/{{data_guid}}/{{chapter_info[0]|space_to_html}}/0/0">
-                                                    <img src="/static/meta/images/{{chapter_info[1]}}" height="150"
-                                                        width="150">
-                                                </a>
-                                            </div>
-                                            {% endfor %}
-                                        </div>
-                                        <p>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}#}
-                        </div>
-                    </div>
+
+            <div class="rounded-xl border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900">
+                <div class="flex items-center gap-2">
+                    <button @click="toggle('favorite')" aria-label="Toggle favorite"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="favorite ? 'text-red-500' : 'text-zinc-400 hover:text-red-400'">
+                        {% include "icons/heart.svg" %}
+                    </button>
+                    <button @click="toggle('watched')" aria-label="Toggle watched"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="watched ? 'text-green-500' : 'text-zinc-400 hover:text-green-400'">
+                        {% include "icons/check.svg" %}
+                    </button>
+                    <button @click="toggle('good')" aria-label="Toggle thumbs up"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="good ? 'text-blue-500' : 'text-zinc-400 hover:text-blue-400'">
+                        {% include "icons/thumb_up.svg" %}
+                    </button>
+                    <button @click="toggle('bad')" aria-label="Toggle thumbs down"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="bad ? 'text-yellow-500' : 'text-zinc-400 hover:text-yellow-400'">
+                        {% include "icons/thumb_down.svg" %}
+                    </button>
+                    <button @click="toggle('trash')" aria-label="Toggle trash"
+                        class="rounded-md p-1 transition-transform active:scale-110"
+                        :class="trash ? 'text-red-600' : 'text-zinc-400 hover:text-red-500'">
+                        {% include "icons/trash.svg" %}
+                    </button>
                 </div>
+                {% if let Some(overview) = template_data_json["overview"].as_str() %}
+                {% if !overview.is_empty() %}
+                <p class="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+                    {{ overview }}
+                </p>
+                {% endif %}
+                {% endif %}
             </div>
         </div>
-        <div></div>
     </div>
+
+    <!-- MEDIA VERSIONS -->
+    <div class="mt-10">
+        <div
+            class="overflow-hidden rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
+            <div class="p-6 pb-0">
+                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Media</p>
+                <h2 class="mt-2 text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">Media Version(s)</h2>
+            </div>
+            {% if template_media_files.len() > 0 %}
+            <div class="overflow-x-auto p-6 pt-4">
+                <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+                    <thead class="bg-zinc-50 dark:bg-zinc-800">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">File</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Resolution</th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Runtime</th>
+                            <th scope="col" class="px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Playback</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800 bg-white dark:bg-zinc-900">
+                        {% for file in template_media_files %}
+                        <tr>
+                            <td class="px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100">{{ file.file_name }}</td>
+                            <td class="px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100">{{ file.resolution }}</td>
+                            <td class="px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100">{{ file.runtime }}</td>
+                            <td class="px-4 py-3 text-right">
+                                <a href="/user/playback/video?media={{ file.mm_media_guid }}"
+                                    aria-label="Play {{ file.file_name }}"
+                                    class="inline-flex items-center rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400">
+                                    Play
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="p-6 pt-4 text-sm text-zinc-600 dark:text-zinc-400">No media files are linked to this movie yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- CAST CAROUSEL -->
+    <div class="mt-10">
+        <h2 class="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-100">Cast</h2>
+
+        <div class="relative">
+            <button @click="scroll('cast', -1)" aria-label="Scroll cast left"
+                class="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-zinc-200 bg-white p-2 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                ‹
+            </button>
+
+            <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="cast">
+                {% for person in template_metadata_cast %}
+                <a href="{% if let Some(person_guid) = person.guid %}/user/metadata/person_detail/{{ person_guid }}{% else %}#{% endif %}"
+                    class="min-w-[140px] text-center">
+                    <div
+                        class="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-zinc-100 text-3xl font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-300">
+                        {{ person.name.chars().next().unwrap_or('?') }}
+                    </div>
+                    <p class="mt-2 text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ person.name }}</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ person.character }}</p>
+                </a>
+                {% endfor %}
+            </div>
+
+            <button @click="scroll('cast', 1)" aria-label="Scroll cast right"
+                class="absolute right-0 top-1/2 -translate-y-1/2 rounded-full border border-zinc-200 bg-white p-2 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                ›
+            </button>
+        </div>
+    </div>
+
+    <!-- CREW CAROUSEL -->
+    <div class="mt-10">
+        <h2 class="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-100">Crew</h2>
+
+        <div class="relative">
+            <button @click="scroll('crew', -1)" aria-label="Scroll crew left"
+                class="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full border border-zinc-200 bg-white p-2 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                ‹
+            </button>
+
+            <div class="flex gap-4 overflow-x-auto scroll-smooth px-10" x-ref="crew">
+                {% for person in template_metadata_crew %}
+                <a href="{% if let Some(person_guid) = person.guid %}/user/metadata/person_detail/{{ person_guid }}{% else %}#{% endif %}"
+                    class="min-w-[140px] text-center">
+                    <div
+                        class="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-zinc-100 text-3xl font-semibold text-zinc-500 dark:bg-zinc-800 dark:text-zinc-300">
+                        {{ person.name.chars().next().unwrap_or('?') }}
+                    </div>
+                    <p class="mt-2 text-sm font-medium text-zinc-800 dark:text-zinc-200">{{ person.name }}</p>
+                    <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ person.job }}</p>
+                </a>
+                {% endfor %}
+            </div>
+
+            <button @click="scroll('crew', 1)" aria-label="Scroll crew right"
+                class="absolute right-0 top-1/2 -translate-y-1/2 rounded-full border border-zinc-200 bg-white p-2 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                ›
+            </button>
+        </div>
+    </div>
+
+    <!-- REVIEWS ACCORDION -->
+    <div class="mt-10">
+        <button @click="reviewsOpen = !reviewsOpen"
+            class="flex w-full items-center justify-between rounded-lg border border-zinc-200 bg-white p-4 text-left shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
+            aria-label="Toggle user reviews">
+            <span class="font-semibold text-zinc-900 dark:text-zinc-100">User Reviews</span>
+            <span x-text="reviewsOpen ? '−' : '+'" class="text-zinc-600 dark:text-zinc-300"></span>
+        </button>
+
+        <div x-show="reviewsOpen" x-transition class="mt-4 space-y-4">
+            <template x-for="review in reviews" :key="review.user">
+                <div class="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
+                    <p class="font-medium text-zinc-900 dark:text-zinc-100" x-text="review.user"></p>
+                    <p class="text-sm text-zinc-600 dark:text-zinc-400" x-text="review.text"></p>
+                </div>
+            </template>
+        </div>
+    </div>
+
+</section>
+
+<script>
+    function moviePage() {
+        return {
+            rating: 4,
+            loaded: false,
+            favorite: false,
+            watched: false,
+            good: false,
+            bad: false,
+            trash: false,
+            reviewsOpen: false,
+
+            genres: ['Action', 'Drama', 'Sci-Fi', 'Thriller'],
+            activeGenres: [],
+
+            reviews: [
+                { user: 'Alice', text: 'Amazing cinematography and story.' },
+                { user: 'Bob', text: 'A bit long, but worth it.' }
+            ],
+
+            toggle(stateName) {
+                this[stateName] = !this[stateName]
+            },
+
+            toggleGenre(genre) {
+                this.activeGenres.includes(genre)
+                    ? this.activeGenres = this.activeGenres.filter(g => g !== genre)
+                    : this.activeGenres.push(genre)
+            },
+
+            scroll(ref, dir) {
+                this.$refs[ref].scrollLeft += dir * 300
+            }
+        }
+    }
+</script>
+
 {% endblock %}

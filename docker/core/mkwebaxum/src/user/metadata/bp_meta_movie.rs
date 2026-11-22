@@ -33,14 +33,14 @@ pub struct FilterOption {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct MovieCastMember {
+pub struct MovieCastMember {
     pub name: String,
     pub character: String,
     pub guid: Option<uuid::Uuid>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct MovieCrewMember {
+pub struct MovieCrewMember {
     pub name: String,
     pub job: String,
     pub guid: Option<uuid::Uuid>,
@@ -511,6 +511,95 @@ struct TemplateMetaMovieDetailContext<'a> {
     page_title: Option<String>,
 }
 
+/// Build the cast / crew display lists from a movie metadata JSON blob,
+/// resolving TMDB person ids to `mm_metadata_person` guids so entries can
+/// link to person metadata.
+pub async fn movie_credits(
+    pool: &PgPool,
+    movie_json: &serde_json::Value,
+) -> (Vec<MovieCastMember>, Vec<MovieCrewMember>) {
+    // collect TMDB person ids from credits so cast/crew can link to person metadata
+    let mut person_media_ids: Vec<i32> = Vec::new();
+    for credit_list in [
+        &movie_json["credits"]["cast"],
+        &movie_json["credits"]["crew"],
+    ] {
+        for credit_member in credit_list.as_array().into_iter().flatten() {
+            let Some(media_id) = credit_member
+                .get("id")
+                .and_then(|value| value.as_i64())
+                .and_then(|id| i32::try_from(id).ok())
+            else {
+                continue;
+            };
+            person_media_ids.push(media_id);
+        }
+    }
+    let person_guid_by_media_id: HashMap<i32, uuid::Uuid> = if person_media_ids.is_empty() {
+        HashMap::new()
+    } else {
+        // without a guid the cast/crew entries simply render without a link
+        let person_rows: Vec<(i32, uuid::Uuid)> = sqlx::query_as(
+            r#"select mm_metadata_person_media_id, mm_metadata_person_guid
+                      from mm_metadata_person
+                     where mm_metadata_person_media_id = any($1)"#,
+        )
+        .bind(person_media_ids)
+        .fetch_all(pool)
+        .await
+        .unwrap_or_default();
+        person_rows.into_iter().collect()
+    };
+
+    let cast_members: Vec<MovieCastMember> = movie_json["credits"]["cast"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|cast_member| {
+            let name = cast_member.get("name").and_then(|value| value.as_str())?;
+            let character = cast_member
+                .get("character")
+                .and_then(|value| value.as_str())
+                .unwrap_or_default();
+            let guid = cast_member
+                .get("id")
+                .and_then(|value| value.as_i64())
+                .and_then(|media_id| i32::try_from(media_id).ok())
+                .and_then(|media_id| person_guid_by_media_id.get(&media_id).copied());
+            Some(MovieCastMember {
+                name: name.to_string(),
+                character: character.to_string(),
+                guid,
+            })
+        })
+        .collect();
+
+    let crew_members: Vec<MovieCrewMember> = movie_json["credits"]["crew"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|crew_member| {
+            let name = crew_member.get("name").and_then(|value| value.as_str())?;
+            let job = crew_member
+                .get("job")
+                .and_then(|value| value.as_str())
+                .unwrap_or_default();
+            let guid = crew_member
+                .get("id")
+                .and_then(|value| value.as_i64())
+                .and_then(|media_id| i32::try_from(media_id).ok())
+                .and_then(|media_id| person_guid_by_media_id.get(&media_id).copied());
+            Some(MovieCrewMember {
+                name: name.to_string(),
+                job: job.to_string(),
+                guid,
+            })
+        })
+        .collect();
+
+    (cast_members, crew_members)
+}
+
 pub async fn user_metadata_movie_detail(
     State(state): State<AppState>,
     Path(guid): Path<uuid::Uuid>,
@@ -571,86 +660,8 @@ pub async fn user_metadata_movie_detail(
             })
             .collect();
 
-        // collect TMDB person ids from credits so cast/crew can link to person metadata
-        let mut person_media_ids: Vec<i32> = Vec::new();
-        for credit_list in [
-            &movie_metadata.mm_metadata_movie_json["credits"]["cast"],
-            &movie_metadata.mm_metadata_movie_json["credits"]["crew"],
-        ] {
-            for credit_member in credit_list.as_array().into_iter().flatten() {
-                let Some(media_id) = credit_member
-                    .get("id")
-                    .and_then(|value| value.as_i64())
-                    .and_then(|id| i32::try_from(id).ok())
-                else {
-                    continue;
-                };
-                person_media_ids.push(media_id);
-            }
-        }
-        let person_guid_by_media_id: HashMap<i32, uuid::Uuid> = if person_media_ids.is_empty() {
-            HashMap::new()
-        } else {
-            // without a guid the cast/crew entries simply render without a link
-            let person_rows: Vec<(i32, uuid::Uuid)> = sqlx::query_as(
-                r#"select mm_metadata_person_media_id, mm_metadata_person_guid
-                          from mm_metadata_person
-                         where mm_metadata_person_media_id = any($1)"#,
-            )
-            .bind(person_media_ids)
-            .fetch_all(&state.sqlx_pool_ro)
-            .await
-            .unwrap_or_default();
-            person_rows.into_iter().collect()
-        };
-
-        let cast_members: Vec<MovieCastMember> =
-            movie_metadata.mm_metadata_movie_json["credits"]["cast"]
-                .as_array()
-                .into_iter()
-                .flatten()
-                .filter_map(|cast_member| {
-                    let name = cast_member.get("name").and_then(|value| value.as_str())?;
-                    let character = cast_member
-                        .get("character")
-                        .and_then(|value| value.as_str())
-                        .unwrap_or_default();
-                    let guid = cast_member
-                        .get("id")
-                        .and_then(|value| value.as_i64())
-                        .and_then(|media_id| i32::try_from(media_id).ok())
-                        .and_then(|media_id| person_guid_by_media_id.get(&media_id).copied());
-                    Some(MovieCastMember {
-                        name: name.to_string(),
-                        character: character.to_string(),
-                        guid,
-                    })
-                })
-                .collect();
-
-        let crew_members: Vec<MovieCrewMember> =
-            movie_metadata.mm_metadata_movie_json["credits"]["crew"]
-                .as_array()
-                .into_iter()
-                .flatten()
-                .filter_map(|crew_member| {
-                    let name = crew_member.get("name").and_then(|value| value.as_str())?;
-                    let job = crew_member
-                        .get("job")
-                        .and_then(|value| value.as_str())
-                        .unwrap_or_default();
-                    let guid = crew_member
-                        .get("id")
-                        .and_then(|value| value.as_i64())
-                        .and_then(|media_id| i32::try_from(media_id).ok())
-                        .and_then(|media_id| person_guid_by_media_id.get(&media_id).copied());
-                    Some(MovieCrewMember {
-                        name: name.to_string(),
-                        job: job.to_string(),
-                        guid,
-                    })
-                })
-                .collect();
+        let (cast_members, crew_members) =
+            movie_credits(&state.sqlx_pool_ro, &movie_metadata.mm_metadata_movie_json).await;
 
         let template = TemplateMetaMovieDetailContext {
             template_data_json: &movie_metadata.mm_metadata_movie_json,

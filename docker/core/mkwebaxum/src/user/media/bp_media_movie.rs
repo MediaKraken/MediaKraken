@@ -1,8 +1,9 @@
 use crate::AppState;
 use crate::mk_lib_database;
 use crate::user_metadata::bp_meta_movie::{
-    FilterOption, FilterQuery, Genre, build_filter_query_suffix, build_movie_pagination,
-    normalize_starts_with, normalize_status_filter, normalize_string_filter,
+    FilterOption, FilterQuery, Genre, MovieCastMember, MovieCrewMember, build_filter_query_suffix,
+    build_movie_pagination, movie_credits, normalize_starts_with, normalize_status_filter,
+    normalize_string_filter,
 };
 use crate::user_preferences;
 use askama::Template;
@@ -426,13 +427,6 @@ pub async fn user_media_movie(
 }
 
 #[derive(Debug, sqlx::FromRow)]
-struct MediaMovieMetadataRow {
-    mm_metadata_movie_json: serde_json::Value,
-    mm_metadata_movie_name: String,
-    mm_poster: String,
-}
-
-#[derive(Debug, sqlx::FromRow)]
 struct MediaMovieFileRow {
     mm_media_guid: uuid::Uuid,
     mm_media_path: String,
@@ -450,9 +444,32 @@ struct TemplateMediaFileList {
 
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_movie_detail.html")]
-struct TemplateMediaMovieDetailContext {
-    template_data: serde_json::Value,
-    template_poster: String,
+struct TemplateMediaMovieDetailContext<'a> {
+    template_data_json: &'a serde_json::Value,
+    #[allow(dead_code)]
+    template_metadata_name_alt: Option<String>,
+    template_metadata_poster: String,
+    #[allow(dead_code)]
+    template_metadata_backdrop: String,
+    #[allow(dead_code)]
+    template_metadata_rating: String,
+    #[allow(dead_code)]
+    template_metadata_star_rating: f32,
+    #[allow(dead_code)]
+    template_metadata_availability: String,
+    template_metadata_tagline: Option<String>,
+    template_metadata_photo_updated: DateTime<Utc>,
+    template_metadata_genre: Vec<Genre>,
+    template_metadata_cast: Vec<MovieCastMember>,
+    template_metadata_crew: Vec<MovieCrewMember>,
+    #[allow(dead_code)]
+    template_metadata_user_watched: serde_json::Value,
+    #[allow(dead_code)]
+    template_metadata_user_rating: serde_json::Value,
+    #[allow(dead_code)]
+    template_metadata_user_request: serde_json::Value,
+    #[allow(dead_code)]
+    template_metadata_user_queue: serde_json::Value,
     template_media_files: Vec<TemplateMediaFileList>,
     page_title: Option<String>,
 }
@@ -515,23 +532,17 @@ pub async fn user_media_movie_detail(
     } else {
         // the detail guid is a media guid (mm_media_guid); resolve the movie
         // metadata it belongs to
-        let metadata_row = sqlx::query_as::<_, MediaMovieMetadataRow>(
-            r#"select mm_metadata_movie_json,
-                      mm_metadata_movie_name,
-                      COALESCE(mm_metadata_movie_localimage_json->>'Poster', '') as mm_poster
-               from mm_metadata_movie
-               where mm_metadata_movie_guid = (
-                   select mm_media_metadata_guid
+        let metadata_guid = match sqlx::query_scalar::<_, uuid::Uuid>(
+            r#"select mm_media_metadata_guid
                    from mm_media
-                   where mm_media_guid = $1
-               )
-               limit 1"#,
+                  where mm_media_guid = $1
+                  limit 1"#,
         )
         .bind(guid)
         .fetch_optional(&state.sqlx_pool_ro)
-        .await;
-        let metadata_row = match metadata_row {
-            Ok(Some(row)) => row,
+        .await
+        {
+            Ok(Some(metadata_guid)) => metadata_guid,
             Ok(None) => {
                 return (
                     StatusCode::NOT_FOUND,
@@ -545,18 +556,64 @@ pub async fn user_media_movie_detail(
                 );
             }
         };
-        let template_data = crate::user::detail_map::movie(
-            &metadata_row.mm_metadata_movie_json,
-            &metadata_row.mm_metadata_movie_name,
-            &metadata_row.mm_poster,
-        );
-        let template_poster = template_data
-            .get("mm_metadata_json")
-            .and_then(|meta| meta.get("poster"))
-            .and_then(serde_json::Value::as_str)
-            .filter(|poster| !poster.is_empty())
-            .map(str::to_string)
-            .unwrap_or_else(|| "/static/image/Movie-icon.png".to_string());
+        let movie_metadata = match mk_lib_database::database_metadata::mk_lib_database_metadata_movie::mk_lib_database_metadata_movie_detail_by_guid(
+            &state.sqlx_pool_ro,
+            metadata_guid,
+            current_user.id,
+        )
+        .await
+        {
+            Ok(row) => row,
+            Err(sqlx::Error::RowNotFound) => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    Html(String::from("Not found")).into_response(),
+                );
+            }
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
+
+        let watched_status = movie_metadata
+            .mm_status_user_json
+            .clone()
+            .unwrap_or_else(|| {
+                json!({
+                    "bad": false,
+                    "good": false,
+                    "trash": false,
+                    "watched": false,
+                    "favorite": false
+                })
+            });
+        let request_status: serde_json::Value = json!(false);
+        let rating_status: serde_json::Value = json!(null);
+        let queue_status: serde_json::Value = json!(false);
+
+        let mut mm_poster: String = "/static/image/Movie-icon.png".to_string();
+        if !movie_metadata.mm_poster.is_empty() {
+            mm_poster = movie_metadata.mm_poster.clone();
+        }
+
+        let genres: Vec<Genre> = movie_metadata
+            .mm_genre
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(|g| {
+                g.get("name").and_then(|n| n.as_str()).map(|name| Genre {
+                    name: name.to_string(),
+                    query_value: urlencoding::encode(name).into_owned(),
+                })
+            })
+            .collect();
+
+        let (cast_members, crew_members) =
+            movie_credits(&state.sqlx_pool_ro, &movie_metadata.mm_metadata_movie_json).await;
 
         // every media file (version) of this movie
         let file_rows = sqlx::query_as::<_, MediaMovieFileRow>(
@@ -564,14 +621,10 @@ pub async fn user_media_movie_detail(
                       mm_media_path,
                       mm_media_ffprobe_json
                from mm_media
-               where mm_media_metadata_guid = (
-                   select mm_media_metadata_guid
-                   from mm_media
-                   where mm_media_guid = $1
-               )
+               where mm_media_metadata_guid = $1
                order by mm_media_path"#,
         )
-        .bind(guid)
+        .bind(metadata_guid)
         .fetch_all(&state.sqlx_pool_ro)
         .await;
         let file_rows = match file_rows {
@@ -608,8 +661,23 @@ pub async fn user_media_movie_detail(
         }
 
         let template = TemplateMediaMovieDetailContext {
-            template_data,
-            template_poster,
+            template_data_json: &movie_metadata.mm_metadata_movie_json,
+            template_metadata_name_alt: movie_metadata.mm_metadata_movie_name_alt.clone(),
+            template_metadata_poster: mm_poster,
+            template_metadata_backdrop: "/static/image/Movie-icon.png".to_string(),
+            template_metadata_rating: "pg13".to_string(),
+            template_metadata_star_rating: movie_metadata.mm_metadata_vote_average.unwrap_or(0.0)
+                as f32,
+            template_metadata_availability: "available".to_string(),
+            template_metadata_tagline: movie_metadata.mm_metadata_tagline.clone(),
+            template_metadata_photo_updated: movie_metadata.photo_updated,
+            template_metadata_genre: genres,
+            template_metadata_cast: cast_members,
+            template_metadata_crew: crew_members,
+            template_metadata_user_watched: watched_status,
+            template_metadata_user_rating: rating_status,
+            template_metadata_user_request: request_status,
+            template_metadata_user_queue: queue_status,
             template_media_files,
             page_title: Some("MediaKraken Movie Detail".to_string()),
         };
