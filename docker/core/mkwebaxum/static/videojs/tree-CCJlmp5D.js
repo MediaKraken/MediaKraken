@@ -1,0 +1,2 @@
+import{i as e}from"./predicates-CkGkSv7A.js";function t(t,n){let r=n;for(;r;){if(r===t||t.contains(r))return!0;let n=r.getRootNode();r=r.assignedSlot??r.parentElement??(e(n)?n.host:null)}return!1}export{t};
+//# sourceMappingURL=tree-CCJlmp5D.js.map

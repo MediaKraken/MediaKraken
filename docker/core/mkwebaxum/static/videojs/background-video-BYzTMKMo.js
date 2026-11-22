@@ -1,0 +1,2 @@
+import{t as e}from"./safe-define-DXxmf7BV.js";import{t}from"./base-vF1mSQ2U.js";var n=class extends t{constructor(){super(),this.target?.addEventListener(`error`,()=>this.dispatchEvent(new Event(`error`)))}getMediaTarget(){return this.target}get src(){return this.target?.src??``}set src(e){let t=this.target;t&&(t.src=e)}get error(){return this.target?.error??null}},r=class extends n{static{this.tagName=`background-video`}};e(r);export{r as t};
+//# sourceMappingURL=background-video-BYzTMKMo.js.map

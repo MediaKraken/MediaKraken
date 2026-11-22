@@ -7,11 +7,17 @@
     media_source: Option<String>
     media_mime: Option<String>
 
-  When media_source is present, #video_player is an HTML5 <video> element
-  playing the file served by /user/playback/stream/{media_guid}; that
-  endpoint supports HTTP Range requests, so seeking works. Until a source
-  is selected, the shell shows a placeholder.
+  When media_source is present, #video_player is a Video.js v10
+  <video-player> element (registered by the /static/videojs/video.js
+  module) whose <video-skin> wraps the native <video> playing the file
+  served by /user/playback/stream/{media_guid}; that endpoint supports
+  HTTP Range requests, so seeking works. Until a source is selected, the
+  shell shows a placeholder.
 #}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/videojs/global.css">
+{% endblock %}
 
 {% block content %}
 <section class="mx-auto max-w-4xl px-4 py-6 sm:px-6">
@@ -30,26 +36,30 @@
     </div>
 
     {% if let Some(source) = media_source %}
-    <div class="mt-6 aspect-video w-full overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-950 shadow-sm dark:border-zinc-800">
-        <video id="video_player" class="h-full w-full" controls preload="auto" aria-label="Video player">
-            {% if let Some(mime) = media_mime %}
-            <source src="{{ source }}" type="{{ mime }}">
-            {% else %}
-            <source src="{{ source }}">
-            {% endif %}
-        </video>
-    </div>
+    <video-player id="video_player">
+        <video-skin
+            class="mt-6 block aspect-video w-full overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-950 shadow-sm dark:border-zinc-800">
+            <video class="h-full w-full" preload="auto" playsinline aria-label="Video player">
+                {% if let Some(mime) = media_mime %}
+                <source src="{{ source }}" type="{{ mime }}">
+                {% else %}
+                <source src="{{ source }}">
+                {% endif %}
+            </video>
+        </video-skin>
+    </video-player>
     {% else %}
     <div id="video_player"
         class="mt-6 aspect-video w-full overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-950 shadow-sm dark:border-zinc-800">
         <div class="flex h-full flex-col items-center justify-center gap-2 text-zinc-400 dark:text-zinc-500">
             <p class="text-sm font-medium">The player will mount here.</p>
-            <p class="text-xs">Waiting for /static/videojs/video.min.js</p>
+            <p class="text-xs">Waiting for /static/videojs/video.js</p>
         </div>
     </div>
     {% endif %}
-
-    <script src="/static/videojs/video.min.js"></script>
-    <script src="/static/videojs/Youtube.min.js"></script>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script type="module" src="/static/videojs/video.js"></script>
 {% endblock %}

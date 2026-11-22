@@ -1,0 +1,2 @@
+const e=`menu.`,t={key:`${e}quality`,text:`Quality`},n={key:`${e}audio`,text:`Audio`},r={key:`${e}captions`,text:`Captions`},i={key:`${e}playbackRate`,text:`Playback rate`},a={key:`${e}customRate`,text:`Custom, {rate}`},o={key:`${e}off`,text:`Off`},s={key:`${e}auto`,text:`Auto`},c={key:`${e}autoWithLabel`,text:`Auto ({label})`},l={key:`${e}subtitles`,text:`Subtitles`};export{a,t as c,r as i,l,s as n,o,c as r,i as s,n as t};
+//# sourceMappingURL=menu-CRlmfoi0.js.map

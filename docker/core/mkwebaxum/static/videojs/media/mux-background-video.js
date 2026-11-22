@@ -1,0 +1,3 @@
+/*! Video.js | https://videojs.org/help */
+import{t as e}from"../safe-define-DXxmf7BV.js";import{At as t,S as n,g as r,kt as i,l as a,p as o,x as s,y as c}from"../error-surface-Cqt0nHa2.js";import{n as l,r as u,t as d}from"../adapter-D5D5oEaw.js";import{t as f}from"../mpeg-ts-transmux-Cl8VMD5j.js";const p=i([r,c,n,o,u,a,s,f]),m=p.behaviors,h=p.defaultConfig,g={...p.initialState,loadActivated:!0},_=t(m,{defaultConfig:h,initialState:g});var v=class extends l{static engineName=`spf-hls-background-video-mpeg-ts`;static createEngine=_},y=class extends d{static{this.Adapter=v}},b=class extends y{static{this.tagName=`mux-background-video`}};e(b);export{b as MuxBackgroundVideoElement};
+//# sourceMappingURL=mux-background-video.js.map

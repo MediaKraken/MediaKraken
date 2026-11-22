@@ -1,0 +1,2 @@
+import{t as e}from"./ui-element-CVn6-byi.js";function t(e){return Array.from(e.childNodes).some(e=>!!e.textContent?.trim())}var n=class n extends e{static{this.tagName=`media-tooltip-label`}#e=!1;static findIn(e){return e.querySelector(n.tagName)}static create(){return document.createElement(n.tagName)}connectedCallback(){this.#e||=t(this),super.connectedCallback()}setSyncedText(e){this.#e||(this.textContent=e)}};export{n as t};
+//# sourceMappingURL=label-BbUTEg2D.js.map

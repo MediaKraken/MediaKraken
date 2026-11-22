@@ -1,0 +1,2 @@
+function e(e){return e instanceof Node&&e.nodeType===9}function t(e){return e instanceof Node&&e.nodeType===11&&`host`in e}function n(e){return e instanceof HTMLMediaElement}function r(e){return e instanceof HTMLImageElement}export{t as i,r as n,n as r,e as t};
+//# sourceMappingURL=predicates-CkGkSv7A.js.map
