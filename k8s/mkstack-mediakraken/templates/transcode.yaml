@@ -11,6 +11,23 @@ spec:
       storage: 10Gi
   storageClassName: longhorn
 ---
+# HLS working volume: mktranscode writes live transcode sessions here
+# (one directory per media guid), the web app serves them read-only.
+# Segments are a working set, not a store: they are deleted on stop and
+# swept by age. Sized for an ABR 720p+1080p full-movie working set.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mkstack-hls-claim
+  namespace: mediakraken
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: longhorn
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -57,9 +74,23 @@ spec:
             - name: mkstack-transcode-claim
               mountPath: /mediakraken/mnt
               readOnly: true
+            # Media library: the DB stores absolute paths under
+            # /mediakraken/metadata, so HLS transcoding can read sources.
+            - name: mkstack-metadata-claim
+              mountPath: /mediakraken/metadata
+              readOnly: true
+            # HLS working volume: live transcode sessions are written here.
+            - name: mkstack-hls-claim
+              mountPath: /mediakraken/hls
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
         - name: mkstack-transcode-claim
           persistentVolumeClaim:
             claimName: mkstack-transcode-claim
+        - name: mkstack-metadata-claim
+          persistentVolumeClaim:
+            claimName: mkstack-metadata-claim
+        - name: mkstack-hls-claim
+          persistentVolumeClaim:
+            claimName: mkstack-hls-claim

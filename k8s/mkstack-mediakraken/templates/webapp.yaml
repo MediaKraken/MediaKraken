@@ -91,6 +91,11 @@ spec:
               name: mkstack-metadata-claim
             - mountPath: /Comics
               name: mkstack-comics-claim
+            # HLS working volume: the web app serves live transcode
+            # playlists/segments from here (written by mktranscode).
+            - mountPath: /mediakraken/hls
+              name: mkstack-hls-claim
+              readOnly: true
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
@@ -100,3 +105,6 @@ spec:
         - name: mkstack-comics-claim
           persistentVolumeClaim:
             claimName: mkstack-comics-claim
+        - name: mkstack-hls-claim
+          persistentVolumeClaim:
+            claimName: mkstack-hls-claim

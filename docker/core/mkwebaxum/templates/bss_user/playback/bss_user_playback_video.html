@@ -4,15 +4,26 @@
   Context (UserPlaybackVideoTemplate):
     page_title: Option<String>
     media_name: Option<String>
+    media_guid: Option<String>
+    playback_mode: Option<String>   "direct" | "hls"
     media_source: Option<String>
     media_mime: Option<String>
 
-  When media_source is present, #video_player is a Video.js v10
-  <video-player> element (registered by the /static/videojs/video.js
-  module) whose <video-skin> wraps the native <video> playing the file
-  served by /user/playback/stream/{media_guid}; that endpoint supports
-  HTTP Range requests, so seeking works. Until a source is selected, the
-  shell shows a placeholder.
+  direct mode: #video_player is a Video.js v10 <video-player> element
+  (registered by the /static/videojs/video.js module) whose <video-skin>
+  wraps the native <video> playing the file served by
+  /user/playback/stream/{media_guid}; that endpoint supports HTTP Range
+  requests, so seeking works.
+
+  hls mode: #video_player is the <hlsjs-video> element (registered by
+  /static/videojs/media/hlsjs-video.js, hls.js bundled). The play button
+  posts /user/playback/hls/start?media={guid}, which queues an FFMPEG
+  HlsStart message; the mktranscode consumer transcodes an ABR ladder
+  into the shared HLS volume and this page serves
+  /user/playback/hls/{guid}/master.m3u8. The stop beacon posts
+  /user/playback/hls/stop on pagehide and on ended.
+
+  Until a source is selected, the shell shows a placeholder.
 #}
 
 {% block extra_head %}
@@ -36,6 +47,82 @@
     </div>
 
     {% if let Some(source) = media_source %}
+        {% if playback_mode.as_deref() == Some("hls") %}
+            {% if let Some(guid) = media_guid %}
+    <div class="relative mt-6 aspect-video w-full overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-950 shadow-sm dark:border-zinc-800"
+        x-data="{
+            state: 'idle',
+            message: '',
+            stopped: false,
+            onEnded: null,
+            onPlaying: null,
+            onError: null,
+            async play() {
+                if (this.state === 'starting' || this.state === 'loading') return;
+                this.state = 'starting';
+                this.message = '';
+                try {
+                    const response = await fetch('/user/playback/hls/start?media={{ guid }}', { method: 'POST' });
+                    const payload = await response.json();
+                    if (!response.ok || payload.ok !== true) {
+                        throw new Error(payload.error || 'Could not start the transcode.');
+                    }
+                    const player = document.getElementById('video_player');
+                    this.onEnded = () => this.stopTranscode();
+                    this.onPlaying = () => { this.state = 'playing'; };
+                    this.onError = () => {
+                        if (this.state === 'loading' || this.state === 'starting') {
+                            this.state = 'error';
+                            this.message = 'Playback failed. Try again.';
+                        }
+                    };
+                    player.removeEventListener('ended', this.onEnded);
+                    player.removeEventListener('playing', this.onPlaying);
+                    player.removeEventListener('error', this.onError);
+                    player.addEventListener('ended', this.onEnded);
+                    player.addEventListener('playing', this.onPlaying);
+                    player.addEventListener('error', this.onError);
+                    player.source = { src: '{{ source }}', engine: { hlsJs: { startPosition: 0 } } };
+                    this.state = 'loading';
+                    // Watchdog: the first segments normally arrive within a
+                    // few seconds; if nothing is playing after a minute the
+                    // transcode (or the player) is stuck, so offer a retry.
+                    setTimeout(() => {
+                        if (this.state === 'loading') {
+                            this.state = 'error';
+                            this.message = 'The transcode did not start in time. Try again.';
+                        }
+                    }, 60000);
+                } catch (error) {
+                    this.state = 'error';
+                    this.message = error.message;
+                }
+            },
+            stopTranscode() {
+                if (this.stopped) return;
+                this.stopped = true;
+                navigator.sendBeacon('/user/playback/hls/stop?media={{ guid }}');
+            }
+        }"
+        x-init="() => window.addEventListener('pagehide', () => stopTranscode())">
+        <hlsjs-video id="video_player" controls playsinline preload="auto" aria-label="Video player"></hlsjs-video>
+        <template x-if="state !== 'playing'">
+            <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-zinc-950/80 px-6 text-center">
+                <p x-show="state === 'starting'" class="text-sm text-zinc-300">Starting transcode…</p>
+                <p x-show="state === 'loading'" class="text-sm text-zinc-300">Transcoding — the first segments take a few seconds.</p>
+                <p x-show="state === 'error'" class="max-w-md text-sm text-red-400" x-text="message"></p>
+                <button type="button"
+                    @click="play()"
+                    class="rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 active:bg-indigo-700"
+                    aria-label="Start playback">
+                    <span x-show="state === 'idle'">Play</span>
+                    <span x-show="state === 'error'">Try again</span>
+                </button>
+            </div>
+        </template>
+    </div>
+            {% endif %}
+        {% else %}
     <video-player id="video_player">
         <video-skin
             class="mt-6 block aspect-video w-full overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-950 shadow-sm dark:border-zinc-800">
@@ -48,6 +135,7 @@
             </video>
         </video-skin>
     </video-player>
+        {% endif %}
     {% else %}
     <div id="video_player"
         class="mt-6 aspect-video w-full overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-950 shadow-sm dark:border-zinc-800">
@@ -61,5 +149,9 @@
 {% endblock %}
 
 {% block extra_scripts %}
+{% if playback_mode.as_deref() == Some("hls") %}
+<script type="module" src="/static/videojs/media/hlsjs-video.js"></script>
+{% else %}
 <script type="module" src="/static/videojs/video.js"></script>
+{% endif %}
 {% endblock %}

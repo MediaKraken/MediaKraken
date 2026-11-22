@@ -730,6 +730,18 @@ async fn main() {
             "/user/playback/stream/{media_guid}",
             get(user_playback::bp_video::user_playback_stream),
         )
+        .route_with_tsr(
+            "/user/playback/hls/start",
+            post(user_playback::bp_video::user_playback_hls_start),
+        )
+        .route_with_tsr(
+            "/user/playback/hls/stop",
+            post(user_playback::bp_video::user_playback_hls_stop),
+        )
+        .route_with_tsr(
+            "/user/playback/hls/{media_guid}/{file_name}",
+            get(user_playback::bp_video::user_playback_hls_segment),
+        )
         .route_with_tsr("/user/hardware", get(user::bp_hardware::user_hardware))
         .route_with_tsr(
             "/user/hardware/phue",

@@ -5,12 +5,13 @@ use axum::{
     body::{Body, Bytes},
     extract::{Path, Query, State},
     http::{HeaderMap, HeaderValue, Method, StatusCode},
-    response::{Html, IntoResponse, Response},
+    response::{Html, IntoResponse, Json, Response},
 };
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
 use futures::Stream;
 use serde::Deserialize;
+use serde_json::json;
 use sqlx::postgres::PgPool;
 use std::io::SeekFrom;
 use std::pin::Pin;
@@ -19,6 +20,14 @@ use tokio::io::{AsyncRead, AsyncSeekExt, ReadBuf};
 
 /// Media files are streamed to the browser in 1 MiB chunks.
 const STREAM_CHUNK_SIZE: usize = 1024 * 1024;
+/// Extensions the browser can decode natively; everything else goes
+/// through the mktranscode HLS path.
+const DIRECT_PLAYBACK_EXTENSIONS: [&str; 5] = ["mp4", "m4v", "webm", "ogv", "ogg"];
+/// Root of the shared HLS working volume (see k8s chart): mktranscode
+/// writes segments here, the web app serves them read-only.
+const HLS_ROOT: &str = "/mediakraken/hls";
+/// Segment/playlist names are restricted to this length.
+const HLS_SEGMENT_NAME_MAX_LEN: usize = 128;
 
 #[derive(Template)]
 #[template(path = "bss_error/bss_error_401.html")]
@@ -29,6 +38,11 @@ struct TemplateError401Context {}
 struct UserPlaybackVideoTemplate {
     page_title: Option<String>,
     media_name: Option<String>,
+    /// `mm_media_guid` of the file to play; `None` on the parameter-less
+    /// shell.
+    media_guid: Option<String>,
+    /// `direct` = native `<video>` stream, `hls` = mktranscode ABR ladder.
+    playback_mode: Option<String>,
     media_source: Option<String>,
     media_mime: Option<String>,
 }
@@ -59,7 +73,7 @@ pub async fn user_playback_video(
         return (StatusCode::UNAUTHORIZED, Html(reply_html).into_response());
     }
 
-    let (media_name, media_source, media_mime) = match query.media {
+    let (media_name, media_guid, playback_mode, media_source, media_mime) = match query.media {
         Some(media_guid) => {
             let media_path =
                 match mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_path_by_uuid(
@@ -89,22 +103,271 @@ pub async fn user_playback_video(
                 .to_string();
             (
                 Some(file_name),
-                Some(format!("/user/playback/stream/{media_guid}")),
+                Some(media_guid.to_string()),
+                Some(playback_mode_for_path(&media_path)),
+                Some(media_source_for_path(&media_path, media_guid)),
                 Some(mime_type_for_path(&media_path).to_string()),
             )
         }
         // the parameter-less form keeps working: plain player shell
-        None => (None, None, None),
+        None => (None, None, None, None, None),
     };
 
     let template = UserPlaybackVideoTemplate {
         page_title: Some("MediaKraken Video Playback".to_string()),
         media_name,
+        media_guid,
+        playback_mode,
         media_source,
         media_mime,
     };
     let reply_html = template.render().unwrap();
     (StatusCode::OK, Html(reply_html).into_response())
+}
+
+/// `direct` when the browser can decode the file natively, `hls` when it
+/// must be transcoded into an ABR ladder first.
+fn playback_mode_for_path(media_path: &str) -> String {
+    let extension = media_path
+        .rsplit('.')
+        .next()
+        .map(str::to_ascii_lowercase)
+        .unwrap_or_default();
+    if DIRECT_PLAYBACK_EXTENSIONS.contains(&extension.as_str()) {
+        "direct".to_string()
+    } else {
+        "hls".to_string()
+    }
+}
+
+/// The player source URL for a media file, by playback mode.
+fn media_source_for_path(media_path: &str, media_guid: uuid::Uuid) -> String {
+    if playback_mode_for_path(media_path) == "hls" {
+        format!("/user/playback/hls/{media_guid}/master.m3u8")
+    } else {
+        format!("/user/playback/stream/{media_guid}")
+    }
+}
+
+/// Only the playlist/segment names the transcode pod generates are served:
+/// `master.m3u8`, `<height>.m3u8` and `<height>_seg_%05d.ts`.
+fn valid_hls_segment_name(name: &str) -> bool {
+    (1..=HLS_SEGMENT_NAME_MAX_LEN).contains(&name.len())
+        && name
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '-'))
+        && (name.ends_with(".m3u8") || name.ends_with(".ts"))
+}
+
+/// Resolves the on-disk path for `media_guid`, or a ready-made error
+/// response. Shared by the start/segment handlers.
+async fn resolve_media_path(
+    state: &AppState,
+    media_guid: uuid::Uuid,
+) -> Result<String, (StatusCode, Json<serde_json::Value>)> {
+    match mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_path_by_uuid(
+        &state.sqlx_pool_ro,
+        media_guid,
+    )
+    .await
+    {
+        Ok(media_path) => Ok(media_path),
+        Err(sqlx::Error::RowNotFound) => Err((
+            StatusCode::NOT_FOUND,
+            Json(json!({"error": "Media not found"})),
+        )),
+        Err(_) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": "Internal server error"})),
+        )),
+    }
+}
+
+/// Publishes an `FFMPEG/HlsStart` message to the mktranscode queue, asking
+/// the running consumer to begin (or restart) the HLS transcode session.
+pub async fn user_playback_hls_start(
+    State(state): State<AppState>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Query(query): Query<PlaybackVideoQuery>,
+) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::POST],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(json!({"error": "Not authorized"})),
+        )
+            .into_response();
+    }
+    let Some(media_guid) = query.media else {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Missing media guid"})),
+        )
+            .into_response();
+    };
+    let media_path = match resolve_media_path(&state, media_guid).await {
+        Ok(media_path) => media_path,
+        Err(response) => return response.into_response(),
+    };
+
+    let (rabbit_connection, rabbit_channel) =
+        match mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp").await {
+            Ok(connection) => connection,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(json!({"error": "Transcoder unavailable"})),
+                )
+                    .into_response();
+            }
+        };
+    // Collapse the publish result before the next await: the error type
+    // (Box<dyn std::error::Error>) is not Send and must not live across it.
+    let publish_ok = matches!(
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish_with_retry(
+            &rabbit_connection,
+            "mktranscode",
+            json!({
+                "Type": "FFMPEG",
+                "Subtype": "HlsStart",
+                "Media UUID": media_guid,
+                "Media Path": media_path,
+            })
+            .to_string(),
+        )
+        .await,
+        Ok(())
+    );
+    let _ =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection).await;
+    if !publish_ok {
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({"error": "Unable to queue the transcode"})),
+        )
+            .into_response();
+    }
+    (StatusCode::OK, Json(json!({"ok": true}))).into_response()
+}
+
+/// Publishes an `FFMPEG/HlsStop` message. Best-effort by design: the
+/// browser sends this as a `sendBeacon` on page close, so the response is
+/// never read. A failed publish only delays cleanup (the transcode pod
+/// sweeps stale session directories by age).
+pub async fn user_playback_hls_stop(
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Query(query): Query<PlaybackVideoQuery>,
+) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::POST],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        return (
+            StatusCode::UNAUTHORIZED,
+            Json(json!({"error": "Not authorized"})),
+        )
+            .into_response();
+    }
+    let Some(media_guid) = query.media else {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(json!({"error": "Missing media guid"})),
+        )
+            .into_response();
+    };
+
+    let (rabbit_connection, rabbit_channel) =
+        match mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp").await {
+            Ok(connection) => connection,
+            Err(_) => return (StatusCode::OK, Json(json!({"ok": false}))).into_response(),
+        };
+    let publish_ok = matches!(
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish_with_retry(
+            &rabbit_connection,
+            "mktranscode",
+            json!({
+                "Type": "FFMPEG",
+                "Subtype": "HlsStop",
+                "Media UUID": media_guid,
+            })
+            .to_string(),
+        )
+        .await,
+        Ok(())
+    );
+    let _ =
+        mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_close(rabbit_channel, rabbit_connection).await;
+    (StatusCode::OK, Json(json!({"ok": publish_ok}))).into_response()
+}
+
+/// Serves one playlist or segment of an HLS session from the shared
+/// working volume. No Range support: hls.js fetches both whole.
+pub async fn user_playback_hls_segment(
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Path((media_guid, file_name)): Path<(uuid::Uuid, String)>,
+) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        let template = TemplateError401Context {};
+        let reply_html = template.render().unwrap();
+        return (StatusCode::UNAUTHORIZED, Html(reply_html)).into_response();
+    }
+
+    if !valid_hls_segment_name(&file_name) {
+        return (StatusCode::BAD_REQUEST, Html(String::from("Bad request"))).into_response();
+    }
+
+    let file_path = format!("{HLS_ROOT}/{media_guid}/{file_name}");
+    let Ok(file_metadata) = tokio::fs::metadata(&file_path).await else {
+        return (StatusCode::NOT_FOUND, Html(String::from("Not found"))).into_response();
+    };
+    let file_size = file_metadata.len();
+    let content_type = if file_name.ends_with(".m3u8") {
+        "application/vnd.apple.mpegurl"
+    } else {
+        "video/mp2t"
+    };
+
+    let stream = match MediaFileStream::open(&file_path, 0, file_size).await {
+        Ok(stream) => stream,
+        Err(_) => {
+            return (StatusCode::NOT_FOUND, Html(String::from("Not found"))).into_response();
+        }
+    };
+
+    let mut response = Response::new(Body::from_stream(stream));
+    *response.status_mut() = StatusCode::OK;
+    let headers = response.headers_mut();
+    headers.insert(
+        "content-type",
+        HeaderValue::from_str(content_type)
+            .unwrap_or_else(|_| HeaderValue::from_static("application/octet-stream")),
+    );
+    headers.insert("content-length", HeaderValue::from(file_size));
+    headers.insert("cache-control", HeaderValue::from_static("no-store"));
+    response
 }
 
 /// A `Range: bytes=...` request present on the stream endpoint.
@@ -327,5 +590,64 @@ fn mime_type_for_path(path: &str) -> &'static str {
         "asf" => "video/x-ms-asf",
         "rm" | "rmvb" => "application/vnd.rn-realmedia",
         _ => "application/octet-stream",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn segment_name_validation() {
+        assert!(valid_hls_segment_name("master.m3u8"));
+        assert!(valid_hls_segment_name("1080.m3u8"));
+        assert!(valid_hls_segment_name("720_seg_00001.ts"));
+        assert!(valid_hls_segment_name("src_seg_12345.ts"));
+        assert!(!valid_hls_segment_name(""));
+        assert!(!valid_hls_segment_name("playlist.m3u"));
+        assert!(!valid_hls_segment_name("a.ts.bak"));
+        assert!(!valid_hls_segment_name("../escape.ts"));
+        assert!(!valid_hls_segment_name("a/b.ts"));
+        assert!(!valid_hls_segment_name("seg-00001.tsX"));
+        assert!(!valid_hls_segment_name(
+            &"a".repeat(HLS_SEGMENT_NAME_MAX_LEN + 1)
+        ));
+    }
+
+    #[test]
+    fn playback_mode_by_extension() {
+        assert_eq!(
+            playback_mode_for_path("/mediakraken/metadata/m/x.mp4"),
+            "direct"
+        );
+        assert_eq!(
+            playback_mode_for_path("/mediakraken/metadata/m/x.MP4"),
+            "direct"
+        );
+        assert_eq!(
+            playback_mode_for_path("/mediakraken/metadata/m/x.mkv"),
+            "hls"
+        );
+        assert_eq!(
+            playback_mode_for_path("/mediakraken/metadata/m/x.avi"),
+            "hls"
+        );
+        assert_eq!(
+            playback_mode_for_path("/mediakraken/metadata/m/noext"),
+            "hls"
+        );
+    }
+
+    #[test]
+    fn media_source_by_mode() {
+        let guid = uuid::Uuid::new_v4();
+        assert_eq!(
+            media_source_for_path("/mediakraken/metadata/m/x.mp4", guid),
+            format!("/user/playback/stream/{guid}")
+        );
+        assert_eq!(
+            media_source_for_path("/mediakraken/metadata/m/x.mkv", guid),
+            format!("/user/playback/hls/{guid}/master.m3u8")
+        );
     }
 }

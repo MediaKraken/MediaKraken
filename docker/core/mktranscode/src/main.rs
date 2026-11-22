@@ -1,3 +1,6 @@
+mod hls;
+
+use hls::HlsManager;
 use mk_lib_common::mk_lib_common_ffmpeg;
 use serde_json::{Value, json};
 use std::error::Error;
@@ -5,7 +8,11 @@ use std::path::Path;
 use std::time::Duration;
 use tokio::process::Command;
 use tokio::signal;
-use tokio::time::timeout;
+use tokio::time::{interval, timeout};
+
+/// How often exited ffmpeg children are reaped and stale segment
+/// directories are swept.
+const HLS_REAP_INTERVAL: Duration = Duration::from_secs(30);
 
 const STREAM2CHROMECAST_PATH: &str = "/mediakraken/stream2chromecast/stream2chromecast.py";
 const COMMAND_TIMEOUT: Duration = Duration::from_secs(60 * 60);
@@ -209,11 +216,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let mut rabbit_consumer =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mktranscode", &rabbit_channel).await?;
 
+    let mut hls_manager = HlsManager::new();
+    let mut hls_reaper = interval(HLS_REAP_INTERVAL);
+    hls_reaper.tick().await; // first tick completes immediately; skip it
+
     loop {
         tokio::select! {
             _ = shutdown_signal() => {
                 eprintln!("mktranscode: shutdown signal received");
+                hls_manager.shutdown();
                 return Ok(());
+            }
+            _ = hls_reaper.tick() => {
+                hls_manager.reap().await;
             }
             msg = rabbit_consumer.recv() => {
                 let Some(msg) = msg else {
@@ -397,6 +412,48 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         //});
                     } else if json_message["Subtype"] == "EbookConvert" {
                         convert_ebook(&json_message).await;
+                    } else if json_message["Subtype"] == "HlsStart" {
+                        let media_uuid_str =
+                            json_message["Media UUID"].as_str().unwrap_or_default();
+                        let media_path =
+                            json_message["Media Path"].as_str().unwrap_or_default();
+                        match uuid::Uuid::parse_str(media_uuid_str) {
+                            Ok(media_uuid) => {
+                                if media_path.is_empty()
+                                    || !media_path.starts_with(hls::MEDIA_PATH_PREFIX)
+                                {
+                                    eprintln!(
+                                        "mktranscode: hls start rejected for {media_uuid}, \
+                                         missing or invalid 'Media Path'"
+                                    );
+                                } else {
+                                    match hls_manager.start(media_uuid, media_path).await {
+                                        Ok(master_path) => eprintln!(
+                                            "mktranscode: hls session started for {media_uuid} -> {master_path}"
+                                        ),
+                                        Err(error) => eprintln!(
+                                            "mktranscode: hls start failed for {media_uuid} ({error})"
+                                        ),
+                                    }
+                                }
+                            }
+                            Err(error) => eprintln!(
+                                "mktranscode: hls start skipped, invalid Media UUID '{media_uuid_str}' ({error})"
+                            ),
+                        }
+                    } else if json_message["Subtype"] == "HlsStop" {
+                        let media_uuid_str =
+                            json_message["Media UUID"].as_str().unwrap_or_default();
+                        match uuid::Uuid::parse_str(media_uuid_str) {
+                            Ok(media_uuid) => {
+                                if hls_manager.stop(&media_uuid).await {
+                                    eprintln!("mktranscode: hls session stopped for {media_uuid}");
+                                }
+                            }
+                            Err(_) => eprintln!(
+                                "mktranscode: hls stop skipped, invalid Media UUID '{media_uuid_str}'"
+                            ),
+                        }
                     }
                     // } else if json_message["Subtype"] == "Sync" {
                     //     ffmpeg_params = [
