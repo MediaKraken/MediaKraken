@@ -16,7 +16,7 @@ Please see the WIKI for documentation.<BR>
 <LI>Native client support for Android, iOS, MacOSX, Linux and Windows
 <li>GPU acceleration support
 <li>"Link" servers together so they can display each others media
-<LI>Central database implemented via PostgreSQL w/Citus plugin for clustering
+<LI>Central database implemented via PostgreSQL w/CNPG plugin for clustering
 <li>Remote control software to run on a touch tablet/phone/pi
 <LI>Dedicated OS builds for the following clients:
     <UL>
@@ -25,5 +25,6 @@ Please see the WIKI for documentation.<BR>
     </UL>
 <li>Offsite Storage Support
 </UL>
+<li>S3 and S3 compatible endpoints
 </ul>
-<h2 style="color:white";>Privacy Policy: This program collects NO data on users.</h2>
+<h2 style="color:white";>Privacy Policy: This program does not "phone home".</h2>

@@ -99,7 +99,7 @@ pub struct FilterQuery {
     pub status: Option<String>,
 }
 
-fn normalize_starts_with(raw: Option<&str>) -> Option<String> {
+pub fn normalize_starts_with(raw: Option<&str>) -> Option<String> {
     let value = raw.map(str::trim).filter(|value| !value.is_empty())?;
     let first_char = value.chars().next()?;
 
@@ -114,13 +114,13 @@ fn normalize_starts_with(raw: Option<&str>) -> Option<String> {
     Some("#".to_string())
 }
 
-fn normalize_string_filter(raw: Option<&str>) -> Option<String> {
+pub fn normalize_string_filter(raw: Option<&str>) -> Option<String> {
     raw.map(str::trim)
         .filter(|value| !value.is_empty())
         .map(ToOwned::to_owned)
 }
 
-fn normalize_status_filter(raw: Option<&str>) -> Option<String> {
+pub fn normalize_status_filter(raw: Option<&str>) -> Option<String> {
     let value = raw.map(str::trim).filter(|value| !value.is_empty())?;
     match value {
         "favorite" | "watched" | "unwatched" | "good" | "bad" | "trash" => Some(value.to_string()),
@@ -128,7 +128,7 @@ fn normalize_status_filter(raw: Option<&str>) -> Option<String> {
     }
 }
 
-fn build_filter_query_suffix(
+pub fn build_filter_query_suffix(
     starts_with: Option<&str>,
     genre: Option<&str>,
     primary_language: Option<&str>,
@@ -161,7 +161,9 @@ fn build_filter_query_suffix(
     }
 }
 
-fn build_movie_pagination(
+#[allow(clippy::too_many_arguments)]
+pub fn build_movie_pagination(
+    base_path: &str,
     total_items: i64,
     page: i64,
     pagination_count: i64,
@@ -190,7 +192,7 @@ fn build_movie_pagination(
     if total_pages == 1 {
         write!(
             pagination_html,
-            r#"<li><a href="/user/metadata/movie/1{suffix}"
+            r#"<li><a href="{base_path}/1{suffix}"
 class="px-3 py-2 rounded-md bg-indigo-600 text-white font-semibold border border-indigo-600">1</a></li>"#,
         )?;
         pagination_html.push_str("</ul></nav>");
@@ -207,7 +209,7 @@ class="px-3 py-2 rounded-md bg-indigo-600 text-white font-semibold border border
             PageItem::Prev(p) => {
                 write!(
                     pagination_html,
-                    r#"<li><a href="/user/metadata/movie/{p}{suffix}"
+                    r#"<li><a href="{base_path}/{p}{suffix}"
 class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200"
 aria-label="Previous">&laquo;</a></li>"#,
                 )?;
@@ -215,14 +217,14 @@ aria-label="Previous">&laquo;</a></li>"#,
             PageItem::Page(p) => {
                 write!(
                     pagination_html,
-                    r#"<li><a href="/user/metadata/movie/{p}{suffix}"
+                    r#"<li><a href="{base_path}/{p}{suffix}"
 class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200">{p}</a></li>"#,
                 )?;
             }
             PageItem::CurrentPage(p) => {
                 write!(
                     pagination_html,
-                    r#"<li><a href="/user/metadata/movie/{p}{suffix}"
+                    r#"<li><a href="{base_path}/{p}{suffix}"
 class="px-3 py-2 rounded-md bg-indigo-600 text-white font-semibold border border-indigo-600"
 aria-current="page">{p}</a></li>"#,
                 )?;
@@ -234,7 +236,7 @@ aria-current="page">{p}</a></li>"#,
             PageItem::Next(p) => {
                 write!(
                     pagination_html,
-                    r#"<li><a href="/user/metadata/movie/{p}{suffix}"
+                    r#"<li><a href="{base_path}/{p}{suffix}"
 class="px-3 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-200"
 aria-label="Next">&raquo;</a></li>"#,
                 )?;
@@ -302,6 +304,7 @@ pub async fn user_metadata_movie(
         .await
         .unwrap();
         let pagination_html = build_movie_pagination(
+            "/user/metadata/movie",
             total_pages,
             page,
             pagination_count,

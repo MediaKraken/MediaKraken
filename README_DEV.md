@@ -1,28 +1,32 @@
-MediaKraken
-    Audio/Video playback suite for web, client and mobile app playback.
+Deployment is done via opentofu, terraform and ansible.
 
-Deployment is done via k8s.
+The environment runs in k8s, running RabbitMQ, dragonflydb and CNPG. Most pods will communicate via RabbitMQ json messages. Logging will be sent to Loki. Metadata will be saved to Longhorn storage.
 
-Programs that run in K8s
-    mkchatmumble
-        Hosts mumble server
-    mkchatteamspeak
-        Hosts teamspeak server
+Deployments that run in K8s
+    mkchatmumble - optional
+        Hosts mumble server - audio chat
+    mkchatteamspeak - optional
+        Hosts teamspeak server - audio chat
     mkcron
         Runs defined jobs for housekeeping, data updates, etc
+            1	Media Scan - Scan for new media		
+            2	Schedules Direct - Fetch TV schedules from Schedules Direct		
+            3	The Movie Database - Grab updated metadata for movie(s) and TV show(s)		
+            4	Trailer	Download new trailer(s)		
+            5	iRadio - Populate iRadio
     mkdownload
         Download files and datasets
     mkfanotify
         File add, update and delete of file(s) notifications
-    mkgamesdbnetfetchbulk
+    mkgamesdbnetfetchbulk - optional
         (WIP) Consumes rabbitmq messages; intended to fetch game metadata (platforms, etc) from the gamesdb.net API
-    mkglobalcache
+    mkglobalcache - optional
         Grab manufacturer, models, etc of electronic equipment (redo to hit Wikipedia?)
-    mkguessitrest
+    mkguessitrest - optional....replacing with Rust lib
         Web API for determining proper Movie and TV Show name of a media file
-    mkhardwarecontrol
+    mkhardwarecontrol - optional
         Receive and send hardware controls via network, IR, etc
-    mkhardwarescanner
+    mkhardwarescanner - optional
         Scan for and update hardware found on specified subnet
     mkinit
         Initializes database and folder file system for saving image metadata
@@ -30,35 +34,35 @@ Programs that run in K8s
         File add, update and delete of file(s) notifications
     mkiradio
         Scrape/api for finding internet radio stations and update their url/description if needed
-    mklibretrocorefetchupdate
+    mklibretrocorefetchupdate - optional
         Grab latest libretro emulation cores
     mkmediascanner
         Scan directories for modified/added files and add/update database for found file(s)
     mkmetadata
         Identify media and download the appropriate metadata
-    mkmetadatamame
+    mkmetadatamame - optional
         Fetch and update MAME/MESS game metadata
-    mkmulticast
+    mkmulticast - don't think this'll work in cluster
         Do multicast broadcasting for cluster discovery
-    mkmusicbrainz
+    mkmusicbrainz - optional
         Grab musicbrainz data and update/insert into DB
-    mknut
+    mknut - optional
         Hosts UPS software NUT
-    mkopenlibrarynetfetchbulk
+    mkopenlibrarynetfetchbulk - optional
         Grab openlibrary metadata and update DB
     mkrabbitconsume
         Processes rabbitmq messages
-    mkschedulesdirectupdate
+    mkschedulesdirectupdate - optional
         Fetch current TV information and update DB
     mksharescanner
         Scan for network SMB and NFS shares on specified subnet
-    mktmdbnetfetchbulk
+    mktmdbnetfetchbulk - optional
         Insert movie and TV tmdb ids to database for metadata fetching
     mktranscode
         Will do transcoding/streaming to web/devices that can't do direct play from the media file itself
-    mktransmission
+    mktransmission - optional
         WebUI and BitTorrent server
-    mktvheadend
+    mktvheadend - optional
         Interface with TV/Streaming hardware
     mkwebaxum
         Main website of application suite
@@ -72,8 +76,6 @@ Libraries used to build
         Postgres/SQLx data access layer: media catalog (movie, tv, music, game, book, ...), users, hardware, libraries, shares, search, backups, cron, schema versioning
     mk_lib_file
         File system and mtime helpers, plus Garage S3 object storage client (feature s3) and garage-admin (feature garage-admin)
-    mk_lib_filler
-        Empty lib to make chef happy
     mk_lib_hardware
         Driver/control integrations for AV and home hardware: chromecast, roku, firetv, appletv, lenbrook, marantz, onkyo, pioneer, hue, nut ups, hdhomerun, crestron, alexa, arduino, pi sensors
     mk_lib_hash
