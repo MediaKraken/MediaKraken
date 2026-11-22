@@ -74,8 +74,9 @@ spec:
             - name: mkstack-transcode-claim
               mountPath: /mediakraken/mnt
               readOnly: true
-            # Media library: the DB stores absolute paths under
-            # /mediakraken/metadata, so HLS transcoding can read sources.
+            # Local library mount: local paths in the DB read from here.
+            # Share-based media (smb:// / nfs:// in mm_media_path) is read
+            # by ffmpeg directly, the same way the ffprobe pass does.
             - name: mkstack-metadata-claim
               mountPath: /mediakraken/metadata
               readOnly: true

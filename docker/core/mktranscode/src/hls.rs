@@ -23,8 +23,16 @@ use uuid::Uuid;
 
 /// Mount point of the shared HLS working volume (see k8s chart).
 pub const HLS_ROOT: &str = "/mediakraken/hls";
-/// Prefix every transcodable media path must have (media library + shares).
-pub const MEDIA_PATH_PREFIX: &str = "/mediakraken/";
+/// The scanner stores `mm_media_path` with a connection header —
+/// `smb://<ip>/<share>/...` or `nfs://<ip>/<path>/...` (see
+/// mkmediascanner::mk_media_path_prefix) — and ffmpeg opens those URLs
+/// directly, the same way the ffprobe pass does. Local absolute paths are
+/// accepted too, for local-library deployments.
+pub fn is_supported_media_path(media_path: &str) -> bool {
+    media_path.starts_with("smb://")
+        || media_path.starts_with("nfs://")
+        || media_path.starts_with('/')
+}
 const HLS_SEGMENT_SECONDS: i32 = 6;
 const KEYFRAME_INTERVAL_FRAMES: i32 = 120;
 const KEYFRAME_MIN_INTERVAL_FRAMES: i32 = 60;
@@ -411,6 +419,23 @@ mod tests {
         assert_eq!(plan_renditions(Some(720)).len(), 1);
         assert_eq!(plan_renditions(Some(360))[0].height, 0);
         assert_eq!(plan_renditions(None).len(), 1);
+    }
+
+    #[test]
+    fn media_path_validation() {
+        assert!(is_supported_media_path(
+            "smb://192.168.50.50/video/movies/a.mkv"
+        ));
+        assert!(is_supported_media_path(
+            "nfs://192.168.50.50/media/movies/a.mkv"
+        ));
+        assert!(is_supported_media_path(
+            "/mediakraken/metadata/movies/a.mkv"
+        ));
+        assert!(!is_supported_media_path(""));
+        assert!(!is_supported_media_path("smb:/192.168.50.50/video/a.mkv"));
+        assert!(!is_supported_media_path("http://192.168.50.50/video/a.mkv"));
+        assert!(!is_supported_media_path("C:\\media\\a.mkv"));
     }
 
     #[test]

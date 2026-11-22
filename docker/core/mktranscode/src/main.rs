@@ -420,7 +420,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                         match uuid::Uuid::parse_str(media_uuid_str) {
                             Ok(media_uuid) => {
                                 if media_path.is_empty()
-                                    || !media_path.starts_with(hls::MEDIA_PATH_PREFIX)
+                                    || !hls::is_supported_media_path(media_path)
                                 {
                                     eprintln!(
                                         "mktranscode: hls start rejected for {media_uuid}, \

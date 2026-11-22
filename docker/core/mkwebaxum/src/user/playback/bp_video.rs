@@ -126,8 +126,14 @@ pub async fn user_playback_video(
 }
 
 /// `direct` when the browser can decode the file natively, `hls` when it
-/// must be transcoded into an ABR ladder first.
+/// must be transcoded into an ABR ladder first. Network-share paths
+/// (`smb://` / `nfs://`, the format the scanner stores) are not local
+/// files the web app can open, so they always transcode — ffmpeg reaches
+/// them directly, the same way the ffprobe pass does.
 fn playback_mode_for_path(media_path: &str) -> String {
+    if media_path.starts_with("smb://") || media_path.starts_with("nfs://") {
+        return "hls".to_string();
+    }
     let extension = media_path
         .rsplit('.')
         .next()
@@ -634,6 +640,16 @@ mod tests {
         );
         assert_eq!(
             playback_mode_for_path("/mediakraken/metadata/m/noext"),
+            "hls"
+        );
+        // Share paths always transcode, even for directly playable
+        // extensions: the web app cannot open them as local files.
+        assert_eq!(
+            playback_mode_for_path("smb://192.168.50.50/video/m/x.mp4"),
+            "hls"
+        );
+        assert_eq!(
+            playback_mode_for_path("nfs://192.168.50.50/media/m/x.mkv"),
             "hls"
         );
     }
