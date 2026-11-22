@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_metadata"
-version = "0.0.276"
+version = "0.0.277"
 edition = "2024"
 
 [profile.release]
@@ -10,12 +10,12 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_common = { version = "0.0.263", registry = "kellnr" }
-mk_lib_database = { version = "0.0.297", registry = "kellnr" }
-mk_lib_hash = { version = "0.0.266", registry = "kellnr" }
-mk_lib_image = { version = "0.0.263", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.264", registry = "kellnr" }
-mk_lib_network = { version = "0.0.263", registry = "kellnr" }
+mk_lib_common = { version = "0.0.264", registry = "kellnr" }
+mk_lib_database = { version = "0.0.298", registry = "kellnr" }
+mk_lib_hash = { version = "0.0.267", registry = "kellnr" }
+mk_lib_image = { version = "0.0.264", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.265", registry = "kellnr" }
+mk_lib_network = { version = "0.0.264", registry = "kellnr" }
 
 discid = { version = "0.7.1", optional = true }
 flickr = "0.1.1"
