@@ -1,0 +1,2649 @@
+-- Dumped from database version 18.1 (Debian 18.1-1.pgdg13+2)
+-- Dumped by pg_dump version 18.6
+
+-- Started on 2026-11-22 23:47:00 UTC
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- TOC entry 10 (class 2615 OID 2200)
+-- Name: public; Type: SCHEMA; Schema: -; Owner: pg_database_owner
+--
+
+CREATE SCHEMA public;
+
+
+ALTER SCHEMA public OWNER TO pg_database_owner;
+
+--
+-- TOC entry 5833 (class 0 OID 0)
+-- Dependencies: 10
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: pg_database_owner
+--
+
+COMMENT ON SCHEMA public IS 'standard public schema';
+
+
+--
+-- TOC entry 359 (class 1255 OID 147654)
+-- Name: touch_photo_updated(); Type: FUNCTION; Schema: public; Owner: metaman
+--
+
+CREATE FUNCTION public.touch_photo_updated() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+            BEGIN
+                NEW.photo_updated := CURRENT_TIMESTAMP;
+                RETURN NEW;
+            END;
+            $$;
+
+
+ALTER FUNCTION public.touch_photo_updated() OWNER TO metaman;
+
+--
+-- TOC entry 3474 (class 3602 OID 4291425)
+-- Name: english_unaccent; Type: TEXT SEARCH CONFIGURATION; Schema: public; Owner: metaman
+--
+
+CREATE TEXT SEARCH CONFIGURATION public.english_unaccent (
+    PARSER = pg_catalog."default" );
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR asciiword WITH english_stem;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR word WITH public.unaccent, english_stem;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR numword WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR email WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR url WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR host WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR sfloat WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR version WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR hword_numpart WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR hword_part WITH public.unaccent, english_stem;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR hword_asciipart WITH english_stem;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR numhword WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR asciihword WITH english_stem;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR hword WITH public.unaccent, english_stem;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR url_path WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR file WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR "float" WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR "int" WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent
+    ADD MAPPING FOR uint WITH simple;
+
+
+ALTER TEXT SEARCH CONFIGURATION public.english_unaccent OWNER TO metaman;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 276 (class 1259 OID 19175)
+-- Name: mm_axum_user_permissions; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_axum_user_permissions (
+    user_id integer NOT NULL,
+    token character varying(256) NOT NULL
+);
+
+
+ALTER TABLE public.mm_axum_user_permissions OWNER TO metaman;
+
+--
+-- TOC entry 275 (class 1259 OID 19164)
+-- Name: mm_axum_users; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_axum_users (
+    id bigint NOT NULL,
+    anonymous boolean NOT NULL,
+    username character varying(256) NOT NULL,
+    password text NOT NULL,
+    email character varying(256),
+    last_signin timestamp with time zone,
+    last_signoff timestamp with time zone
+);
+
+
+ALTER TABLE public.mm_axum_users OWNER TO metaman;
+
+--
+-- TOC entry 274 (class 1259 OID 19163)
+-- Name: mm_axum_users_id_seq; Type: SEQUENCE; Schema: public; Owner: metaman
+--
+
+ALTER TABLE public.mm_axum_users ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.mm_axum_users_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- TOC entry 277 (class 1259 OID 19181)
+-- Name: mm_backup; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_backup (
+    mm_backup_guid uuid NOT NULL,
+    mm_backup_description text NOT NULL,
+    mm_backup_location_type integer NOT NULL,
+    mm_backup_location text NOT NULL,
+    mm_backup_created timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public.mm_backup OWNER TO metaman;
+
+--
+-- TOC entry 280 (class 1259 OID 19259)
+-- Name: mm_bar_code_own; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_bar_code_own (
+    mm_bar_code_own_uuid uuid NOT NULL,
+    mm_bar_code_own_user integer NOT NULL
+);
+
+
+ALTER TABLE public.mm_bar_code_own OWNER TO metaman;
+
+--
+-- TOC entry 279 (class 1259 OID 19248)
+-- Name: mm_bar_codes; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_bar_codes (
+    mm_bar_code_uuid uuid NOT NULL,
+    mm_bar_code_code text NOT NULL,
+    mm_bar_code_type smallint NOT NULL,
+    mm_bar_code_json jsonb,
+    mm_bar_code_metadata_uuid uuid
+);
+
+
+ALTER TABLE public.mm_bar_codes OWNER TO metaman;
+
+--
+-- TOC entry 232 (class 1259 OID 18691)
+-- Name: mm_cron_jobs; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_cron_jobs (
+    mm_cron_guid uuid NOT NULL,
+    mm_cron_name text,
+    mm_cron_description text,
+    mm_cron_enabled boolean,
+    mm_cron_schedule_type text,
+    mm_cron_last_run timestamp with time zone,
+    mm_cron_json jsonb,
+    mm_cron_schedule_time smallint
+);
+
+
+ALTER TABLE public.mm_cron_jobs OWNER TO metaman;
+
+--
+-- TOC entry 288 (class 1259 OID 4226137)
+-- Name: mm_downloaded; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_downloaded (
+    mm_download_guid uuid NOT NULL,
+    mm_downloaded_url text NOT NULL
+);
+
+
+ALTER TABLE public.mm_downloaded OWNER TO metaman;
+
+--
+-- TOC entry 233 (class 1259 OID 18697)
+-- Name: mm_game_dedicated_servers; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_game_dedicated_servers (
+    mm_game_server_guid uuid NOT NULL,
+    mm_game_server_name text,
+    mm_game_server_json jsonb
+);
+
+
+ALTER TABLE public.mm_game_dedicated_servers OWNER TO metaman;
+
+--
+-- TOC entry 234 (class 1259 OID 18703)
+-- Name: mm_hardware_device; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_hardware_device (
+    mm_device_guid uuid NOT NULL,
+    mm_device_json jsonb,
+    mm_device_spec_guid uuid
+);
+
+
+ALTER TABLE public.mm_hardware_device OWNER TO metaman;
+
+--
+-- TOC entry 235 (class 1259 OID 18709)
+-- Name: mm_hardware_manufacturer; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_hardware_manufacturer (
+    mm_hardware_manu_guid uuid NOT NULL,
+    mm_hardware_manu_name text,
+    mm_hardware_manu_gc_id integer
+);
+
+
+ALTER TABLE public.mm_hardware_manufacturer OWNER TO metaman;
+
+--
+-- TOC entry 272 (class 1259 OID 19147)
+-- Name: mm_hardware_model; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_hardware_model (
+    mm_hardware_model_guid uuid NOT NULL,
+    mm_hardware_manufacturer text,
+    mm_hardware_model_type text,
+    mm_hardware_model_name text
+);
+
+
+ALTER TABLE public.mm_hardware_model OWNER TO metaman;
+
+--
+-- TOC entry 236 (class 1259 OID 18715)
+-- Name: mm_hardware_specifications; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_hardware_specifications (
+    mm_hardware_spec_guid uuid NOT NULL,
+    mm_hardware_spec_model text,
+    mm_hardware_spec_json jsonb,
+    mm_hardware_spec_ir_json jsonb,
+    mm_hardware_spec_manufacturer_guid uuid
+);
+
+
+ALTER TABLE public.mm_hardware_specifications OWNER TO metaman;
+
+--
+-- TOC entry 237 (class 1259 OID 18721)
+-- Name: mm_hardware_type; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_hardware_type (
+    mm_hardware_type_guid uuid NOT NULL,
+    mm_hardware_type_name text
+);
+
+
+ALTER TABLE public.mm_hardware_type OWNER TO metaman;
+
+--
+-- TOC entry 287 (class 1259 OID 3080685)
+-- Name: mm_languages; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_languages (
+    id integer NOT NULL,
+    code character varying(2) NOT NULL,
+    language text
+);
+
+
+ALTER TABLE public.mm_languages OWNER TO metaman;
+
+--
+-- TOC entry 286 (class 1259 OID 3080684)
+-- Name: mm_languages_id_seq; Type: SEQUENCE; Schema: public; Owner: metaman
+--
+
+CREATE SEQUENCE public.mm_languages_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.mm_languages_id_seq OWNER TO metaman;
+
+--
+-- TOC entry 5834 (class 0 OID 0)
+-- Dependencies: 286
+-- Name: mm_languages_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: metaman
+--
+
+ALTER SEQUENCE public.mm_languages_id_seq OWNED BY public.mm_languages.id;
+
+
+--
+-- TOC entry 238 (class 1259 OID 18727)
+-- Name: mm_library_dir; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_library_dir (
+    mm_media_dir_guid uuid NOT NULL,
+    mm_media_dir_path text,
+    mm_media_dir_last_scanned timestamp with time zone,
+    mm_media_dir_status jsonb,
+    mm_media_dir_class_enum smallint,
+    mm_media_dir_share_guid uuid
+);
+
+
+ALTER TABLE public.mm_library_dir OWNER TO metaman;
+
+--
+-- TOC entry 239 (class 1259 OID 18733)
+-- Name: mm_library_link; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_library_link (
+    mm_link_guid uuid NOT NULL,
+    mm_link_name text,
+    mm_link_json jsonb,
+    mm_link_username text,
+    mm_link_password text
+);
+
+
+ALTER TABLE public.mm_library_link OWNER TO metaman;
+
+--
+-- TOC entry 240 (class 1259 OID 18739)
+-- Name: mm_media; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_media (
+    mm_media_guid uuid NOT NULL,
+    mm_media_metadata_guid uuid,
+    mm_media_path text,
+    mm_media_ffprobe_json jsonb,
+    mm_media_json jsonb,
+    mm_media_class_enum smallint,
+    mm_media_share_guid uuid NOT NULL
+);
+
+
+ALTER TABLE public.mm_media OWNER TO metaman;
+
+--
+-- TOC entry 241 (class 1259 OID 18745)
+-- Name: mm_media_channel; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_media_channel (
+    mm_channel_guid uuid NOT NULL,
+    mm_channel_name text,
+    mm_channel_media_id jsonb,
+    mm_channel_country_guid uuid,
+    mm_channel_logo_guid uuid
+);
+
+
+ALTER TABLE public.mm_media_channel OWNER TO metaman;
+
+--
+-- TOC entry 242 (class 1259 OID 18751)
+-- Name: mm_media_remote; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_media_remote (
+    mmr_media_guid uuid NOT NULL,
+    mmr_media_link_guid uuid,
+    mmr_media_uuid uuid,
+    mmr_media_metadata_guid uuid,
+    mmr_media_ffprobe_json jsonb,
+    mmr_media_json jsonb,
+    mmr_media_class_enum smallint
+);
+
+
+ALTER TABLE public.mm_media_remote OWNER TO metaman;
+
+--
+-- TOC entry 243 (class 1259 OID 18757)
+-- Name: mm_media_sync; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_media_sync (
+    mm_sync_guid uuid NOT NULL,
+    mm_sync_path text,
+    mm_sync_path_to text,
+    mm_sync_options_json jsonb
+);
+
+
+ALTER TABLE public.mm_media_sync OWNER TO metaman;
+
+--
+-- TOC entry 244 (class 1259 OID 18763)
+-- Name: mm_metadata_album; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_album (
+    mm_metadata_album_guid uuid NOT NULL,
+    mm_metadata_album_name text,
+    mm_metadata_album_id jsonb,
+    mm_metadata_album_json jsonb,
+    mm_metadata_album_musician_guid uuid,
+    mm_metadata_album_user_json jsonb,
+    mm_metadata_album_localimage jsonb
+);
+
+
+ALTER TABLE public.mm_metadata_album OWNER TO metaman;
+
+--
+-- TOC entry 245 (class 1259 OID 18769)
+-- Name: mm_metadata_anime; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_anime (
+    mm_metadata_anime_guid uuid NOT NULL,
+    mm_metadata_anime_name text,
+    mm_metadata_anime_json jsonb,
+    mm_metadata_anime_mapping jsonb,
+    mm_metadata_anime_mapping_before text,
+    mm_metadata_anime_localimage jsonb,
+    mm_metadata_anime_user_json jsonb,
+    mm_metadata_anime_media_id integer
+);
+
+
+ALTER TABLE public.mm_metadata_anime OWNER TO metaman;
+
+--
+-- TOC entry 246 (class 1259 OID 18775)
+-- Name: mm_metadata_book; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_book (
+    mm_metadata_book_guid uuid NOT NULL,
+    mm_metadata_book_isbn text,
+    mm_metadata_book_isbn13 text,
+    mm_metadata_book_name text,
+    mm_metadata_book_json jsonb,
+    mm_metadata_book_localimage jsonb,
+    photo_updated timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.mm_metadata_book OWNER TO metaman;
+
+--
+-- TOC entry 247 (class 1259 OID 18781)
+-- Name: mm_metadata_collection; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_collection (
+    mm_metadata_collection_guid uuid NOT NULL,
+    mm_metadata_collection_name jsonb,
+    mm_metadata_collection_media_ids jsonb,
+    mm_metadata_collection_json jsonb,
+    mm_metadata_collection_imagelocal jsonb
+);
+
+
+ALTER TABLE public.mm_metadata_collection OWNER TO metaman;
+
+--
+-- TOC entry 248 (class 1259 OID 18787)
+-- Name: mm_metadata_download_que; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_download_que (
+    mm_download_guid uuid NOT NULL,
+    mm_download_provider text,
+    mm_download_que_type smallint,
+    mm_download_new_uuid uuid,
+    mm_download_provider_id integer,
+    mm_download_status text,
+    mm_download_path text
+);
+
+
+ALTER TABLE public.mm_metadata_download_que OWNER TO metaman;
+
+--
+-- TOC entry 249 (class 1259 OID 18793)
+-- Name: mm_metadata_game_software_info; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_game_software_info (
+    gi_game_info_id uuid CONSTRAINT mm_metadata_game_software_info_gi_id_not_null NOT NULL,
+    gi_game_info_system_id uuid,
+    gi_game_info_short_name text,
+    gi_game_info_name text,
+    gi_game_info_json jsonb,
+    gi_game_info_localimage jsonb,
+    gi_game_info_sha1 text,
+    gi_game_info_blake3 text
+);
+
+
+ALTER TABLE public.mm_metadata_game_software_info OWNER TO metaman;
+
+--
+-- TOC entry 250 (class 1259 OID 18799)
+-- Name: mm_metadata_game_systems_info; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_game_systems_info (
+    gs_game_system_id uuid CONSTRAINT mm_metadata_game_systems_info_gs_id_not_null NOT NULL,
+    gs_game_system_name text,
+    gs_game_system_alias text,
+    gs_game_system_json jsonb,
+    gs_game_system_localimage jsonb
+);
+
+
+ALTER TABLE public.mm_metadata_game_systems_info OWNER TO metaman;
+
+--
+-- TOC entry 251 (class 1259 OID 18805)
+-- Name: mm_metadata_logo; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_logo (
+    mm_metadata_logo_guid uuid NOT NULL,
+    mm_metadata_logo_media_guid jsonb,
+    mm_metadata_logo_image_path text
+);
+
+
+ALTER TABLE public.mm_metadata_logo OWNER TO metaman;
+
+--
+-- TOC entry 252 (class 1259 OID 18811)
+-- Name: mm_metadata_movie; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_movie (
+    mm_metadata_movie_guid uuid NOT NULL,
+    mm_metadata_movie_media_id integer,
+    mm_metadata_movie_name text,
+    mm_metadata_movie_json jsonb,
+    mm_metadata_movie_localimage_json jsonb,
+    mm_metadata_movie_name_alt text,
+    title_search tsvector GENERATED ALWAYS AS (((setweight(to_tsvector('simple'::regconfig, COALESCE(mm_metadata_movie_name, ''::text)), 'A'::"char") || ''::tsvector) || setweight(to_tsvector('simple'::regconfig, COALESCE(mm_metadata_movie_name_alt, ''::text)), 'B'::"char"))) STORED,
+    photo_updated timestamp with time zone DEFAULT now(),
+    mm_metadata_movie_primary_lang_gen text GENERATED ALWAYS AS (lower(COALESCE((mm_metadata_movie_json ->> 'primary_language'::text), (mm_metadata_movie_json ->> 'original_language'::text), ''::text))) STORED
+);
+
+
+ALTER TABLE public.mm_metadata_movie OWNER TO metaman;
+
+--
+-- TOC entry 253 (class 1259 OID 18817)
+-- Name: mm_metadata_music; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_music (
+    mm_metadata_music_guid uuid NOT NULL,
+    mm_metadata_media_music_id jsonb,
+    mm_metadata_music_name text,
+    mm_metadata_music_json jsonb,
+    mm_metadata_music_album_guid uuid,
+    photo_updated timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.mm_metadata_music OWNER TO metaman;
+
+--
+-- TOC entry 254 (class 1259 OID 18823)
+-- Name: mm_metadata_music_video; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_music_video (
+    mm_metadata_music_video_guid uuid NOT NULL,
+    mm_metadata_music_video_media_id jsonb,
+    mm_metadata_music_video_band text,
+    mm_metadata_music_video_song text,
+    mm_metadata_music_video_json jsonb,
+    mm_metadata_music_video_localimage_json jsonb,
+    photo_updated timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.mm_metadata_music_video OWNER TO metaman;
+
+--
+-- TOC entry 255 (class 1259 OID 18829)
+-- Name: mm_metadata_musician; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_musician (
+    mm_metadata_musician_guid uuid NOT NULL,
+    mm_metadata_musician_name text,
+    mm_metadata_musician_id jsonb,
+    mm_metadata_musician_json jsonb,
+    mm_metadata_musician_localimage jsonb
+);
+
+
+ALTER TABLE public.mm_metadata_musician OWNER TO metaman;
+
+--
+-- TOC entry 256 (class 1259 OID 18835)
+-- Name: mm_metadata_person; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_person (
+    mm_metadata_person_guid uuid NOT NULL,
+    mm_metadata_person_media_id integer,
+    mm_metadata_person_meta_json jsonb,
+    mm_metadata_person_image text,
+    mm_metadata_person_name text,
+    photo_updated timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.mm_metadata_person OWNER TO metaman;
+
+--
+-- TOC entry 257 (class 1259 OID 18841)
+-- Name: mm_metadata_review; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_review (
+    mm_review_guid uuid NOT NULL,
+    mm_review_metadata_guid uuid,
+    mm_review_json jsonb
+);
+
+
+ALTER TABLE public.mm_metadata_review OWNER TO metaman;
+
+--
+-- TOC entry 258 (class 1259 OID 18847)
+-- Name: mm_metadata_sports; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_sports (
+    mm_metadata_sports_guid uuid NOT NULL,
+    mm_metadata_media_sports_id jsonb,
+    mm_metadata_sports_name text,
+    mm_metadata_sports_json jsonb,
+    mm_metadata_sports_image_json jsonb,
+    photo_updated timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.mm_metadata_sports OWNER TO metaman;
+
+--
+-- TOC entry 259 (class 1259 OID 18853)
+-- Name: mm_metadata_tvshow; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_tvshow (
+    mm_metadata_tvshow_guid uuid NOT NULL,
+    mm_metadata_tvshow_name text,
+    mm_metadata_tvshow_json jsonb,
+    mm_metadata_tvshow_localimage_json jsonb,
+    mm_metadata_media_tvshow_id integer,
+    mm_metadata_tvshow_name_alt text,
+    title_search tsvector GENERATED ALWAYS AS (((setweight(to_tsvector('simple'::regconfig, COALESCE(mm_metadata_tvshow_name, ''::text)), 'A'::"char") || ''::tsvector) || setweight(to_tsvector('simple'::regconfig, COALESCE(mm_metadata_tvshow_name_alt, ''::text)), 'B'::"char"))) STORED,
+    photo_updated timestamp with time zone DEFAULT now()
+);
+
+
+ALTER TABLE public.mm_metadata_tvshow OWNER TO metaman;
+
+--
+-- TOC entry 282 (class 1259 OID 122482)
+-- Name: mm_metadata_user_status; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_metadata_user_status (
+    mm_status_guid uuid NOT NULL,
+    mm_status_user_id bigint NOT NULL,
+    mm_status_user_json jsonb NOT NULL,
+    mm_status_type_book uuid,
+    mm_status_type_movie uuid,
+    mm_status_type_music uuid,
+    mm_status_type_music_video uuid,
+    mm_status_type_sports uuid,
+    mm_status_type_tvshow uuid
+);
+
+
+ALTER TABLE public.mm_metadata_user_status OWNER TO metaman;
+
+--
+-- TOC entry 273 (class 1259 OID 19157)
+-- Name: mm_network_shares; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_network_shares (
+    mm_network_share_guid uuid NOT NULL,
+    mm_network_share_ip inet,
+    mm_network_share_path text,
+    mm_network_share_comment text,
+    mm_network_share_version smallint,
+    mm_network_share_user_guid uuid,
+    mm_network_share_workgroup text
+);
+
+
+ALTER TABLE public.mm_network_shares OWNER TO metaman;
+
+--
+-- TOC entry 260 (class 1259 OID 18859)
+-- Name: mm_notification; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_notification (
+    mm_notification_guid uuid NOT NULL,
+    mm_notification_text text,
+    mm_notification_time timestamp with time zone,
+    mm_notification_dismissible boolean
+);
+
+
+ALTER TABLE public.mm_notification OWNER TO metaman;
+
+--
+-- TOC entry 283 (class 1259 OID 263675)
+-- Name: mm_openlib_author; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_openlib_author (
+    type text,
+    key text,
+    revision integer,
+    last_modified timestamp without time zone,
+    data jsonb
+);
+
+
+ALTER TABLE public.mm_openlib_author OWNER TO metaman;
+
+--
+-- TOC entry 284 (class 1259 OID 263678)
+-- Name: mm_openlib_edition; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_openlib_edition (
+    type text,
+    key text,
+    revision integer,
+    last_modified timestamp without time zone,
+    data jsonb
+);
+
+
+ALTER TABLE public.mm_openlib_edition OWNER TO metaman;
+
+--
+-- TOC entry 285 (class 1259 OID 263685)
+-- Name: mm_openlib_work; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_openlib_work (
+    type text,
+    key text,
+    revision integer,
+    last_modified timestamp without time zone,
+    data jsonb
+);
+
+
+ALTER TABLE public.mm_openlib_work OWNER TO metaman;
+
+--
+-- TOC entry 261 (class 1259 OID 18865)
+-- Name: mm_options_and_status; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_options_and_status (
+    mm_options_and_status_guid uuid NOT NULL,
+    mm_options_json jsonb,
+    mm_status_json jsonb
+);
+
+
+ALTER TABLE public.mm_options_and_status OWNER TO metaman;
+
+--
+-- TOC entry 262 (class 1259 OID 18871)
+-- Name: mm_radio; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_radio (
+    mm_radio_guid uuid NOT NULL,
+    mm_radio_name text,
+    mm_radio_description text,
+    mm_radio_address text,
+    mm_radio_active boolean,
+    mm_radio_stationuuid text,
+    mm_radio_country text,
+    mm_radio_language text,
+    mm_radio_tags text,
+    mm_radio_url_resolved text
+);
+
+
+ALTER TABLE public.mm_radio OWNER TO metaman;
+
+--
+-- TOC entry 281 (class 1259 OID 19453)
+-- Name: mm_session; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_session (
+    id character varying(128) NOT NULL,
+    expires bigint,
+    session text NOT NULL
+);
+
+
+ALTER TABLE public.mm_session OWNER TO metaman;
+
+--
+-- TOC entry 278 (class 1259 OID 19196)
+-- Name: mm_share_auth; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_share_auth (
+    mm_share_auth_guid uuid NOT NULL,
+    mm_share_auth_user text NOT NULL,
+    mm_share_auth_password text NOT NULL
+);
+
+
+ALTER TABLE public.mm_share_auth OWNER TO metaman;
+
+--
+-- TOC entry 263 (class 1259 OID 18877)
+-- Name: mm_software_category; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_software_category (
+    mm_software_category_guid uuid NOT NULL,
+    mm_software_category_category text
+);
+
+
+ALTER TABLE public.mm_software_category OWNER TO metaman;
+
+--
+-- TOC entry 264 (class 1259 OID 18883)
+-- Name: mm_software_developer; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_software_developer (
+    mm_developer_guid uuid NOT NULL,
+    mm_developer_name text,
+    mm_developer_json jsonb
+);
+
+
+ALTER TABLE public.mm_software_developer OWNER TO metaman;
+
+--
+-- TOC entry 265 (class 1259 OID 18889)
+-- Name: mm_software_publisher; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_software_publisher (
+    mm_publisher_guid uuid NOT NULL,
+    mm_publisher_name text,
+    mm_publisher_json jsonb
+);
+
+
+ALTER TABLE public.mm_software_publisher OWNER TO metaman;
+
+--
+-- TOC entry 266 (class 1259 OID 18895)
+-- Name: mm_tv_schedule; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_tv_schedule (
+    mm_tv_schedule_id uuid NOT NULL,
+    mm_tv_schedule_station_id text,
+    mm_tv_schedule_date date,
+    mm_tv_schedule_json jsonb
+);
+
+
+ALTER TABLE public.mm_tv_schedule OWNER TO metaman;
+
+--
+-- TOC entry 267 (class 1259 OID 18901)
+-- Name: mm_tv_schedule_program; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_tv_schedule_program (
+    mm_tv_schedule_program_guid uuid NOT NULL,
+    mm_tv_schedule_program_id text,
+    mm_tv_schedule_program_json jsonb
+);
+
+
+ALTER TABLE public.mm_tv_schedule_program OWNER TO metaman;
+
+--
+-- TOC entry 268 (class 1259 OID 18907)
+-- Name: mm_tv_stations; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_tv_stations (
+    mm_tv_stations_id uuid NOT NULL,
+    mm_tv_station_name text,
+    mm_tv_station_id text,
+    mm_tv_station_channel text,
+    mm_tv_station_json jsonb,
+    mm_tv_station_image text
+);
+
+
+ALTER TABLE public.mm_tv_stations OWNER TO metaman;
+
+--
+-- TOC entry 269 (class 1259 OID 18919)
+-- Name: mm_user_activity; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_user_activity (
+    mm_activity_guid uuid NOT NULL,
+    mm_activity_name text,
+    mm_activity_overview text,
+    mm_activity_short_overview text,
+    mm_activity_type text,
+    mm_activity_item_guid uuid,
+    mm_activity_user_guid uuid,
+    mm_activity_datecreated timestamp with time zone,
+    mm_activity_log_severity text
+);
+
+
+ALTER TABLE public.mm_user_activity OWNER TO metaman;
+
+--
+-- TOC entry 270 (class 1259 OID 18938)
+-- Name: mm_user_queue; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_user_queue (
+    mm_user_queue_guid uuid NOT NULL,
+    mm_user_queue_name text,
+    mm_user_queue_user_id uuid,
+    mm_user_queue_media_type_enum smallint
+);
+
+
+ALTER TABLE public.mm_user_queue OWNER TO metaman;
+
+--
+-- TOC entry 271 (class 1259 OID 18944)
+-- Name: mm_version; Type: TABLE; Schema: public; Owner: metaman
+--
+
+CREATE TABLE public.mm_version (
+    mm_version_number integer
+);
+
+
+ALTER TABLE public.mm_version OWNER TO metaman;
+
+--
+-- TOC entry 5428 (class 2604 OID 3080688)
+-- Name: mm_languages id; Type: DEFAULT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_languages ALTER COLUMN id SET DEFAULT nextval('public.mm_languages_id_seq'::regclass);
+
+
+--
+-- TOC entry 5613 (class 2606 OID 18949)
+-- Name: mm_software_category gc_id_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_software_category
+    ADD CONSTRAINT gc_id_pk PRIMARY KEY (mm_software_category_guid);
+
+
+--
+-- TOC entry 5518 (class 2606 OID 18951)
+-- Name: mm_metadata_game_software_info gi_id_mpk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_game_software_info
+    ADD CONSTRAINT gi_id_mpk PRIMARY KEY (gi_game_info_id);
+
+
+--
+-- TOC entry 5525 (class 2606 OID 18953)
+-- Name: mm_metadata_game_systems_info gs_id_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_game_systems_info
+    ADD CONSTRAINT gs_id_pk PRIMARY KEY (gs_game_system_id);
+
+
+--
+-- TOC entry 5669 (class 2606 OID 3080692)
+-- Name: mm_languages languages_pkey; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_languages
+    ADD CONSTRAINT languages_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 5509 (class 2606 OID 18955)
+-- Name: mm_metadata_download_que mdq_id_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_download_que
+    ADD CONSTRAINT mdq_id_pk PRIMARY KEY (mm_download_guid);
+
+
+--
+-- TOC entry 5629 (class 2606 OID 18957)
+-- Name: mm_user_activity mm_activity_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_user_activity
+    ADD CONSTRAINT mm_activity_pk PRIMARY KEY (mm_activity_guid);
+
+
+--
+-- TOC entry 5639 (class 2606 OID 19174)
+-- Name: mm_axum_users mm_axum_users_pkey; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_axum_users
+    ADD CONSTRAINT mm_axum_users_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 5468 (class 2606 OID 18959)
+-- Name: mm_media_channel mm_channel_guid_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_media_channel
+    ADD CONSTRAINT mm_channel_guid_pk PRIMARY KEY (mm_channel_guid);
+
+
+--
+-- TOC entry 5433 (class 2606 OID 18961)
+-- Name: mm_cron_jobs mm_cron_guid_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_cron_jobs
+    ADD CONSTRAINT mm_cron_guid_pk PRIMARY KEY (mm_cron_guid);
+
+
+--
+-- TOC entry 5615 (class 2606 OID 18963)
+-- Name: mm_software_developer mm_developer_id; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_software_developer
+    ADD CONSTRAINT mm_developer_id PRIMARY KEY (mm_developer_guid);
+
+
+--
+-- TOC entry 5438 (class 2606 OID 18965)
+-- Name: mm_hardware_device mm_device_id_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_hardware_device
+    ADD CONSTRAINT mm_device_id_pk PRIMARY KEY (mm_device_guid);
+
+
+--
+-- TOC entry 5672 (class 2606 OID 4226146)
+-- Name: mm_downloaded mm_downloaded_pkey; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_downloaded
+    ADD CONSTRAINT mm_downloaded_pkey PRIMARY KEY (mm_download_guid);
+
+
+--
+-- TOC entry 5435 (class 2606 OID 18967)
+-- Name: mm_game_dedicated_servers mm_game_server_id; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_game_dedicated_servers
+    ADD CONSTRAINT mm_game_server_id PRIMARY KEY (mm_game_server_guid);
+
+
+--
+-- TOC entry 5447 (class 2606 OID 18969)
+-- Name: mm_hardware_specifications mm_hardware_id; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_hardware_specifications
+    ADD CONSTRAINT mm_hardware_id PRIMARY KEY (mm_hardware_spec_guid);
+
+
+--
+-- TOC entry 5443 (class 2606 OID 18971)
+-- Name: mm_hardware_manufacturer mm_hardware_manu_uni_name; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_hardware_manufacturer
+    ADD CONSTRAINT mm_hardware_manu_uni_name UNIQUE (mm_hardware_manu_name);
+
+
+--
+-- TOC entry 5445 (class 2606 OID 18973)
+-- Name: mm_hardware_manufacturer mm_hardware_manufacturer_pkey; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_hardware_manufacturer
+    ADD CONSTRAINT mm_hardware_manufacturer_pkey PRIMARY KEY (mm_hardware_manu_guid);
+
+
+--
+-- TOC entry 5634 (class 2606 OID 19154)
+-- Name: mm_hardware_model mm_hardware_model_guid_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_hardware_model
+    ADD CONSTRAINT mm_hardware_model_guid_pk PRIMARY KEY (mm_hardware_model_guid);
+
+
+--
+-- TOC entry 5452 (class 2606 OID 18975)
+-- Name: mm_hardware_type mm_hardware_type_pkey; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_hardware_type
+    ADD CONSTRAINT mm_hardware_type_pkey PRIMARY KEY (mm_hardware_type_guid);
+
+
+--
+-- TOC entry 5454 (class 2606 OID 18977)
+-- Name: mm_hardware_type mm_hardware_type_uni_name; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_hardware_type
+    ADD CONSTRAINT mm_hardware_type_uni_name UNIQUE (mm_hardware_type_name);
+
+
+--
+-- TOC entry 5459 (class 2606 OID 18979)
+-- Name: mm_library_link mm_link_guid_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_library_link
+    ADD CONSTRAINT mm_link_guid_pk PRIMARY KEY (mm_link_guid);
+
+
+--
+-- TOC entry 5456 (class 2606 OID 18981)
+-- Name: mm_library_dir mm_media_dir_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_library_dir
+    ADD CONSTRAINT mm_media_dir_pk PRIMARY KEY (mm_media_dir_guid);
+
+
+--
+-- TOC entry 5466 (class 2606 OID 18983)
+-- Name: mm_media mm_media_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_media
+    ADD CONSTRAINT mm_media_pk PRIMARY KEY (mm_media_guid);
+
+
+--
+-- TOC entry 5487 (class 2606 OID 18985)
+-- Name: mm_metadata_album mm_metadata_album_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_album
+    ADD CONSTRAINT mm_metadata_album_pk PRIMARY KEY (mm_metadata_album_guid);
+
+
+--
+-- TOC entry 5495 (class 2606 OID 18987)
+-- Name: mm_metadata_anime mm_metadata_anime_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_anime
+    ADD CONSTRAINT mm_metadata_anime_pk PRIMARY KEY (mm_metadata_anime_guid);
+
+
+--
+-- TOC entry 5498 (class 2606 OID 18989)
+-- Name: mm_metadata_book mm_metadata_book_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_book
+    ADD CONSTRAINT mm_metadata_book_pk PRIMARY KEY (mm_metadata_book_guid);
+
+
+--
+-- TOC entry 5504 (class 2606 OID 18991)
+-- Name: mm_metadata_collection mm_metadata_collection_guid_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_collection
+    ADD CONSTRAINT mm_metadata_collection_guid_pk PRIMARY KEY (mm_metadata_collection_guid);
+
+
+--
+-- TOC entry 5531 (class 2606 OID 18993)
+-- Name: mm_metadata_logo mm_metadata_logo_guid_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_logo
+    ADD CONSTRAINT mm_metadata_logo_guid_pk PRIMARY KEY (mm_metadata_logo_guid);
+
+
+--
+-- TOC entry 5551 (class 2606 OID 18995)
+-- Name: mm_metadata_music mm_metadata_music_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_music
+    ADD CONSTRAINT mm_metadata_music_pk PRIMARY KEY (mm_metadata_music_guid);
+
+
+--
+-- TOC entry 5562 (class 2606 OID 18997)
+-- Name: mm_metadata_music_video mm_metadata_music_video_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_music_video
+    ADD CONSTRAINT mm_metadata_music_video_pk PRIMARY KEY (mm_metadata_music_video_guid);
+
+
+--
+-- TOC entry 5569 (class 2606 OID 18999)
+-- Name: mm_metadata_musician mm_metadata_musician_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_musician
+    ADD CONSTRAINT mm_metadata_musician_pk PRIMARY KEY (mm_metadata_musician_guid);
+
+
+--
+-- TOC entry 5543 (class 2606 OID 19001)
+-- Name: mm_metadata_movie mm_metadata_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_movie
+    ADD CONSTRAINT mm_metadata_pk PRIMARY KEY (mm_metadata_movie_guid);
+
+
+--
+-- TOC entry 5591 (class 2606 OID 19003)
+-- Name: mm_metadata_sports mm_metadata_sports_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_sports
+    ADD CONSTRAINT mm_metadata_sports_pk PRIMARY KEY (mm_metadata_sports_guid);
+
+
+--
+-- TOC entry 5599 (class 2606 OID 19005)
+-- Name: mm_metadata_tvshow mm_metadata_tvshow_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_tvshow
+    ADD CONSTRAINT mm_metadata_tvshow_pk PRIMARY KEY (mm_metadata_tvshow_guid);
+
+
+--
+-- TOC entry 5651 (class 2606 OID 122491)
+-- Name: mm_metadata_user_status mm_metadata_user_status_pkey; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_user_status
+    ADD CONSTRAINT mm_metadata_user_status_pkey PRIMARY KEY (mm_status_guid);
+
+
+--
+-- TOC entry 5637 (class 2606 OID 19206)
+-- Name: mm_network_shares mm_network_shares_pkey; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_network_shares
+    ADD CONSTRAINT mm_network_shares_pkey PRIMARY KEY (mm_network_share_guid);
+
+
+--
+-- TOC entry 5602 (class 2606 OID 19007)
+-- Name: mm_notification mm_notification_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_notification
+    ADD CONSTRAINT mm_notification_pk PRIMARY KEY (mm_notification_guid);
+
+
+--
+-- TOC entry 5604 (class 2606 OID 19009)
+-- Name: mm_options_and_status mm_options_and_status_guid_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_options_and_status
+    ADD CONSTRAINT mm_options_and_status_guid_pk PRIMARY KEY (mm_options_and_status_guid);
+
+
+--
+-- TOC entry 5618 (class 2606 OID 19011)
+-- Name: mm_software_publisher mm_publisher_id; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_software_publisher
+    ADD CONSTRAINT mm_publisher_id PRIMARY KEY (mm_publisher_guid);
+
+
+--
+-- TOC entry 5606 (class 2606 OID 2752459)
+-- Name: mm_radio mm_radio_address_uk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_radio
+    ADD CONSTRAINT mm_radio_address_uk UNIQUE (mm_radio_address);
+
+
+--
+-- TOC entry 5608 (class 2606 OID 19013)
+-- Name: mm_radio mm_radio_guid_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_radio
+    ADD CONSTRAINT mm_radio_guid_pk PRIMARY KEY (mm_radio_guid);
+
+
+--
+-- TOC entry 5578 (class 2606 OID 19015)
+-- Name: mm_metadata_review mm_review_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_review
+    ADD CONSTRAINT mm_review_pk PRIMARY KEY (mm_review_guid);
+
+
+--
+-- TOC entry 5649 (class 2606 OID 19461)
+-- Name: mm_session mm_session_pkey; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_session
+    ADD CONSTRAINT mm_session_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 5479 (class 2606 OID 19017)
+-- Name: mm_media_sync mm_sync_guid_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_media_sync
+    ADD CONSTRAINT mm_sync_guid_pk PRIMARY KEY (mm_sync_guid);
+
+
+--
+-- TOC entry 5621 (class 2606 OID 19019)
+-- Name: mm_tv_schedule mm_tv_schedule_id_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_tv_schedule
+    ADD CONSTRAINT mm_tv_schedule_id_pk PRIMARY KEY (mm_tv_schedule_id);
+
+
+--
+-- TOC entry 5625 (class 2606 OID 19021)
+-- Name: mm_tv_schedule_program mm_tv_schedule_program_guid_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_tv_schedule_program
+    ADD CONSTRAINT mm_tv_schedule_program_guid_pk PRIMARY KEY (mm_tv_schedule_program_guid);
+
+
+--
+-- TOC entry 5627 (class 2606 OID 19023)
+-- Name: mm_tv_stations mm_tv_stations_id_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_tv_stations
+    ADD CONSTRAINT mm_tv_stations_id_pk PRIMARY KEY (mm_tv_stations_id);
+
+
+--
+-- TOC entry 5631 (class 2606 OID 19031)
+-- Name: mm_user_queue mm_user_queue_id; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_user_queue
+    ADD CONSTRAINT mm_user_queue_id PRIMARY KEY (mm_user_queue_guid);
+
+
+--
+-- TOC entry 5575 (class 2606 OID 19033)
+-- Name: mm_metadata_person mmp_id_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_person
+    ADD CONSTRAINT mmp_id_pk PRIMARY KEY (mm_metadata_person_guid);
+
+
+--
+-- TOC entry 5477 (class 2606 OID 19035)
+-- Name: mm_media_remote mmr_media_remote_pk; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_media_remote
+    ADD CONSTRAINT mmr_media_remote_pk PRIMARY KEY (mmr_media_guid);
+
+
+--
+-- TOC entry 5529 (class 2606 OID 19194)
+-- Name: mm_metadata_game_systems_info system_name_unique; Type: CONSTRAINT; Schema: public; Owner: metaman
+--
+
+ALTER TABLE ONLY public.mm_metadata_game_systems_info
+    ADD CONSTRAINT system_name_unique UNIQUE (gs_game_system_name);
+
+
+--
+-- TOC entry 5611 (class 1259 OID 19036)
+-- Name: gc_category_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX gc_category_idx_name ON public.mm_software_category USING btree (mm_software_category_category);
+
+
+--
+-- TOC entry 5514 (class 1259 OID 19037)
+-- Name: gi_game_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX gi_game_idx_name ON public.mm_metadata_game_software_info USING btree (gi_game_info_name);
+
+
+--
+-- TOC entry 5515 (class 1259 OID 19038)
+-- Name: gi_game_idx_name_trigram_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX gi_game_idx_name_trigram_idx ON public.mm_metadata_game_software_info USING gist (gi_game_info_name public.gist_trgm_ops);
+
+
+--
+-- TOC entry 5516 (class 1259 OID 19039)
+-- Name: gi_game_idx_short_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX gi_game_idx_short_name ON public.mm_metadata_game_software_info USING btree (gi_game_info_short_name);
+
+
+--
+-- TOC entry 5519 (class 1259 OID 19040)
+-- Name: gi_system_id_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX gi_system_id_ndx ON public.mm_metadata_game_software_info USING btree (gi_game_info_system_id);
+
+
+--
+-- TOC entry 5510 (class 1259 OID 19041)
+-- Name: mdq_que_type_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mdq_que_type_idx_name ON public.mm_metadata_download_que USING btree (mm_download_que_type);
+
+
+--
+-- TOC entry 5640 (class 1259 OID 19180)
+-- Name: mm_axum_user_permissions_user_id; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_axum_user_permissions_user_id ON public.mm_axum_user_permissions USING btree (user_id);
+
+
+--
+-- TOC entry 5641 (class 1259 OID 19191)
+-- Name: mm_backup_created_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_backup_created_ndx ON public.mm_backup USING btree (mm_backup_created);
+
+
+--
+-- TOC entry 5643 (class 1259 OID 19257)
+-- Name: mm_bar_code_code_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_bar_code_code_ndx ON public.mm_bar_codes USING btree (mm_bar_code_code);
+
+
+--
+-- TOC entry 5647 (class 1259 OID 19264)
+-- Name: mm_bar_code_own_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_bar_code_own_ndx ON public.mm_bar_code_own USING btree (mm_bar_code_own_user, mm_bar_code_own_uuid);
+
+
+--
+-- TOC entry 5644 (class 1259 OID 19258)
+-- Name: mm_bar_code_type_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_bar_code_type_ndx ON public.mm_bar_codes USING btree (mm_bar_code_type);
+
+
+--
+-- TOC entry 5645 (class 1259 OID 19256)
+-- Name: mm_bar_code_uuid_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE UNIQUE INDEX mm_bar_code_uuid_ndx ON public.mm_bar_codes USING btree (mm_bar_code_uuid);
+
+
+--
+-- TOC entry 5646 (class 1259 OID 19635)
+-- Name: mm_bar_codes_metadata_uuid_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_bar_codes_metadata_uuid_ndx ON public.mm_bar_codes USING btree (mm_bar_code_metadata_uuid);
+
+
+--
+-- TOC entry 5469 (class 1259 OID 19042)
+-- Name: mm_channel_idx_country; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_channel_idx_country ON public.mm_media_channel USING btree (mm_channel_country_guid);
+
+
+--
+-- TOC entry 5470 (class 1259 OID 19043)
+-- Name: mm_channel_idx_logo; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_channel_idx_logo ON public.mm_media_channel USING btree (mm_channel_logo_guid);
+
+
+--
+-- TOC entry 5471 (class 1259 OID 19044)
+-- Name: mm_channel_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_channel_idx_name ON public.mm_media_channel USING btree (mm_channel_name);
+
+
+--
+-- TOC entry 5472 (class 1259 OID 19045)
+-- Name: mm_channel_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_channel_idxgin_json ON public.mm_media_channel USING gin (mm_channel_media_id);
+
+
+--
+-- TOC entry 5616 (class 1259 OID 19046)
+-- Name: mm_developer_name_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_developer_name_idx ON public.mm_software_developer USING btree (mm_developer_name);
+
+
+--
+-- TOC entry 5439 (class 1259 OID 19047)
+-- Name: mm_device_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_device_idxgin_json ON public.mm_hardware_device USING gin (mm_device_json);
+
+
+--
+-- TOC entry 5511 (class 1259 OID 19048)
+-- Name: mm_download_idx_provider; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_download_idx_provider ON public.mm_metadata_download_que USING btree (mm_download_provider);
+
+
+--
+-- TOC entry 5512 (class 1259 OID 19049)
+-- Name: mm_download_que_ndx_provider_id; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_download_que_ndx_provider_id ON public.mm_metadata_download_que USING btree (mm_download_provider_id);
+
+
+--
+-- TOC entry 5513 (class 1259 OID 19050)
+-- Name: mm_download_que_ndx_status; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_download_que_ndx_status ON public.mm_metadata_download_que USING btree (mm_download_status);
+
+
+--
+-- TOC entry 5670 (class 1259 OID 4226530)
+-- Name: mm_download_url_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_download_url_ndx ON public.mm_downloaded USING btree (mm_downloaded_url);
+
+
+--
+-- TOC entry 5520 (class 1259 OID 19051)
+-- Name: mm_game_info_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_game_info_idxgin_json ON public.mm_metadata_game_software_info USING gin (gi_game_info_json);
+
+
+--
+-- TOC entry 5521 (class 1259 OID 19052)
+-- Name: mm_game_info_idxgin_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_game_info_idxgin_name ON public.mm_metadata_game_software_info USING gin (((gi_game_info_json -> '@name'::text)));
+
+
+--
+-- TOC entry 5436 (class 1259 OID 19053)
+-- Name: mm_game_server_name_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_game_server_name_idx ON public.mm_game_dedicated_servers USING btree (mm_game_server_name);
+
+
+--
+-- TOC entry 5526 (class 1259 OID 19054)
+-- Name: mm_game_systems_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_game_systems_idxgin_json ON public.mm_metadata_game_systems_info USING gin (gs_game_system_json);
+
+
+--
+-- TOC entry 5440 (class 1259 OID 19055)
+-- Name: mm_hardware_device_idx_spec_uuid; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_hardware_device_idx_spec_uuid ON public.mm_hardware_device USING btree (mm_device_spec_guid);
+
+
+--
+-- TOC entry 5448 (class 1259 OID 19056)
+-- Name: mm_hardware_idx_model; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_hardware_idx_model ON public.mm_hardware_specifications USING btree (mm_hardware_spec_model);
+
+
+--
+-- TOC entry 5441 (class 1259 OID 19057)
+-- Name: mm_hardware_manu_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_hardware_manu_idx_name ON public.mm_hardware_manufacturer USING btree (mm_hardware_manu_name);
+
+
+--
+-- TOC entry 5632 (class 1259 OID 19155)
+-- Name: mm_hardware_manufacturer_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_hardware_manufacturer_name ON public.mm_hardware_model USING btree (mm_hardware_manufacturer);
+
+
+--
+-- TOC entry 5635 (class 1259 OID 19156)
+-- Name: mm_hardware_model_type_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_hardware_model_type_name ON public.mm_hardware_model USING btree (mm_hardware_model_type);
+
+
+--
+-- TOC entry 5449 (class 1259 OID 19058)
+-- Name: mm_hardware_spec_idx_manu_uuid; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_hardware_spec_idx_manu_uuid ON public.mm_hardware_specifications USING btree (mm_hardware_spec_manufacturer_guid);
+
+
+--
+-- TOC entry 5450 (class 1259 OID 19059)
+-- Name: mm_hardware_type_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_hardware_type_idx_name ON public.mm_hardware_type USING btree (mm_hardware_type_name);
+
+
+--
+-- TOC entry 5460 (class 1259 OID 19060)
+-- Name: mm_link_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_link_idx_name ON public.mm_library_link USING btree (mm_link_name);
+
+
+--
+-- TOC entry 5461 (class 1259 OID 19061)
+-- Name: mm_link_json_idxgin; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_link_json_idxgin ON public.mm_library_link USING gin (mm_link_json);
+
+
+--
+-- TOC entry 5488 (class 1259 OID 19062)
+-- Name: mm_media_anime_name_trigram_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_media_anime_name_trigram_idx ON public.mm_metadata_anime USING gist (mm_metadata_anime_name public.gist_trgm_ops);
+
+
+--
+-- TOC entry 5457 (class 1259 OID 19195)
+-- Name: mm_media_dir_share_guid_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_media_dir_share_guid_ndx ON public.mm_library_dir USING btree (mm_media_dir_share_guid);
+
+
+--
+-- TOC entry 5462 (class 1259 OID 19063)
+-- Name: mm_media_idx_metadata_uuid; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_media_idx_metadata_uuid ON public.mm_media USING btree (mm_media_metadata_guid);
+
+
+--
+-- TOC entry 5463 (class 1259 OID 19064)
+-- Name: mm_media_idx_path; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_media_idx_path ON public.mm_media USING btree (mm_media_path);
+
+
+--
+-- TOC entry 5464 (class 1259 OID 19065)
+-- Name: mm_media_idxgin_ffprobe; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_media_idxgin_ffprobe ON public.mm_media USING gin (mm_media_ffprobe_json);
+
+
+--
+-- TOC entry 5552 (class 1259 OID 19066)
+-- Name: mm_media_music_video_band_trigram_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_media_music_video_band_trigram_idx ON public.mm_metadata_music_video USING gist (mm_metadata_music_video_band public.gist_trgm_ops);
+
+
+--
+-- TOC entry 5553 (class 1259 OID 19067)
+-- Name: mm_media_music_video_song_trigram_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_media_music_video_song_trigram_idx ON public.mm_metadata_music_video USING gist (mm_metadata_music_video_song public.gist_trgm_ops);
+
+
+--
+-- TOC entry 5533 (class 1259 OID 19068)
+-- Name: mm_media_name_trigram_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_media_name_trigram_idx ON public.mm_metadata_movie USING gist (mm_metadata_movie_name public.gist_trgm_ops);
+
+
+--
+-- TOC entry 5473 (class 1259 OID 19069)
+-- Name: mm_media_remote_ndx_link_id; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_media_remote_ndx_link_id ON public.mm_media_remote USING btree (mmr_media_link_guid);
+
+
+--
+-- TOC entry 5474 (class 1259 OID 19070)
+-- Name: mm_media_remote_ndx_media_id; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_media_remote_ndx_media_id ON public.mm_media_remote USING btree (mmr_media_uuid);
+
+
+--
+-- TOC entry 5475 (class 1259 OID 19071)
+-- Name: mm_media_remote_ndx_meta_id; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_media_remote_ndx_meta_id ON public.mm_media_remote USING btree (mmr_media_metadata_guid);
+
+
+--
+-- TOC entry 5480 (class 1259 OID 19072)
+-- Name: mm_metadata_album_idx_musician; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_album_idx_musician ON public.mm_metadata_album USING btree (mm_metadata_album_musician_guid);
+
+
+--
+-- TOC entry 5481 (class 1259 OID 19073)
+-- Name: mm_metadata_album_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_album_idx_name ON public.mm_metadata_album USING btree (mm_metadata_album_name);
+
+
+--
+-- TOC entry 5482 (class 1259 OID 19074)
+-- Name: mm_metadata_album_idx_name_lower; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_album_idx_name_lower ON public.mm_metadata_album USING btree (lower(mm_metadata_album_name));
+
+
+--
+-- TOC entry 5483 (class 1259 OID 19075)
+-- Name: mm_metadata_album_idxgin_id_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_album_idxgin_id_json ON public.mm_metadata_album USING gin (mm_metadata_album_id);
+
+
+--
+-- TOC entry 5484 (class 1259 OID 19076)
+-- Name: mm_metadata_album_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_album_idxgin_json ON public.mm_metadata_album USING gin (mm_metadata_album_json);
+
+
+--
+-- TOC entry 5485 (class 1259 OID 19077)
+-- Name: mm_metadata_album_name_trigram_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_album_name_trigram_idx ON public.mm_metadata_album USING gist (mm_metadata_album_name public.gist_trgm_ops);
+
+
+--
+-- TOC entry 5489 (class 1259 OID 19078)
+-- Name: mm_metadata_anime_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_anime_idx_name ON public.mm_metadata_anime USING btree (mm_metadata_anime_name);
+
+
+--
+-- TOC entry 5490 (class 1259 OID 19079)
+-- Name: mm_metadata_anime_idx_name_lower; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_anime_idx_name_lower ON public.mm_metadata_anime USING btree (lower(mm_metadata_anime_name));
+
+
+--
+-- TOC entry 5491 (class 1259 OID 19080)
+-- Name: mm_metadata_anime_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_anime_idxgin_json ON public.mm_metadata_anime USING gin (mm_metadata_anime_json);
+
+
+--
+-- TOC entry 5492 (class 1259 OID 19081)
+-- Name: mm_metadata_anime_idxgin_user_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_anime_idxgin_user_json ON public.mm_metadata_anime USING gin (mm_metadata_anime_user_json);
+
+
+--
+-- TOC entry 5493 (class 1259 OID 19082)
+-- Name: mm_metadata_anime_ndx_media_id; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_anime_ndx_media_id ON public.mm_metadata_anime USING btree (mm_metadata_anime_media_id);
+
+
+--
+-- TOC entry 5496 (class 1259 OID 19083)
+-- Name: mm_metadata_book_name_trigram_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_book_name_trigram_idx ON public.mm_metadata_book USING gist (mm_metadata_book_name public.gist_trgm_ops);
+
+
+--
+-- TOC entry 5505 (class 1259 OID 19084)
+-- Name: mm_metadata_collection_idxgin_media_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_collection_idxgin_media_json ON public.mm_metadata_collection USING gin (mm_metadata_collection_media_ids);
+
+
+--
+-- TOC entry 5506 (class 1259 OID 19085)
+-- Name: mm_metadata_collection_idxgin_meta_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_collection_idxgin_meta_json ON public.mm_metadata_collection USING gin (mm_metadata_collection_json);
+
+
+--
+-- TOC entry 5507 (class 1259 OID 19086)
+-- Name: mm_metadata_collection_idxgin_name_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_collection_idxgin_name_json ON public.mm_metadata_collection USING gin (mm_metadata_collection_name);
+
+
+--
+-- TOC entry 5522 (class 1259 OID 19087)
+-- Name: mm_metadata_game_software_info_blake3_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_game_software_info_blake3_idx ON public.mm_metadata_game_software_info USING btree (gi_game_info_blake3);
+
+
+--
+-- TOC entry 5523 (class 1259 OID 19088)
+-- Name: mm_metadata_game_software_info_sha1_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_game_software_info_sha1_idx ON public.mm_metadata_game_software_info USING btree (gi_game_info_sha1);
+
+
+--
+-- TOC entry 5527 (class 1259 OID 19192)
+-- Name: mm_metadata_game_systems_info_ndx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE UNIQUE INDEX mm_metadata_game_systems_info_ndx_name ON public.mm_metadata_game_systems_info USING btree (gs_game_system_name);
+
+
+--
+-- TOC entry 5554 (class 1259 OID 19090)
+-- Name: mm_metadata_idx_band_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idx_band_name ON public.mm_metadata_music_video USING btree (mm_metadata_music_video_band);
+
+
+--
+-- TOC entry 5555 (class 1259 OID 19091)
+-- Name: mm_metadata_idx_band_name_lower; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idx_band_name_lower ON public.mm_metadata_music_video USING btree (lower(mm_metadata_music_video_band));
+
+
+--
+-- TOC entry 5499 (class 1259 OID 19092)
+-- Name: mm_metadata_idx_book_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idx_book_name ON public.mm_metadata_book USING btree (mm_metadata_book_name);
+
+
+--
+-- TOC entry 5500 (class 1259 OID 19093)
+-- Name: mm_metadata_idx_book_name_lower; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idx_book_name_lower ON public.mm_metadata_book USING btree (lower(mm_metadata_book_name));
+
+
+--
+-- TOC entry 5534 (class 1259 OID 19094)
+-- Name: mm_metadata_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idx_name ON public.mm_metadata_movie USING btree (mm_metadata_movie_name);
+
+
+--
+-- TOC entry 5535 (class 1259 OID 19095)
+-- Name: mm_metadata_idx_name_lower; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idx_name_lower ON public.mm_metadata_movie USING btree (lower(mm_metadata_movie_name));
+
+
+--
+-- TOC entry 5556 (class 1259 OID 19096)
+-- Name: mm_metadata_idx_song_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idx_song_name ON public.mm_metadata_music_video USING btree (mm_metadata_music_video_song);
+
+
+--
+-- TOC entry 5557 (class 1259 OID 19097)
+-- Name: mm_metadata_idx_song_name_lower; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idx_song_name_lower ON public.mm_metadata_music_video USING btree (lower(mm_metadata_music_video_song));
+
+
+--
+-- TOC entry 5501 (class 1259 OID 19098)
+-- Name: mm_metadata_idxgin_isbn; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idxgin_isbn ON public.mm_metadata_book USING btree (mm_metadata_book_isbn);
+
+
+--
+-- TOC entry 5502 (class 1259 OID 19099)
+-- Name: mm_metadata_idxgin_isbn13; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idxgin_isbn13 ON public.mm_metadata_book USING btree (mm_metadata_book_isbn13);
+
+
+--
+-- TOC entry 5536 (class 1259 OID 19100)
+-- Name: mm_metadata_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idxgin_json ON public.mm_metadata_movie USING gin (mm_metadata_movie_json);
+
+
+--
+-- TOC entry 5558 (class 1259 OID 19101)
+-- Name: mm_metadata_idxgin_music_video_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idxgin_music_video_json ON public.mm_metadata_music_video USING gin (mm_metadata_music_video_json);
+
+
+--
+-- TOC entry 5559 (class 1259 OID 19102)
+-- Name: mm_metadata_idxgin_music_video_media_id; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idxgin_music_video_media_id ON public.mm_metadata_music_video USING gin (mm_metadata_music_video_media_id);
+
+
+--
+-- TOC entry 5560 (class 1259 OID 19103)
+-- Name: mm_metadata_idxgin_music_video_media_id_imvdb; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_idxgin_music_video_media_id_imvdb ON public.mm_metadata_music_video USING gin (((mm_metadata_music_video_media_id -> 'imvdb'::text)));
+
+
+--
+-- TOC entry 5532 (class 1259 OID 19105)
+-- Name: mm_metadata_logo_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_logo_idxgin_json ON public.mm_metadata_logo USING gin (mm_metadata_logo_media_guid);
+
+
+--
+-- TOC entry 5592 (class 1259 OID 19106)
+-- Name: mm_metadata_media_tvshow_id_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_media_tvshow_id_idx ON public.mm_metadata_tvshow USING btree (mm_metadata_media_tvshow_id);
+
+
+--
+-- TOC entry 5537 (class 1259 OID 4291426)
+-- Name: mm_metadata_movie_fts_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_movie_fts_ndx ON public.mm_metadata_movie USING gin ((((setweight(to_tsvector('public.english_unaccent'::regconfig, COALESCE(mm_metadata_movie_name, ''::text)), 'A'::"char") || ''::tsvector) || setweight(to_tsvector('public.english_unaccent'::regconfig, COALESCE(mm_metadata_movie_name_alt, ''::text)), 'B'::"char"))));
+
+
+--
+-- TOC entry 5538 (class 1259 OID 3079410)
+-- Name: mm_metadata_movie_genre_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_movie_genre_idxgin_json ON public.mm_metadata_movie USING gin (((mm_metadata_movie_json -> 'genres'::text)));
+
+
+--
+-- TOC entry 5539 (class 1259 OID 19107)
+-- Name: mm_metadata_movie_ndx_media_id; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_movie_ndx_media_id ON public.mm_metadata_movie USING btree (mm_metadata_movie_media_id);
+
+
+--
+-- TOC entry 5540 (class 1259 OID 3079401)
+-- Name: mm_metadata_movie_original_language_lower_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_movie_original_language_lower_ndx ON public.mm_metadata_movie USING btree (lower((mm_metadata_movie_json ->> 'original_language'::text))) WHERE (COALESCE((mm_metadata_movie_json ->> 'original_language'::text), ''::text) <> ''::text);
+
+
+--
+-- TOC entry 5541 (class 1259 OID 3851753)
+-- Name: mm_metadata_movie_primary_lang_gen_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_movie_primary_lang_gen_ndx ON public.mm_metadata_movie USING btree (mm_metadata_movie_primary_lang_gen);
+
+
+--
+-- TOC entry 5544 (class 1259 OID 19108)
+-- Name: mm_metadata_music_idx_album; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_music_idx_album ON public.mm_metadata_music USING btree (mm_metadata_music_album_guid);
+
+
+--
+-- TOC entry 5545 (class 1259 OID 19109)
+-- Name: mm_metadata_music_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_music_idx_name ON public.mm_metadata_music USING btree (mm_metadata_music_name);
+
+
+--
+-- TOC entry 5546 (class 1259 OID 19110)
+-- Name: mm_metadata_music_idx_name_lower; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_music_idx_name_lower ON public.mm_metadata_music USING btree (lower(mm_metadata_music_name));
+
+
+--
+-- TOC entry 5547 (class 1259 OID 19111)
+-- Name: mm_metadata_music_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_music_idxgin_json ON public.mm_metadata_music USING gin (mm_metadata_music_json);
+
+
+--
+-- TOC entry 5548 (class 1259 OID 19112)
+-- Name: mm_metadata_music_idxgin_media_id; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_music_idxgin_media_id ON public.mm_metadata_music USING gin (mm_metadata_media_music_id);
+
+
+--
+-- TOC entry 5549 (class 1259 OID 19114)
+-- Name: mm_metadata_music_name_trigram_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_music_name_trigram_idx ON public.mm_metadata_music USING gist (mm_metadata_music_name public.gist_trgm_ops);
+
+
+--
+-- TOC entry 5563 (class 1259 OID 19116)
+-- Name: mm_metadata_musician_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_musician_idx_name ON public.mm_metadata_musician USING btree (mm_metadata_musician_name);
+
+
+--
+-- TOC entry 5564 (class 1259 OID 19117)
+-- Name: mm_metadata_musician_idx_name_lower; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_musician_idx_name_lower ON public.mm_metadata_musician USING btree (lower(mm_metadata_musician_name));
+
+
+--
+-- TOC entry 5565 (class 1259 OID 19118)
+-- Name: mm_metadata_musician_idxgin_id_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_musician_idxgin_id_json ON public.mm_metadata_musician USING gin (mm_metadata_musician_id);
+
+
+--
+-- TOC entry 5566 (class 1259 OID 19119)
+-- Name: mm_metadata_musician_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_musician_idxgin_json ON public.mm_metadata_musician USING gin (mm_metadata_musician_json);
+
+
+--
+-- TOC entry 5567 (class 1259 OID 19120)
+-- Name: mm_metadata_musician_name_trigram_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_musician_name_trigram_idx ON public.mm_metadata_musician USING gist (mm_metadata_musician_name public.gist_trgm_ops);
+
+
+--
+-- TOC entry 5570 (class 1259 OID 19121)
+-- Name: mm_metadata_person_idx_id; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_person_idx_id ON public.mm_metadata_person USING btree (mm_metadata_person_media_id);
+
+
+--
+-- TOC entry 5571 (class 1259 OID 19122)
+-- Name: mm_metadata_person_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_person_idx_name ON public.mm_metadata_person USING btree (mm_metadata_person_name);
+
+
+--
+-- TOC entry 5572 (class 1259 OID 19123)
+-- Name: mm_metadata_person_idx_name_lower; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_person_idx_name_lower ON public.mm_metadata_person USING btree (lower(mm_metadata_person_name));
+
+
+--
+-- TOC entry 5573 (class 1259 OID 19124)
+-- Name: mm_metadata_person_idxgin_meta_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_person_idxgin_meta_json ON public.mm_metadata_person USING gin (mm_metadata_person_meta_json);
+
+
+--
+-- TOC entry 5576 (class 1259 OID 19125)
+-- Name: mm_metadata_review_idx_metadata_uuid; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_review_idx_metadata_uuid ON public.mm_metadata_review USING btree (mm_review_metadata_guid);
+
+
+--
+-- TOC entry 5579 (class 1259 OID 19126)
+-- Name: mm_metadata_sports_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_sports_idx_name ON public.mm_metadata_sports USING btree (mm_metadata_sports_name);
+
+
+--
+-- TOC entry 5580 (class 1259 OID 19127)
+-- Name: mm_metadata_sports_idx_name_lower; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_sports_idx_name_lower ON public.mm_metadata_sports USING btree (lower(mm_metadata_sports_name));
+
+
+--
+-- TOC entry 5581 (class 1259 OID 19128)
+-- Name: mm_metadata_sports_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_sports_idxgin_json ON public.mm_metadata_sports USING gin (mm_metadata_sports_json);
+
+
+--
+-- TOC entry 5582 (class 1259 OID 19129)
+-- Name: mm_metadata_sports_idxgin_media_id; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_sports_idxgin_media_id ON public.mm_metadata_sports USING gin (mm_metadata_media_sports_id);
+
+
+--
+-- TOC entry 5583 (class 1259 OID 19130)
+-- Name: mm_metadata_sports_idxgin_media_id_imdb; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_sports_idxgin_media_id_imdb ON public.mm_metadata_sports USING gin (((mm_metadata_media_sports_id -> 'imdb'::text)));
+
+
+--
+-- TOC entry 5584 (class 1259 OID 19131)
+-- Name: mm_metadata_sports_idxgin_media_id_thesportsdb; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_sports_idxgin_media_id_thesportsdb ON public.mm_metadata_sports USING gin (((mm_metadata_media_sports_id -> 'thesportsdb'::text)));
+
+
+--
+-- TOC entry 5585 (class 1259 OID 19132)
+-- Name: mm_metadata_sports_idxgin_media_id_thetvdb; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_sports_idxgin_media_id_thetvdb ON public.mm_metadata_sports USING gin (((mm_metadata_media_sports_id -> 'thetvdb'::text)));
+
+
+--
+-- TOC entry 5586 (class 1259 OID 19133)
+-- Name: mm_metadata_sports_idxgin_media_id_thetvdbseries; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_sports_idxgin_media_id_thetvdbseries ON public.mm_metadata_sports USING gin (((mm_metadata_media_sports_id -> 'thetvdbSeries'::text)));
+
+
+--
+-- TOC entry 5587 (class 1259 OID 19134)
+-- Name: mm_metadata_sports_idxgin_media_id_tmdb; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_sports_idxgin_media_id_tmdb ON public.mm_metadata_sports USING gin (((mm_metadata_media_sports_id -> 'tmdb'::text)));
+
+
+--
+-- TOC entry 5588 (class 1259 OID 19135)
+-- Name: mm_metadata_sports_idxgin_media_id_tvmaze; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_sports_idxgin_media_id_tvmaze ON public.mm_metadata_sports USING gin (((mm_metadata_media_sports_id -> 'tvmaze'::text)));
+
+
+--
+-- TOC entry 5589 (class 1259 OID 19136)
+-- Name: mm_metadata_sports_name_trigram_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_sports_name_trigram_idx ON public.mm_metadata_sports USING gist (mm_metadata_sports_name public.gist_trgm_ops);
+
+
+--
+-- TOC entry 5593 (class 1259 OID 4291428)
+-- Name: mm_metadata_tvshow_fts_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_tvshow_fts_ndx ON public.mm_metadata_tvshow USING gin ((((setweight(to_tsvector('public.english_unaccent'::regconfig, COALESCE(mm_metadata_tvshow_name, ''::text)), 'A'::"char") || ''::tsvector) || setweight(to_tsvector('public.english_unaccent'::regconfig, COALESCE(mm_metadata_tvshow_name_alt, ''::text)), 'B'::"char"))));
+
+
+--
+-- TOC entry 5594 (class 1259 OID 19137)
+-- Name: mm_metadata_tvshow_idx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_tvshow_idx_name ON public.mm_metadata_tvshow USING btree (mm_metadata_tvshow_name);
+
+
+--
+-- TOC entry 5595 (class 1259 OID 19138)
+-- Name: mm_metadata_tvshow_idx_name_lower; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_tvshow_idx_name_lower ON public.mm_metadata_tvshow USING btree (lower(mm_metadata_tvshow_name));
+
+
+--
+-- TOC entry 5596 (class 1259 OID 19139)
+-- Name: mm_metadata_tvshow_idxgin_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_tvshow_idxgin_json ON public.mm_metadata_tvshow USING gin (mm_metadata_tvshow_json);
+
+
+--
+-- TOC entry 5597 (class 1259 OID 19140)
+-- Name: mm_metadata_tvshow_idxgin_localimage_json; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_tvshow_idxgin_localimage_json ON public.mm_metadata_tvshow USING gin (mm_metadata_tvshow_json);
+
+
+--
+-- TOC entry 5652 (class 1259 OID 122492)
+-- Name: mm_metadata_user_status_user_id_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_metadata_user_status_user_id_ndx ON public.mm_metadata_user_status USING btree (mm_status_user_id);
+
+
+--
+-- TOC entry 5600 (class 1259 OID 19141)
+-- Name: mm_notification_ndx_time; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_notification_ndx_time ON public.mm_notification USING btree (mm_notification_time);
+
+
+--
+-- TOC entry 5665 (class 1259 OID 1395324)
+-- Name: mm_openlib_author_key_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_openlib_author_key_idx ON public.mm_openlib_author USING btree (key);
+
+
+--
+-- TOC entry 5666 (class 1259 OID 1395326)
+-- Name: mm_openlib_edition_key_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_openlib_edition_key_idx ON public.mm_openlib_edition USING btree (key);
+
+
+--
+-- TOC entry 5667 (class 1259 OID 1395325)
+-- Name: mm_openlib_work_key_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_openlib_work_key_idx ON public.mm_openlib_work USING btree (key);
+
+
+--
+-- TOC entry 5619 (class 1259 OID 19142)
+-- Name: mm_publisher_name_idx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_publisher_name_idx ON public.mm_software_publisher USING btree (mm_publisher_name);
+
+
+--
+-- TOC entry 5609 (class 1259 OID 19143)
+-- Name: mm_radio_ndx_active; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_radio_ndx_active ON public.mm_radio USING btree (mm_radio_active);
+
+
+--
+-- TOC entry 5610 (class 1259 OID 19144)
+-- Name: mm_radio_ndx_name; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_radio_ndx_name ON public.mm_radio USING btree (mm_radio_name);
+
+
+--
+-- TOC entry 5642 (class 1259 OID 19204)
+-- Name: mm_share_auth_user_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_share_auth_user_ndx ON public.mm_share_auth USING btree (mm_share_auth_user);
+
+
+--
+-- TOC entry 5653 (class 1259 OID 122493)
+-- Name: mm_status_type_book_uuid_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_status_type_book_uuid_ndx ON public.mm_metadata_user_status USING btree (mm_status_type_book);
+
+
+--
+-- TOC entry 5654 (class 1259 OID 122494)
+-- Name: mm_status_type_movie_uuid_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_status_type_movie_uuid_ndx ON public.mm_metadata_user_status USING btree (mm_status_type_movie);
+
+
+--
+-- TOC entry 5655 (class 1259 OID 122496)
+-- Name: mm_status_type_music_video_uuid_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_status_type_music_video_uuid_ndx ON public.mm_metadata_user_status USING btree (mm_status_type_music_video);
+
+
+--
+-- TOC entry 5656 (class 1259 OID 122497)
+-- Name: mm_status_type_sports_uuid_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_status_type_sports_uuid_ndx ON public.mm_metadata_user_status USING btree (mm_status_type_sports);
+
+
+--
+-- TOC entry 5657 (class 1259 OID 122498)
+-- Name: mm_status_type_tvshow_uuid_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_status_type_tvshow_uuid_ndx ON public.mm_metadata_user_status USING btree (mm_status_type_tvshow);
+
+
+--
+-- TOC entry 5622 (class 1259 OID 19145)
+-- Name: mm_tv_schedule_ndx_schedule_date; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_tv_schedule_ndx_schedule_date ON public.mm_tv_schedule USING btree (mm_tv_schedule_date);
+
+
+--
+-- TOC entry 5623 (class 1259 OID 19146)
+-- Name: mm_tv_schedule_ndx_station_id; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mm_tv_schedule_ndx_station_id ON public.mm_tv_schedule USING btree (mm_tv_schedule_station_id);
+
+
+--
+-- TOC entry 5658 (class 1259 OID 122500)
+-- Name: mm_user_book_status_unique; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE UNIQUE INDEX mm_user_book_status_unique ON public.mm_metadata_user_status USING btree (mm_status_user_id, mm_status_type_book);
+
+
+--
+-- TOC entry 5659 (class 1259 OID 122499)
+-- Name: mm_user_movie_status_unique; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE UNIQUE INDEX mm_user_movie_status_unique ON public.mm_metadata_user_status USING btree (mm_status_user_id, mm_status_type_movie);
+
+
+--
+-- TOC entry 5660 (class 1259 OID 122501)
+-- Name: mm_user_music_status_unique; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE UNIQUE INDEX mm_user_music_status_unique ON public.mm_metadata_user_status USING btree (mm_status_user_id, mm_status_type_music);
+
+
+--
+-- TOC entry 5661 (class 1259 OID 122502)
+-- Name: mm_user_music_video_status_unique; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE UNIQUE INDEX mm_user_music_video_status_unique ON public.mm_metadata_user_status USING btree (mm_status_user_id, mm_status_type_music_video);
+
+
+--
+-- TOC entry 5662 (class 1259 OID 122503)
+-- Name: mm_user_sports_status_unique; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE UNIQUE INDEX mm_user_sports_status_unique ON public.mm_metadata_user_status USING btree (mm_status_user_id, mm_status_type_sports);
+
+
+--
+-- TOC entry 5663 (class 1259 OID 122504)
+-- Name: mm_user_tvshow_status_unique; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE UNIQUE INDEX mm_user_tvshow_status_unique ON public.mm_metadata_user_status USING btree (mm_status_user_id, mm_status_type_tvshow);
+
+
+--
+-- TOC entry 5664 (class 1259 OID 122495)
+-- Name: mmm_status_type_music_uuid_ndx; Type: INDEX; Schema: public; Owner: metaman
+--
+
+CREATE INDEX mmm_status_type_music_uuid_ndx ON public.mm_metadata_user_status USING btree (mm_status_type_music);
+
+
+--
+-- TOC entry 5673 (class 2620 OID 147655)
+-- Name: mm_metadata_movie trg_touch_movie_photo_updated_at; Type: TRIGGER; Schema: public; Owner: metaman
+--
+
+CREATE TRIGGER trg_touch_movie_photo_updated_at BEFORE UPDATE OF mm_metadata_movie_localimage_json ON public.mm_metadata_movie FOR EACH ROW WHEN ((old.mm_metadata_movie_localimage_json IS DISTINCT FROM new.mm_metadata_movie_localimage_json)) EXECUTE FUNCTION public.touch_photo_updated();
+
+
+-- Completed on 2026-11-22 23:47:00 UTC
+
+--
+-- PostgreSQL database dump complete
+--
+
+\unrestrict nbbR12h6jEC12cGDHSuEogA0wVsz4FGitkoFxZXoQ53pGcidUtkvCPBrg4W2Drv
+

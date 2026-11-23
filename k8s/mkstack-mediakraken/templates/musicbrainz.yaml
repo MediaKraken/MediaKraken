@@ -56,7 +56,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mkmusicbrainz:dev
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           name: mkstack-musicbrainz
           volumeMounts:
             - mountPath: /mediakraken/mbdump

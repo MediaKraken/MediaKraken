@@ -34,7 +34,7 @@ parser.add_argument('-k', '--gameserver', required=False,
 parser.add_argument('-e', '--email', required=False,
                     help='Send results email', action="store_true")
 parser.add_argument('-i', '--image', metavar='image', required=False,
-                    help='Image to build')
+                    help='Image to build (comma-separated for multiple)')
 parser.add_argument('-p', '--push', required=False,
                     help='Push images to Hub', action="store_true")
 parser.add_argument('-r', '--rebuild', required=False,
@@ -124,7 +124,11 @@ async def main():
     images_to_build = []
 
     if args.image:
-        images_to_build.append(args.image)
+        images_to_build.extend(
+            image.strip()
+            for image in args.image.split(',')
+            if image.strip()
+        )
     else:
         if args.base:
             for build_image in docker_images_list.DOCKER_IMAGES:

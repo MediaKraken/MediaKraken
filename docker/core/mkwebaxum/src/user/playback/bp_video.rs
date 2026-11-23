@@ -75,27 +75,13 @@ pub async fn user_playback_video(
 
     let (media_name, media_guid, playback_mode, media_source, media_mime) = match query.media {
         Some(media_guid) => {
-            let media_path =
-                match mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_path_by_uuid(
-                    &state.sqlx_pool_ro,
-                    media_guid,
-                )
-                .await
-                {
-                    Ok(media_path) => media_path,
-                    Err(sqlx::Error::RowNotFound) => {
-                        return (
-                            StatusCode::NOT_FOUND,
-                            Html(String::from("Not found")).into_response(),
-                        );
-                    }
-                    Err(_) => {
-                        return (
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            Html(String::from("Internal server error")).into_response(),
-                        );
-                    }
-                };
+            // The share header (smb:// / nfs://) is reconstructed from the
+            // share row so the playback mode matches the path the
+            // transcoder will actually open.
+            let (media_path, _) = match resolve_media_path(&state, media_guid).await {
+                Ok(value) => value,
+                Err((status, body)) => return (status, body.into_response()),
+            };
             let file_name = media_path
                 .rsplit('/')
                 .next()
@@ -127,9 +113,9 @@ pub async fn user_playback_video(
 
 /// `direct` when the browser can decode the file natively, `hls` when it
 /// must be transcoded into an ABR ladder first. Network-share paths
-/// (`smb://` / `nfs://`, the format the scanner stores) are not local
-/// files the web app can open, so they always transcode — ffmpeg reaches
-/// them directly, the same way the ffprobe pass does.
+/// (`smb://` / `nfs://`) are not local files the web app can open, so they
+/// always transcode — ffmpeg reaches them directly, the same way the
+/// ffprobe pass does.
 fn playback_mode_for_path(media_path: &str) -> String {
     if media_path.starts_with("smb://") || media_path.starts_with("nfs://") {
         return "hls".to_string();
@@ -165,28 +151,145 @@ fn valid_hls_segment_name(name: &str) -> bool {
         && (name.ends_with(".m3u8") || name.ends_with(".ts"))
 }
 
-/// Resolves the on-disk path for `media_guid`, or a ready-made error
-/// response. Shared by the start/segment handlers.
+/// Resolves the stored path and the source dimensions for `media_guid`,
+/// or a ready-made error response. `mm_media_path` is stored relative to
+/// the share root; the connection header (`smb://` / `nfs://`) is rebuilt
+/// from the share row so the returned path is the exact string the
+/// transcoder hands to ffmpeg. The dimensions come from the scanner's
+/// ffprobe pass (`mm_media_ffprobe_json`) so the transcode pod does not
+/// have to probe the source over the share again.
 async fn resolve_media_path(
     state: &AppState,
     media_guid: uuid::Uuid,
-) -> Result<String, (StatusCode, Json<serde_json::Value>)> {
-    match mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_path_by_uuid(
-        &state.sqlx_pool_ro,
-        media_guid,
+) -> Result<(String, Option<(u32, u32)>), (StatusCode, Json<serde_json::Value>)> {
+    let row: (String, Option<serde_json::Value>, uuid::Uuid) = match sqlx::query_as(
+        r#"select mm_media_path, mm_media_ffprobe_json, mm_media_share_guid
+        from mm_media
+        where mm_media_guid = $1"#,
     )
+    .bind(media_guid)
+    .fetch_one(&state.sqlx_pool_ro)
     .await
     {
-        Ok(media_path) => Ok(media_path),
-        Err(sqlx::Error::RowNotFound) => Err((
-            StatusCode::NOT_FOUND,
-            Json(json!({"error": "Media not found"})),
-        )),
-        Err(_) => Err((
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({"error": "Internal server error"})),
-        )),
+        Ok(row) => row,
+        Err(sqlx::Error::RowNotFound) => {
+            return Err((
+                StatusCode::NOT_FOUND,
+                Json(json!({"error": "Media not found"})),
+            ));
+        }
+        Err(_) => {
+            return Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"error": "Internal server error"})),
+            ));
+        }
+    };
+    let media_path = match resolve_share_media_path(state, &row.0, row.2).await {
+        Ok(path) => path,
+        Err(response) => return Err(response),
+    };
+    Ok((media_path, source_dimensions_from_probe(row.1.as_ref())))
+}
+
+/// Rebuilds the connection header the scanner's `mk_media_path_prefix`
+/// attaches to its messages: `mm_media_path` is stored relative to the
+/// share root, and the header comes from the share row — the protocol
+/// from `mm_network_share_version`, the host from `mm_network_share_ip`.
+/// Paths that already carry a header pass through unchanged.
+async fn resolve_share_media_path(
+    state: &AppState,
+    media_path: &str,
+    share_guid: uuid::Uuid,
+) -> Result<String, (StatusCode, Json<serde_json::Value>)> {
+    if media_path.starts_with("smb://") || media_path.starts_with("nfs://") {
+        return Ok(media_path.to_string());
     }
+    let share =
+        match mk_lib_database::mk_lib_database_network_share::mk_lib_database_network_share_detail(
+            &state.sqlx_pool_ro,
+            share_guid,
+        )
+        .await
+        {
+            Ok(share) => share,
+            Err(sqlx::Error::RowNotFound) => {
+                return Err((
+                    StatusCode::NOT_FOUND,
+                    Json(json!({"error": "Media share not found"})),
+                ));
+            }
+            Err(_) => {
+                return Err((
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(json!({"error": "Internal server error"})),
+                ));
+            }
+        };
+    match share_media_path(
+        share.mm_network_share_version,
+        share.mm_network_share_ip,
+        &share.mm_network_share_path,
+        media_path,
+    ) {
+        Ok(path) => Ok(path),
+        Err(error) => {
+            eprintln!(
+                "mkwebaxum: media share header resolution failed for share {share_guid} \
+                 (path {media_path}): {error}"
+            );
+            Err((
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({"error": "Unsupported media share path"})),
+            ))
+        }
+    }
+}
+
+/// The full media path from the share row's protocol and host.
+///
+/// `mm_network_share_version` is authoritative (protocol table in
+/// `mk_lib_network_share`): 0-2 is SMB, where the share path is a UNC
+/// name and only the share segment is used (host comes from
+/// `mm_network_share_ip`); 5-9 is NFS, where the share path is
+/// server-relative. Any other value is rejected rather than guessed.
+fn share_media_path(
+    share_version: i16,
+    share_ip: std::net::IpAddr,
+    share_path: &str,
+    media_path: &str,
+) -> Result<String, String> {
+    let header = match share_version {
+        0..=2 => {
+            let share_name =
+                mk_lib_database::mk_lib_database_network_share::parse_share_name(share_path)
+                    .ok_or_else(|| format!("share path '{share_path}' is not a valid UNC path"))?;
+            format!("smb://{share_ip}/{share_name}")
+        }
+        5..=9 => {
+            let share_root = share_path.trim_start_matches('/');
+            format!("nfs://{share_ip}/{share_root}")
+        }
+        version => return Err(format!("unsupported share protocol version {version}")),
+    };
+    Ok(format!("{header}{media_path}"))
+}
+
+/// First video stream dimensions from a scanner ffprobe document.
+fn source_dimensions_from_probe(probe: Option<&serde_json::Value>) -> Option<(u32, u32)> {
+    let streams = probe?.get("streams")?.as_array()?;
+    for stream in streams {
+        if stream.get("codec_type").and_then(serde_json::Value::as_str) == Some("video")
+            && let Some(width) = stream.get("width").and_then(serde_json::Value::as_u64)
+            && let Some(height) = stream.get("height").and_then(serde_json::Value::as_u64)
+        {
+            return match (width.try_into(), height.try_into()) {
+                (Ok(width), Ok(height)) => Some((width, height)),
+                _ => None,
+            };
+        }
+    }
+    None
 }
 
 /// Publishes an `FFMPEG/HlsStart` message to the mktranscode queue, asking
@@ -219,8 +322,8 @@ pub async fn user_playback_hls_start(
         )
             .into_response();
     };
-    let media_path = match resolve_media_path(&state, media_guid).await {
-        Ok(media_path) => media_path,
+    let (media_path, source_dimensions) = match resolve_media_path(&state, media_guid).await {
+        Ok(value) => value,
         Err(response) => return response.into_response(),
     };
 
@@ -235,19 +338,25 @@ pub async fn user_playback_hls_start(
                     .into_response();
             }
         };
+    // The source dimensions come from the scanner's ffprobe pass, so the
+    // transcode pod plans the ladder without probing the share itself.
+    let mut message = json!({
+        "Type": "FFMPEG",
+        "Subtype": "HlsStart",
+        "Media UUID": media_guid,
+        "Media Path": media_path,
+    });
+    if let Some((width, height)) = source_dimensions {
+        message["Source Width"] = json!(width);
+        message["Source Height"] = json!(height);
+    }
     // Collapse the publish result before the next await: the error type
     // (Box<dyn std::error::Error>) is not Send and must not live across it.
     let publish_ok = matches!(
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_publish_with_retry(
             &rabbit_connection,
             "mktranscode",
-            json!({
-                "Type": "FFMPEG",
-                "Subtype": "HlsStart",
-                "Media UUID": media_guid,
-                "Media Path": media_path,
-            })
-            .to_string(),
+            message.to_string(),
         )
         .await,
         Ok(())
@@ -652,6 +761,32 @@ mod tests {
             playback_mode_for_path("nfs://192.168.50.50/media/m/x.mkv"),
             "hls"
         );
+    }
+
+    #[test]
+    fn share_media_path_header() {
+        let ip: std::net::IpAddr = "192.168.50.50".parse().unwrap();
+        // SMB (version 1 = smb2): UNC share path, only the share segment
+        // is used; the host comes from the share row.
+        assert_eq!(
+            share_media_path(1, ip, "\\\\192.168.50.50\\video", "/movies/a.mkv").unwrap(),
+            "smb://192.168.50.50/video/movies/a.mkv"
+        );
+        // Forward-slash UNC with a deeper subpath: the subpath is dropped.
+        assert_eq!(
+            share_media_path(2, ip, "//192.168.50.50/video/sub", "/a.mkv").unwrap(),
+            "smb://192.168.50.50/video/a.mkv"
+        );
+        // NFS (version 8 = nfs4.1): server-relative share path.
+        assert_eq!(
+            share_media_path(8, ip, "/media", "/movies/a.mkv").unwrap(),
+            "nfs://192.168.50.50/media/movies/a.mkv"
+        );
+        // Unknown protocol versions are rejected, never guessed.
+        assert!(share_media_path(3, ip, "\\\\h\\video", "/a.mkv").is_err());
+        assert!(share_media_path(4, ip, "\\\\h\\video", "/a.mkv").is_err());
+        // SMB share paths that do not yield a share name are rejected.
+        assert!(share_media_path(1, ip, "192.168.50.50", "/a.mkv").is_err());
     }
 
     #[test]

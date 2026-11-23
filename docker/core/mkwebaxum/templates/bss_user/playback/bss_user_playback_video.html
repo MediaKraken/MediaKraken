@@ -67,6 +67,13 @@
                     if (!response.ok || payload.ok !== true) {
                         throw new Error(payload.error || 'Could not start the transcode.');
                     }
+                    // hls.js treats a 404 playlist as a fatal error (it only
+                    // retries network failures and 5xx), and the transcode
+                    // pod writes the master playlist only once the encoders
+                    // have spawned and the variant playlist only after the
+                    // first segment — so wait for both to exist before
+                    // handing the player a source.
+                    await this.waitForPlaylists();
                     const player = document.getElementById('video_player');
                     this.onEnded = () => this.stopTranscode();
                     this.onPlaying = () => { this.state = 'playing'; };
@@ -97,6 +104,58 @@
                     this.state = 'error';
                     this.message = error.message;
                 }
+            },
+            async waitForPlaylists() {
+                const masterUrl = '{{ source }}';
+                const deadline = Date.now() + 55000;
+                const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+                let variantUrl = null;
+                while (Date.now() < deadline) {
+                    if (!variantUrl) {
+                        const masterResponse = await this.fetchMaybe(masterUrl);
+                        if (!masterResponse || !masterResponse.ok) {
+                            await sleep(500);
+                            continue;
+                        }
+                        variantUrl = this.firstVariantUrl(await masterResponse.text(), masterUrl);
+                        if (!variantUrl) {
+                            await sleep(500);
+                            continue;
+                        }
+                    }
+                    const variantResponse = await this.fetchMaybe(variantUrl);
+                    if (variantResponse && variantResponse.ok) return;
+                    await sleep(500);
+                }
+                throw new Error('The transcode did not start in time. Try again.');
+            },
+            async fetchMaybe(url) {
+                try {
+                    return await fetch(url, { cache: 'no-store' });
+                } catch {
+                    return null;
+                }
+            },
+            firstVariantUrl(master, masterUrl) {
+                // masterUrl is document-relative, so it must be made
+                // absolute before it can be used as a URL base.
+                let base;
+                try {
+                    base = new URL(masterUrl, document.baseURI);
+                } catch {
+                    return null;
+                }
+                const lines = master.split('\n').map(line => line.trim());
+                for (let index = 0; index + 1 < lines.length; index++) {
+                    if (lines[index].startsWith('#EXT-X-STREAM-INF') && lines[index + 1]) {
+                        try {
+                            return new URL(lines[index + 1], base).href;
+                        } catch {
+                            return null;
+                        }
+                    }
+                }
+                return null;
             },
             stopTranscode() {
                 if (this.stopped) return;

@@ -424,15 +424,44 @@ async fn main() -> Result<(), Box<dyn Error>> {
                                 {
                                     eprintln!(
                                         "mktranscode: hls start rejected for {media_uuid}, \
-                                         missing or invalid 'Media Path'"
+                                         missing or invalid 'Media Path' ('{media_path}')"
                                     );
                                 } else {
-                                    match hls_manager.start(media_uuid, media_path).await {
+                                    // Source dimensions from the scanner's ffprobe
+                                    // pass; absent for unprobed media, in which
+                                    // case the session falls back to probing.
+                                    let source_dimensions = json_message
+                                        .get("Source Width")
+                                        .and_then(Value::as_u64)
+                                        .zip(
+                                            json_message
+                                                .get("Source Height")
+                                                .and_then(Value::as_u64),
+                                        )
+                                        .and_then(|(width, height)| {
+                                            let Ok(width) = u32::try_from(width) else {
+                                                return None;
+                                            };
+                                            let Ok(height) = u32::try_from(height) else {
+                                                return None;
+                                            };
+                                            if width > 0 && height > 0 {
+                                                Some((width, height))
+                                            } else {
+                                                None
+                                            }
+                                        });
+                                    match hls_manager
+                                        .start(media_uuid, media_path, source_dimensions)
+                                        .await
+                                    {
                                         Ok(master_path) => eprintln!(
-                                            "mktranscode: hls session started for {media_uuid} -> {master_path}"
+                                            "mktranscode: hls session ready for {media_uuid} \
+                                             input {media_path} -> {master_path}"
                                         ),
                                         Err(error) => eprintln!(
-                                            "mktranscode: hls start failed for {media_uuid} ({error})"
+                                            "mktranscode: hls start failed for {media_uuid} \
+                                             input {media_path} ({error})"
                                         ),
                                     }
                                 }

@@ -41,7 +41,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mkinotify:dev
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           name: mkstack-inotify
       restartPolicy: Always
       terminationGracePeriodSeconds: 30

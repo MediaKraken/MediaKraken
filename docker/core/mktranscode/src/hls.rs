@@ -1,11 +1,15 @@
 //! Live HLS transcode sessions.
 //!
 //! A `HlsStart` message spawns one ffmpeg process per ABR rendition, each
-//! writing a live-style HLS playlist under `HLS_ROOT/<guid>/`. The web app
-//! serves those files to the browser through a session-authenticated route;
-//! the playlists are not cached, so the growing stream is picked up as soon
-//! as segments appear. A `HlsStop` message kills the ffmpeg children and
-//! deletes the segment directory.
+//! writing a live-style HLS playlist under `HLS_ROOT/<guid>/`. A repeated
+//! `HlsStart` reuses the tracked session instead of restarting it: the
+//! playlists a browser has loaded are only coherent with the on-disk
+//! segments while the same ffmpeg children keep writing them, so a
+//! mid-playback wipe leaves the player chasing deleted segments. The web
+//! app serves those files to the browser through a session-authenticated
+//! route; the playlists are not cached, so the growing stream is picked up
+//! as soon as segments appear. A `HlsStop` message kills the ffmpeg
+//! children and deletes the segment directory.
 //!
 //! All segments live on the shared `mkstack-hls-claim` volume: mktranscode
 //! mounts it read-write, the web app mounts it read-only. Segments are a
@@ -23,11 +27,12 @@ use uuid::Uuid;
 
 /// Mount point of the shared HLS working volume (see k8s chart).
 pub const HLS_ROOT: &str = "/mediakraken/hls";
-/// The scanner stores `mm_media_path` with a connection header —
-/// `smb://<ip>/<share>/...` or `nfs://<ip>/<path>/...` (see
-/// mkmediascanner::mk_media_path_prefix) — and ffmpeg opens those URLs
-/// directly, the same way the ffprobe pass does. Local absolute paths are
-/// accepted too, for local-library deployments.
+/// `mm_media_path` is stored relative to the share root, so publishers
+/// rebuild the connection header — `smb://<ip>/<share>/...` or
+/// `nfs://<ip>/<path>/...` (see mkmediascanner::mk_media_path_prefix) —
+/// before sending it; ffmpeg opens those URLs directly, the same way the
+/// ffprobe pass does. Local absolute paths are accepted too, for
+/// local-library deployments.
 pub fn is_supported_media_path(media_path: &str) -> bool {
     media_path.starts_with("smb://")
         || media_path.starts_with("nfs://")
@@ -62,6 +67,10 @@ impl RenditionPlan {
 
 /// One ffmpeg child per ABR rendition for a single media item.
 struct HlsSession {
+    /// The exact input path every ffmpeg child was spawned with; kept on
+    /// the session so exit logs say which file the child actually tried
+    /// to open.
+    media_path: String,
     children: Vec<Child>,
 }
 
@@ -251,21 +260,46 @@ impl HlsManager {
         }
     }
 
-    /// Starts (or restarts) the HLS session for `guid`. Returns the path of
-    /// the master playlist.
-    pub async fn start(&mut self, guid: Uuid, media_path: &str) -> Result<String, String> {
-        // Restarting a media item starts from a clean slate.
+    /// Starts the HLS session for `guid`, or reuses the one already tracked
+    /// when a repeated `HlsStart` arrives (the page publishes one per Play
+    /// click). `source_dimensions` is the source video size from the
+    /// scanner's ffprobe pass (carried in the `HlsStart` message); when it
+    /// is absent (unprobed media), the source is probed directly instead.
+    /// Returns the path of the master playlist.
+    pub async fn start(
+        &mut self,
+        guid: Uuid,
+        media_path: &str,
+        source_dimensions: Option<(u32, u32)>,
+    ) -> Result<String, String> {
+        let dir = Path::new(HLS_ROOT).join(guid.to_string());
+        let master_path = dir.join("master.m3u8");
+        // Get-or-create. A Play/Try-again click must not wipe a healthy
+        // session: a tracked session's files are always coherent (the
+        // playlists reference only the segments that were written, whether
+        // the children are still running or already finished), while a
+        // restart would delete segments the browser is about to request.
+        if self.sessions.contains_key(&guid) && tokio::fs::metadata(&master_path).await.is_ok() {
+            eprintln!("mktranscode: hls session reused for {guid} (input {media_path})");
+            return Ok(master_path.to_string_lossy().into_owned());
+        }
+
+        // No tracked session (first start, or the transcode pod restarted
+        // and lost the in-memory map): start from a clean slate.
         self.remove_session(&guid).await;
 
-        let dir = Path::new(HLS_ROOT).join(guid.to_string());
         if let Err(error) = tokio::fs::create_dir_all(&dir).await {
             return Err(format!("create session directory: {error}"));
         }
 
-        let source = probe_source_dimensions(media_path).await;
+        let source = match source_dimensions {
+            Some(source) => Some(source),
+            None => probe_source_dimensions(media_path).await,
+        };
         let renditions = plan_renditions(source.map(|(_, height)| height));
 
         let mut session = HlsSession {
+            media_path: media_path.to_string(),
             children: Vec::new(),
         };
         for rendition in &renditions {
@@ -289,12 +323,13 @@ impl HlsManager {
             } else {
                 "native".to_string()
             };
-            eprintln!("mktranscode: hls rendition started for {guid} ({rendition_name})");
+            eprintln!(
+                "mktranscode: hls rendition started for {guid} ({rendition_name}) input {media_path}"
+            );
             session.children.push(child);
         }
 
         let master_body = master_playlist_body(&renditions, source);
-        let master_path = dir.join("master.m3u8");
         if let Err(error) = tokio::fs::write(&master_path, master_body).await {
             for child in session.children.iter_mut() {
                 let _ = child.start_kill();
@@ -345,7 +380,11 @@ impl HlsManager {
         for (guid, session) in self.sessions.iter_mut() {
             session.children.retain_mut(|child| match child.try_wait() {
                 Ok(Some(status)) => {
-                    eprintln!("mktranscode: hls ffmpeg for {guid} exited with {status}");
+                    eprintln!(
+                        "mktranscode: hls ffmpeg for {guid} exited with {status} \
+                         (input {})",
+                        session.media_path
+                    );
                     false
                 }
                 Ok(None) => true,
@@ -394,7 +433,10 @@ impl HlsManager {
     /// directories are left for the next consumer's age sweep.
     pub fn shutdown(&mut self) {
         for (guid, session) in self.sessions.iter_mut() {
-            eprintln!("mktranscode: hls session {guid} terminated on shutdown");
+            eprintln!(
+                "mktranscode: hls session {guid} terminated on shutdown (input {})",
+                session.media_path
+            );
             Self::kill_session(session);
         }
     }

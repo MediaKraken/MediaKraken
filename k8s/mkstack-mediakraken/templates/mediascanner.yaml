@@ -48,7 +48,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mkmediascanner:dev
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           name: mkstack-mediascanner
           volumeMounts:
             - mountPath: /mediakraken/metadata

@@ -41,7 +41,7 @@ spec:
                   name: run-env-type
                   key: debug
           image: mediakraken/mksharescanner:dev
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           name: mkstack-sharescanner
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
