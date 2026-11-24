@@ -118,6 +118,6 @@ External applications
     theater_roku
         Roku SceneGraph channel (BrightScript) to browse the mediakraken catalog by category from a roku device
     theater_thin
-        Thin TV playback client: FLTK window embedding mpv (ipc over unix socket) that plays whatever the controller tells it to
+        Headless thin TV playback client: supervises a cage Wayland kiosk (GBM/DRM) running mpv (ipc over unix socket) that plays whatever the controller tells it to
     theater_tizen
         Tizen TV web app (html/js): mediakraken audio/video streaming client for tizen televisions

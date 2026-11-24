@@ -1,4 +1,3 @@
-use fltk::{app, enums::Color, prelude::*, window};
 use serde_json::{Value, json};
 use std::{
     collections::HashMap,
@@ -19,6 +18,7 @@ const REQUEST_HEADER_LIMIT: usize = 8 * 1024;
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(5);
 const MPV_READY_TIMEOUT: Duration = Duration::from_secs(10);
 const MPV_SOCKET_WRITE_TIMEOUT: Duration = Duration::from_secs(2);
+const STACK_CHECK_INTERVAL: Duration = Duration::from_secs(5);
 const MEDIA_ROOT_ENV: &str = "THEATER_THIN_MEDIA_ROOT";
 const AUTH_TOKEN_ENV: &str = "THEATER_THIN_TOKEN";
 
@@ -28,12 +28,15 @@ struct MpvController {
 }
 
 impl MpvController {
-    fn spawn(window_handle: u64, socket_path: PathBuf) -> std::io::Result<Self> {
+    fn spawn(socket_path: PathBuf) -> std::io::Result<Self> {
         let _ = fs::remove_file(&socket_path);
-        let child = Command::new("mpv")
-            .arg(format!("--wid={window_handle}"))
+        // cage runs the single maximized client on the GBM/DRM backend (no X11,
+        // no display manager); mpv renders into it via the dmabuf-wayland vo.
+        let child = Command::new("cage")
+            .arg("--")
+            .arg("mpv")
+            .arg("--vo=dmabuf-wayland")
             .arg("--idle=yes")
-            .arg("--force-window=yes")
             .arg(format!("--input-ipc-server={}", socket_path.display()))
             .spawn()?;
         Ok(Self {
@@ -103,10 +106,7 @@ fn auth_token() -> Option<String> {
 }
 
 fn main() {
-    // mpv --wid only works with X11 windows; warn early on Wayland-only sessions.
-    if env::var_os("WAYLAND_DISPLAY").is_some() && env::var_os("DISPLAY").is_none() {
-        eprintln!("warning: running under Wayland without XWayland; mpv embedding will not work");
-    }
+    check_drm_device();
 
     let runtime = match tokio::runtime::Builder::new_current_thread().build() {
         Ok(rt) => rt,
@@ -119,21 +119,11 @@ fn main() {
         mk_lib_network::mk_lib_network_mediakraken::mk_lib_network_find_mediakraken_server(),
     );
 
-    let app = app::App::default().with_scheme(app::AppScheme::Gtk);
-    let mut win = window::Window::new(100, 100, 800, 600, "Media Player");
-    let mut mpv_win = window::Window::new(10, 10, 780, 520, "");
-    mpv_win.end();
-    mpv_win.set_color(Color::Black);
-    win.end();
-    win.show();
-    win.make_resizable(true);
-
     let socket_path = runtime_socket_path();
-    let handle = mpv_win.raw_handle();
-    let controller = match MpvController::spawn(handle, socket_path) {
+    let controller = match MpvController::spawn(socket_path) {
         Ok(c) => Arc::new(c),
         Err(e) => {
-            eprintln!("Failed to launch mpv: {e}");
+            eprintln!("Failed to launch cage/mpv: {e}");
             return;
         }
     };
@@ -153,11 +143,35 @@ fn main() {
 
     run_http_api(Arc::clone(&controller), token, media_root);
 
-    if let Err(error) = app.run() {
-        eprintln!("Application exited with error: {error}");
+    // The HTTP API runs on background threads; the main thread only supervises
+    // the display stack (cage + mpv). If it dies, exit so the service
+    // supervisor (systemd Restart=) restarts the whole stack.
+    loop {
+        thread::sleep(STACK_CHECK_INTERVAL);
+        if let Ok(mut guard) = controller.child.lock()
+            && let Some(status) = guard
+                .as_mut()
+                .and_then(|child| child.try_wait().ok().flatten())
+        {
+            eprintln!("display stack (cage/mpv) exited: {status}; exiting for restart");
+            return;
+        }
     }
+}
 
-    controller.shutdown();
+fn check_drm_device() {
+    let has_card = fs::read_dir("/dev/dri")
+        .map(|entries| {
+            entries
+                .flatten()
+                .any(|e| e.file_name().to_string_lossy().starts_with("card"))
+        })
+        .unwrap_or(false);
+    if !has_card {
+        eprintln!(
+            "warning: no /dev/dri/card* device found; the cage/DRM display stack will not start without one"
+        );
+    }
 }
 
 fn run_http_api(

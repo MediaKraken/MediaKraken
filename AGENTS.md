@@ -75,7 +75,7 @@ otherwise, prefer the safest minimal change.
 
 #### Theater System (`src_app/theater_*`)
 - `theater_controller_pi` / `theater_full`: FLTK GUI on Pi, uses `mk_lib_network` from kellnr.
-- `theater_thin`: thin client, FLTK + serde_json, connects to `theater_full`.
+- `theater_thin`: headless daemon (no UI framework): supervises `cage` (Wayland kiosk on GBM/DRM) running mpv via `--vo=dmabuf-wayland`, serves the localhost HTTP API for `theater_controller_pi`.
 - `theater_roku` / `theater_tizen`: non-Rust TV clients (no Cargo.toml).
 - Network communication between components must be versioned and backward-compatible.
 
