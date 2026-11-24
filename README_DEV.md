@@ -57,7 +57,7 @@ Deployments that run in K8s
     mksharescanner
         Scan for network SMB and NFS shares on specified subnet
     mktmdbnetfetchbulk - optional
-        Insert movie and TV tmdb ids to database for metadata fetching
+        Insert movie, TV and Person tmdb ids to database for metadata fetching
     mktranscode
         Will do transcoding/streaming to web/devices that can't do direct play from the media file itself
     mktransmission - optional
@@ -66,6 +66,7 @@ Deployments that run in K8s
         Interface with TV/Streaming hardware
     mkwebaxum
         Main website of application suite
+        API: inotify events from remote share hosts
 
 Libraries used to build
     mk_lib_common

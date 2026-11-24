@@ -272,6 +272,26 @@ pub async fn mk_lib_database_media_ffmpeg_update_by_uuid(
     Ok(())
 }
 
+/// Store the file's blake3 digest on the media record (lowercase hex,
+/// as produced by `mk_lib_hash::mk_lib_hash_blake3::mk_file_hash_blake3`).
+pub async fn mk_lib_database_media_blake3_update(
+    sqlx_pool: &sqlx::PgPool,
+    mm_media_guid: Uuid,
+    mm_media_blake3: &str,
+) -> Result<(), sqlx::Error> {
+    let mut transaction = sqlx_pool.begin().await?;
+    sqlx::query(
+        r#"update mm_media set mm_media_blake3 = $1
+        where mm_media_guid = $2"#,
+    )
+    .bind(mm_media_blake3)
+    .bind(mm_media_guid)
+    .execute(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(())
+}
+
 pub async fn mk_lib_database_media_new_count(
     sqlx_pool: &sqlx::PgPool,
     days_old: i64,

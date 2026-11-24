@@ -199,6 +199,13 @@ RUN buildDeps="aom-dev \
       cd nv-codec-headers && \
       make PREFIX=/usr install
 
+    # AMD AMF headers for ffmpeg
+    RUN echo "Begin: amf-headers" && \
+      DIR=$(mktemp -d) && cd ${DIR} && \
+      git clone --depth 1 https://github.com/GPUOpen-LibrariesAndSDKs/AMF.git && \
+      mkdir -p /usr/include/AMF && \
+      cp -r AMF/amf/public/include/* /usr/include/AMF/
+
     # ffmpeg itself (Shared)
     RUN echo "Begin: ffmpeg" && \    
       DIR=$(mktemp -d) && cd ${DIR} && \
@@ -234,7 +241,12 @@ RUN buildDeps="aom-dev \
           --enable-libspeex \
           --enable-libtheora \
           --enable-libwebp \
+          --enable-ffnvcodec \
+          --enable-nvenc \
+          --enable-cuvid \
+          --enable-amf \
           --enable-vaapi \
+          --enable-libvpl \
           --enable-libvmaf \          
           --enable-libvorbis \
           --enable-libvpl \          

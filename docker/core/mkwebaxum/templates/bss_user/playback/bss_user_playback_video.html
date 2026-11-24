@@ -21,7 +21,10 @@
   HlsStart message; the mktranscode consumer transcodes an ABR ladder
   into the shared HLS volume and this page serves
   /user/playback/hls/{guid}/master.m3u8. The stop beacon posts
-  /user/playback/hls/stop on pagehide and on ended.
+  /user/playback/hls/stop on pagehide and on ended. Once the source is set,
+  play() is attempted automatically; the tech does not auto-start without
+  an autoplay attribute, and if the browser blocks unmuted autoplay the
+  overlay offers a one-tap Play button (user gesture) instead of failing.
 
   Until a source is selected, the shell shows a placeholder.
 #}
@@ -57,6 +60,32 @@
             onEnded: null,
             onPlaying: null,
             onError: null,
+            async attemptPlay(declareReady) {
+                // Only called while waiting for the first frames. An early
+                // play() (before the tech has attached the media element)
+                // rejects with NotSupportedError; a later one rejects with
+                // NotAllowedError when the browser blocks unmuted autoplay
+                // (no user gesture left by the time the segments are ready).
+                if (this.state !== 'loading') return;
+                try {
+                    await document.getElementById('video_player').play();
+                    this.state = 'playing';
+                } catch {
+                    if (declareReady) this.state = 'ready';
+                }
+            },
+            async startPlayback() {
+                // Called from the overlay Play button, i.e. from a real user
+                // gesture, so the browser must allow it.
+                if (this.state !== 'ready') return;
+                try {
+                    await document.getElementById('video_player').play();
+                    this.state = 'playing';
+                } catch {
+                    this.state = 'error';
+                    this.message = 'The browser blocked playback. Allow audio for this site and press Play again.';
+                }
+            },
             async play() {
                 if (this.state === 'starting' || this.state === 'loading') return;
                 this.state = 'starting';
@@ -78,7 +107,7 @@
                     this.onEnded = () => this.stopTranscode();
                     this.onPlaying = () => { this.state = 'playing'; };
                     this.onError = () => {
-                        if (this.state === 'loading' || this.state === 'starting') {
+                        if (this.state === 'loading' || this.state === 'starting' || this.state === 'ready') {
                             this.state = 'error';
                             this.message = 'Playback failed. Try again.';
                         }
@@ -91,9 +120,21 @@
                     player.addEventListener('error', this.onError);
                     player.source = { src: '{{ source }}', engine: { hlsJs: { startPosition: 0 } } };
                     this.state = 'loading';
+                    // Nothing calls play() on its own: the hls.js tech only
+                    // auto-starts with an autoplay attribute, which the
+                    // element does not have. Try to start now and again the
+                    // moment the first metadata is available (the tech
+                    // attaches the media element after the source is set, so
+                    // an early play() may reject with NotSupportedError). If
+                    // the browser still refuses (unmuted autoplay blocked),
+                    // show a one-tap Play button instead of failing.
+                    player.addEventListener('loadedmetadata', () => this.attemptPlay(true), { once: true });
+                    void this.attemptPlay(false);
                     // Watchdog: the first segments normally arrive within a
                     // few seconds; if nothing is playing after a minute the
                     // transcode (or the player) is stuck, so offer a retry.
+                    // 'loading'-only on purpose: the ready button waits for
+                    // the user, not for a timer.
                     setTimeout(() => {
                         if (this.state === 'loading') {
                             this.state = 'error';
@@ -169,12 +210,13 @@
             <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-zinc-950/80 px-6 text-center">
                 <p x-show="state === 'starting'" class="text-sm text-zinc-300">Starting transcode…</p>
                 <p x-show="state === 'loading'" class="text-sm text-zinc-300">Transcoding — the first segments take a few seconds.</p>
+                <p x-show="state === 'ready'" class="text-sm text-zinc-300">Transcode ready — press Play to start.</p>
                 <p x-show="state === 'error'" class="max-w-md text-sm text-red-400" x-text="message"></p>
                 <button type="button"
-                    @click="play()"
+                    @click="state === 'ready' ? startPlayback() : play()"
                     class="rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow transition hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 active:bg-indigo-700"
                     aria-label="Start playback">
-                    <span x-show="state === 'idle'">Play</span>
+                    <span x-show="state === 'idle' || state === 'ready'">Play</span>
                     <span x-show="state === 'error'">Try again</span>
                 </button>
             </div>

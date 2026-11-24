@@ -15,6 +15,7 @@ use mk_lib_common::mk_lib_common_media_extension::{
     GAME_EXTENSION, MEDIA_EXTENSION, MEDIA_EXTENSION_SKIP_FFMPEG, SUBTITLE_EXTENSION,
 };
 use mk_lib_database::mk_lib_database_network_share::{DBShareList, parse_share_name};
+use mk_lib_hash::mk_lib_hash_blake3::mk_file_hash_blake3;
 use mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push;
 use mk_lib_share::mk_lib_smb_pavao::FileMetadata;
 use mk_lib_share::mk_lib_smb_smbclient::is_smb_ls_date;
@@ -52,6 +53,10 @@ const RABBIT_PREFETCH_COUNT: u16 = 1;
 const SMB_PROBE_TIMEOUT: Duration = Duration::from_secs(60);
 const SMB_TREE_TIMEOUT: Duration = Duration::from_secs(1800);
 const NFS_TREE_TIMEOUT: Duration = Duration::from_secs(1800);
+// Per-file download bound for blake3 hashing. Same order as the tree
+// listing timeouts; a file that cannot be pulled within this window is
+// left with mm_media_blake3 NULL rather than stalling the scan.
+const HASH_DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(1800);
 
 fn mk_nfs_uri(share_info: &DBShareList, uri: &str) -> String {
     let share_path = share_info.mm_network_share_path.trim_start_matches('/');
@@ -183,6 +188,71 @@ fn build_smbclient_command(
 
 fn smb_path_is_safe(cleaned: &str) -> bool {
     !cleaned.contains([';', '"', '\n', '\r', '\\'])
+}
+
+// Runs a subprocess to completion under a bounded wait, killing the child
+// on timeout. Wrapping `output()` in `tokio::time::timeout` would drop the
+// child without killing it, leaving an orphaned smbclient writing into the
+// temp file while the scanner moves on. `wait()` (not `wait_with_output()`)
+// is used so the child stays killable from the timeout arm; stderr is
+// drained after a failed exit for the error message.
+async fn run_subprocess_with_kill(
+    timeout: Duration,
+    mut cmd: Command,
+    label: &str,
+) -> Result<(), Box<dyn Error>> {
+    let mut child = cmd
+        .spawn()
+        .map_err(|e| format!("{label} spawn failed: {e}"))?;
+    match tokio::time::timeout(timeout, child.wait()).await {
+        Ok(Ok(status)) if status.success() => Ok(()),
+        Ok(Ok(status)) => {
+            let mut stderr = String::new();
+            if let Some(mut stderr_handle) = child.stderr.take() {
+                use tokio::io::AsyncReadExt;
+                let _ = stderr_handle.read_to_string(&mut stderr).await;
+            }
+            Err(format!("{label} exited {:?}: {}", status.code(), stderr.trim()).into())
+        }
+        Ok(Err(e)) => Err(format!("{label} wait failed: {e}").into()),
+        Err(_) => {
+            let _ = child.kill().await;
+            Err(format!("{label} timed out after {timeout:?}").into())
+        }
+    }
+}
+
+// Download one file to a local temp copy and return its BLAKE3 digest
+// (lowercase hex). The scanner pod has no share mounts, and
+// `mk_lib_hash` only reads local files, so the file is pulled down first:
+// SMB via `smbclient get`, NFS via `nfs-get` (mirrors the `nfs-ls` listing
+// fallback). The caller owns `local_path` and removes it afterwards.
+async fn mk_media_blake3_hash(
+    share_info: &DBShareList,
+    smb_reachable: bool,
+    file_name: &str,
+    local_path: &Path,
+) -> Result<String, Box<dyn Error>> {
+    if smb_reachable {
+        let Some(share_uri) = mk_smb_share_uri(share_info) else {
+            return Err("invalid SMB share URI".into());
+        };
+        let cleaned = file_name.trim_start_matches('/');
+        if !smb_path_is_safe(cleaned) {
+            return Err("path contains disallowed characters".into());
+        }
+        let cmd = build_smbclient_command(
+            share_info,
+            &share_uri,
+            &[format!("get \"{}\" \"{}\"", cleaned, local_path.display())],
+        )?;
+        run_subprocess_with_kill(HASH_DOWNLOAD_TIMEOUT, cmd, "smbclient get").await?;
+    } else {
+        let mut cmd = Command::new("nfs-get");
+        cmd.arg(mk_nfs_uri(share_info, file_name)).arg(local_path);
+        run_subprocess_with_kill(HASH_DOWNLOAD_TIMEOUT, cmd, "nfs-get").await?;
+    }
+    mk_file_hash_blake3(local_path.to_string_lossy().as_ref()).await
 }
 
 // The probe returns a plain bool, so without this the reason for `false`
@@ -879,6 +949,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let mut total_files: u64 = 0;
             let mut already_known_count: u64 = 0;
             let mut filtered_count: u64 = 0;
+            let mut hashed_count: u64 = 0;
             let original_media_class = row_data.mm_media_dir_class_enum;
             // "Media Path" in the messages below is published with this
             // connection header prefixed; `file_metadata.name` is
@@ -1060,6 +1131,60 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 {
                     eprintln!("mkmediascanner loki push failed ({err})");
                 }
+
+                // BLAKE3 of the whole file: download to a temp local copy in
+                // the container, hash it, delete it. Failures leave
+                // mm_media_blake3 NULL and move on — path-based dedup means
+                // the record is not re-added on later scans, so a failed
+                // hash is not retried automatically.
+                let local_hash_path =
+                    std::env::temp_dir().join(format!("mkmediascanner_blake3_{media_id}"));
+                match mk_media_blake3_hash(
+                    &share_info,
+                    smb_reachable,
+                    &file_metadata.name,
+                    &local_hash_path,
+                )
+                .await
+                {
+                    Ok(hash) => {
+                        let _ = std::fs::remove_file(&local_hash_path);
+                        match mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_blake3_update(
+                                &sqlx_pool_rw,
+                                media_id,
+                                &hash,
+                            )
+                            .await
+                        {
+                            Ok(()) => hashed_count += 1,
+                            Err(error) => {
+                                if let Err(err) = mk_logging_loki_push(json!({
+                                    "level": "error",
+                                    "message": "blake3 update failed",
+                                    "module": module_path!(),
+                                    "payload": {"media_id": media_id, "path": file_metadata.name, "error": error.to_string()},
+                                }))
+                                .await
+                                {
+                                    eprintln!("mkmediascanner loki push failed ({err})");
+                                }
+                            }
+                        }
+                    }
+                    Err(error) => {
+                        let _ = std::fs::remove_file(&local_hash_path);
+                        if let Err(err) = mk_logging_loki_push(json!({
+                            "level": "warn",
+                            "message": "blake3 hash failed; mm_media_blake3 left NULL",
+                            "module": module_path!(),
+                            "payload": {"media_id": media_id, "path": file_metadata.name, "error": error.to_string()},
+                        }))
+                        .await
+                        {
+                            eprintln!("mkmediascanner loki push failed ({err})");
+                        }
+                    }
+                }
             }
 
             if let Err(err) = mk_logging_loki_push(json!({
@@ -1071,6 +1196,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     "added": total_files,
                     "already_known": already_known_count,
                     "filtered": filtered_count,
+                    "hashed": hashed_count,
                 },
             }))
             .await

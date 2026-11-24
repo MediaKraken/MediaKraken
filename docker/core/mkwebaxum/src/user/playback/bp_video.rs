@@ -20,9 +20,16 @@ use tokio::io::{AsyncRead, AsyncSeekExt, ReadBuf};
 
 /// Media files are streamed to the browser in 1 MiB chunks.
 const STREAM_CHUNK_SIZE: usize = 1024 * 1024;
-/// Extensions the browser can decode natively; everything else goes
-/// through the mktranscode HLS path.
-const DIRECT_PLAYBACK_EXTENSIONS: [&str; 5] = ["mp4", "m4v", "webm", "ogv", "ogg"];
+/// ffprobe `format.format_name` values (the demuxer names) of the
+/// containers the browser can demux natively. The Matroska family needs
+/// the WebM-restricted codec check below: ffprobe reports the same
+/// `format_name` for WebM and MKV, so the codecs separate them.
+const MP4_FAMILY_FORMAT_NAME: &str = "mov,mp4,m4a,3gp,3g2,mj2";
+const MATROSKA_FORMAT_NAME: &str = "matroska,webm";
+const OGG_FORMAT_NAME: &str = "Ogg";
+/// WebM-restricted codecs: the subset the browser decodes in Matroska.
+const WEBM_VIDEO_CODECS: [&str; 3] = ["vp8", "vp9", "av1"];
+const WEBM_AUDIO_CODECS: [&str; 2] = ["opus", "vorbis"];
 /// Root of the shared HLS working volume (see k8s chart): mktranscode
 /// writes segments here, the web app serves them read-only.
 const HLS_ROOT: &str = "/mediakraken/hls";
@@ -78,7 +85,7 @@ pub async fn user_playback_video(
             // The share header (smb:// / nfs://) is reconstructed from the
             // share row so the playback mode matches the path the
             // transcoder will actually open.
-            let (media_path, _) = match resolve_media_path(&state, media_guid).await {
+            let (media_path, probe) = match resolve_media_path(&state, media_guid).await {
                 Ok(value) => value,
                 Err((status, body)) => return (status, body.into_response()),
             };
@@ -90,9 +97,13 @@ pub async fn user_playback_video(
             (
                 Some(file_name),
                 Some(media_guid.to_string()),
-                Some(playback_mode_for_path(&media_path)),
-                Some(media_source_for_path(&media_path, media_guid)),
-                Some(mime_type_for_path(&media_path).to_string()),
+                Some(playback_mode_for_media(&media_path, probe.as_ref())),
+                Some(media_source_for_media(
+                    &media_path,
+                    probe.as_ref(),
+                    media_guid,
+                )),
+                direct_mime_for_probe(probe.as_ref()).map(str::to_string),
             )
         }
         // the parameter-less form keeps working: plain player shell
@@ -111,21 +122,18 @@ pub async fn user_playback_video(
     (StatusCode::OK, Html(reply_html).into_response())
 }
 
-/// `direct` when the browser can decode the file natively, `hls` when it
-/// must be transcoded into an ABR ladder first. Network-share paths
-/// (`smb://` / `nfs://`) are not local files the web app can open, so they
-/// always transcode — ffmpeg reaches them directly, the same way the
-/// ffprobe pass does.
-fn playback_mode_for_path(media_path: &str) -> String {
+/// `direct` when the browser can decode the probed container natively,
+/// `hls` when it must be transcoded into an ABR ladder first. The probed
+/// format is authoritative — the file extension is never consulted, so a
+/// mislabelled file (e.g. Matroska in an `.mp4` name) takes the transcode
+/// path. Network-share paths (`smb://` / `nfs://`) are not local files the
+/// web app can open, so they always transcode — ffmpeg reaches them
+/// directly, the same way the ffprobe pass does.
+fn playback_mode_for_media(media_path: &str, probe: Option<&serde_json::Value>) -> String {
     if media_path.starts_with("smb://") || media_path.starts_with("nfs://") {
         return "hls".to_string();
     }
-    let extension = media_path
-        .rsplit('.')
-        .next()
-        .map(str::to_ascii_lowercase)
-        .unwrap_or_default();
-    if DIRECT_PLAYBACK_EXTENSIONS.contains(&extension.as_str()) {
+    if direct_mime_for_probe(probe).is_some() {
         "direct".to_string()
     } else {
         "hls".to_string()
@@ -133,12 +141,78 @@ fn playback_mode_for_path(media_path: &str) -> String {
 }
 
 /// The player source URL for a media file, by playback mode.
-fn media_source_for_path(media_path: &str, media_guid: uuid::Uuid) -> String {
-    if playback_mode_for_path(media_path) == "hls" {
+fn media_source_for_media(
+    media_path: &str,
+    probe: Option<&serde_json::Value>,
+    media_guid: uuid::Uuid,
+) -> String {
+    if playback_mode_for_media(media_path, probe) == "hls" {
         format!("/user/playback/hls/{media_guid}/master.m3u8")
     } else {
         format!("/user/playback/stream/{media_guid}")
     }
+}
+
+/// The content type the browser can demux natively for the probed
+/// container, or `None` when the file must take the mktranscode HLS path.
+/// This is the single direct-vs-HLS decision: the mode is `direct` exactly
+/// when this returns `Some`, so the `<source type>` and the stream
+/// `content-type` can never name a container the browser rejects.
+///
+/// ffprobe's `format.format_name` is the demuxer name; the Matroska family
+/// is only directly playable when its streams use the WebM-restricted
+/// codecs, because ffprobe cannot tell WebM from MKV by name. No probe
+/// (or no `format_name` / `streams`) means the container is unknown, so
+/// the safe answer is `None` (transcode).
+fn direct_mime_for_probe(probe: Option<&serde_json::Value>) -> Option<&'static str> {
+    let probe = probe?;
+    let format_name = probe.get("format")?.get("format_name")?.as_str()?;
+    if format_name.eq_ignore_ascii_case(MP4_FAMILY_FORMAT_NAME) {
+        return Some("video/mp4");
+    }
+    if format_name.eq_ignore_ascii_case(MATROSKA_FORMAT_NAME) {
+        return is_webm_subset(probe.get("streams")?).then_some("video/webm");
+    }
+    if format_name.eq_ignore_ascii_case(OGG_FORMAT_NAME) {
+        return Some("video/ogg");
+    }
+    None
+}
+
+/// True when there is at least one video stream and every video/audio
+/// stream uses a WebM-restricted codec — the subset the browser decodes
+/// in Matroska. Subtitle/data streams are ignored.
+fn is_webm_subset(streams: &serde_json::Value) -> bool {
+    let Some(streams) = streams.as_array() else {
+        return false;
+    };
+    let mut has_video = false;
+    for stream in streams {
+        let codec_name = stream
+            .get("codec_name")
+            .and_then(serde_json::Value::as_str)
+            .unwrap_or_default();
+        match stream.get("codec_type").and_then(serde_json::Value::as_str) {
+            Some("video") => {
+                has_video = true;
+                if !WEBM_VIDEO_CODECS
+                    .iter()
+                    .any(|codec| codec_name.eq_ignore_ascii_case(codec))
+                {
+                    return false;
+                }
+            }
+            Some("audio")
+                if !WEBM_AUDIO_CODECS
+                    .iter()
+                    .any(|codec| codec_name.eq_ignore_ascii_case(codec)) =>
+            {
+                return false;
+            }
+            _ => {}
+        }
+    }
+    has_video
 }
 
 /// Only the playlist/segment names the transcode pod generates are served:
@@ -151,17 +225,18 @@ fn valid_hls_segment_name(name: &str) -> bool {
         && (name.ends_with(".m3u8") || name.ends_with(".ts"))
 }
 
-/// Resolves the stored path and the source dimensions for `media_guid`,
-/// or a ready-made error response. `mm_media_path` is stored relative to
-/// the share root; the connection header (`smb://` / `nfs://`) is rebuilt
-/// from the share row so the returned path is the exact string the
-/// transcoder hands to ffmpeg. The dimensions come from the scanner's
-/// ffprobe pass (`mm_media_ffprobe_json`) so the transcode pod does not
-/// have to probe the source over the share again.
+/// Resolves the stored path and the scanner's ffprobe document for
+/// `media_guid`, or a ready-made error response. `mm_media_path` is stored
+/// relative to the share root; the connection header (`smb://` / `nfs://`)
+/// is rebuilt from the share row so the returned path is the exact string
+/// the transcoder hands to ffmpeg. The ffprobe document
+/// (`mm_media_ffprobe_json`) carries the probed container the playback
+/// routing decides on and the source dimensions the transcode pod plans
+/// from, so neither has to probe the source over the share again.
 async fn resolve_media_path(
     state: &AppState,
     media_guid: uuid::Uuid,
-) -> Result<(String, Option<(u32, u32)>), (StatusCode, Json<serde_json::Value>)> {
+) -> Result<(String, Option<serde_json::Value>), (StatusCode, Json<serde_json::Value>)> {
     let row: (String, Option<serde_json::Value>, uuid::Uuid) = match sqlx::query_as(
         r#"select mm_media_path, mm_media_ffprobe_json, mm_media_share_guid
         from mm_media
@@ -189,7 +264,7 @@ async fn resolve_media_path(
         Ok(path) => path,
         Err(response) => return Err(response),
     };
-    Ok((media_path, source_dimensions_from_probe(row.1.as_ref())))
+    Ok((media_path, row.1))
 }
 
 /// Rebuilds the connection header the scanner's `mk_media_path_prefix`
@@ -322,10 +397,13 @@ pub async fn user_playback_hls_start(
         )
             .into_response();
     };
-    let (media_path, source_dimensions) = match resolve_media_path(&state, media_guid).await {
+    let (media_path, probe) = match resolve_media_path(&state, media_guid).await {
         Ok(value) => value,
         Err(response) => return response.into_response(),
     };
+    // The source dimensions come from the scanner's ffprobe pass, so the
+    // transcode pod plans the ladder without probing the share itself.
+    let source_dimensions = source_dimensions_from_probe(probe.as_ref());
 
     let (rabbit_connection, rabbit_channel) =
         match mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkwebapp").await {
@@ -338,8 +416,6 @@ pub async fn user_playback_hls_start(
                     .into_response();
             }
         };
-    // The source dimensions come from the scanner's ffprobe pass, so the
-    // transcode pod plans the ladder without probing the share itself.
     let mut message = json!({
         "Type": "FFMPEG",
         "Subtype": "HlsStart",
@@ -563,17 +639,18 @@ pub async fn user_playback_stream(
         return (StatusCode::UNAUTHORIZED, Html(reply_html)).into_response();
     }
 
-    let media_path = match mk_lib_database::database_media::mk_lib_database_media::mk_lib_database_media_path_by_uuid(
-        &state.sqlx_pool_ro,
-        media_guid,
+    // The ffprobe document selects the content type by probed container,
+    // the same way the playback page picks the playback mode.
+    let row: Option<(String, Option<serde_json::Value>)> = match sqlx::query_as(
+        r#"select mm_media_path, mm_media_ffprobe_json
+        from mm_media
+        where mm_media_guid = $1"#,
     )
+    .bind(media_guid)
+    .fetch_optional(&state.sqlx_pool_ro)
     .await
     {
-        Ok(media_path) => media_path,
-        Err(sqlx::Error::RowNotFound) => {
-            return (StatusCode::NOT_FOUND, Html(String::from("Not found")))
-                .into_response();
-        }
+        Ok(row) => row,
         Err(_) => {
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -582,12 +659,17 @@ pub async fn user_playback_stream(
                 .into_response();
         }
     };
+    let Some((media_path, probe)) = row else {
+        return (StatusCode::NOT_FOUND, Html(String::from("Not found"))).into_response();
+    };
 
     let Ok(file_metadata) = tokio::fs::metadata(&media_path).await else {
         return (StatusCode::NOT_FOUND, Html(String::from("Not found"))).into_response();
     };
     let file_size = file_metadata.len();
-    let mime_type = mime_type_for_path(&media_path);
+    // Containers the browser cannot demux (or no probe at all) are served
+    // as opaque bytes: the playback page never routes them here.
+    let mime_type = direct_mime_for_probe(probe.as_ref()).unwrap_or("application/octet-stream");
 
     let (status, content_range, length, start) =
         match parse_range_header(headers.get("range"), file_size) {
@@ -685,29 +767,6 @@ impl Stream for MediaFileStream {
     }
 }
 
-/// Best-effort content type for a media file, by extension.
-fn mime_type_for_path(path: &str) -> &'static str {
-    let extension = path
-        .rsplit('.')
-        .next()
-        .map(str::to_ascii_lowercase)
-        .unwrap_or_default();
-    match extension.as_str() {
-        "mp4" | "m4v" | "m4p" => "video/mp4",
-        "webm" => "video/webm",
-        "ogv" | "ogg" => "video/ogg",
-        "mkv" => "video/x-matroska",
-        "avi" => "video/x-msvideo",
-        "mov" | "qt" => "video/quicktime",
-        "mpeg" | "mpg" | "mpe" | "vob" | "m2v" => "video/mpeg",
-        "flv" => "video/x-flv",
-        "wmv" => "video/x-ms-wmv",
-        "asf" => "video/x-ms-asf",
-        "rm" | "rmvb" => "application/vnd.rn-realmedia",
-        _ => "application/octet-stream",
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -729,36 +788,168 @@ mod tests {
         ));
     }
 
+    /// A minimal ffprobe document with the given `format_name` and streams.
+    fn probe_with_format(format_name: &str, streams: serde_json::Value) -> serde_json::Value {
+        json!({
+            "format": { "format_name": format_name },
+            "streams": streams,
+        })
+    }
+
+    fn probe_video_audio(video: &str, audio: &str) -> serde_json::Value {
+        json!([
+            { "codec_type": "video", "codec_name": video },
+            { "codec_type": "audio", "codec_name": audio },
+        ])
+    }
+
     #[test]
-    fn playback_mode_by_extension() {
+    fn direct_mime_by_probe() {
+        // The MP4/MOV family is demuxed natively.
         assert_eq!(
-            playback_mode_for_path("/mediakraken/metadata/m/x.mp4"),
+            direct_mime_for_probe(Some(&probe_with_format(
+                "mov,mp4,m4a,3gp,3g2,mj2",
+                probe_video_audio("h264", "aac")
+            ))),
+            Some("video/mp4")
+        );
+        // Matroska family: only the WebM-restricted codec subset is
+        // directly playable — ffprobe cannot tell WebM from MKV by name.
+        assert_eq!(
+            direct_mime_for_probe(Some(&probe_with_format(
+                "matroska,webm",
+                probe_video_audio("vp9", "opus")
+            ))),
+            Some("video/webm")
+        );
+        assert_eq!(
+            direct_mime_for_probe(Some(&probe_with_format(
+                "matroska,webm",
+                probe_video_audio("vp8", "vorbis")
+            ))),
+            Some("video/webm")
+        );
+        assert_eq!(
+            direct_mime_for_probe(Some(&probe_with_format(
+                "matroska,webm",
+                probe_video_audio("av1", "opus")
+            ))),
+            Some("video/webm")
+        );
+        // A typical MKV (H.264 + AC-3) is not a playable WebM.
+        assert_eq!(
+            direct_mime_for_probe(Some(&probe_with_format(
+                "matroska,webm",
+                probe_video_audio("h264", "ac3")
+            ))),
+            None
+        );
+        // WebM video with a non-WebM audio codec is not directly playable.
+        assert_eq!(
+            direct_mime_for_probe(Some(&probe_with_format(
+                "matroska,webm",
+                probe_video_audio("vp9", "aac")
+            ))),
+            None
+        );
+        // Audio-only Matroska has no video to show in the player.
+        assert_eq!(
+            direct_mime_for_probe(Some(&json!({
+                "format": { "format_name": "matroska,webm" },
+                "streams": [{ "codec_type": "audio", "codec_name": "opus" }],
+            }))),
+            None
+        );
+        // A missing codec name fails the WebM check, never the match.
+        assert_eq!(
+            direct_mime_for_probe(Some(&json!({
+                "format": { "format_name": "matroska,webm" },
+                "streams": [{ "codec_type": "video" }],
+            }))),
+            None
+        );
+        // Ogg is demuxed natively.
+        assert_eq!(
+            direct_mime_for_probe(Some(&probe_with_format(
+                "Ogg",
+                probe_video_audio("theora", "vorbis")
+            ))),
+            Some("video/ogg")
+        );
+        // Other containers (AVI, MPEG-TS, ...) transcode.
+        assert_eq!(
+            direct_mime_for_probe(Some(&probe_with_format(
+                "avi",
+                probe_video_audio("mpeg4", "mp3")
+            ))),
+            None
+        );
+        assert_eq!(
+            direct_mime_for_probe(Some(&probe_with_format(
+                "mpegts",
+                probe_video_audio("h264", "ac3")
+            ))),
+            None
+        );
+        // No probe, no format name, or no streams: the container is
+        // unknown, so it transcodes.
+        assert_eq!(direct_mime_for_probe(None), None);
+        assert_eq!(direct_mime_for_probe(Some(&json!({}))), None);
+        assert_eq!(direct_mime_for_probe(Some(&json!({ "format": {} }))), None);
+        assert_eq!(
+            direct_mime_for_probe(Some(&json!({
+                "format": { "format_name": "matroska,webm" },
+            }))),
+            None
+        );
+        // Demuxer names are matched case-insensitively.
+        assert_eq!(
+            direct_mime_for_probe(Some(&probe_with_format(
+                "MOV,MP4,M4A,3GP,3G2,MJ2",
+                probe_video_audio("h264", "aac")
+            ))),
+            Some("video/mp4")
+        );
+    }
+
+    #[test]
+    fn playback_mode_by_probe() {
+        let mp4 = probe_with_format("mov,mp4,m4a,3gp,3g2,mj2", probe_video_audio("h264", "aac"));
+        let mkv = probe_with_format("matroska,webm", probe_video_audio("h264", "ac3"));
+        let webm = probe_with_format("matroska,webm", probe_video_audio("vp9", "opus"));
+
+        // The probe decides, not the name: a true MP4 plays direct even
+        // under an .mkv name; a Matroska file transcodes under any name.
+        assert_eq!(
+            playback_mode_for_media("/mediakraken/metadata/m/x.mkv", Some(&mp4)),
             "direct"
         );
         assert_eq!(
-            playback_mode_for_path("/mediakraken/metadata/m/x.MP4"),
+            playback_mode_for_media("/mediakraken/metadata/m/x.mp4", Some(&mkv)),
+            "hls"
+        );
+        assert_eq!(
+            playback_mode_for_media("/mediakraken/metadata/m/x.webm", Some(&webm)),
             "direct"
         );
+        // A .webm-named file that is really a full MKV still transcodes.
         assert_eq!(
-            playback_mode_for_path("/mediakraken/metadata/m/x.mkv"),
+            playback_mode_for_media("/mediakraken/metadata/m/x.webm", Some(&mkv)),
             "hls"
         );
+        // No probe data: the container is unknown, so it transcodes.
         assert_eq!(
-            playback_mode_for_path("/mediakraken/metadata/m/x.avi"),
-            "hls"
-        );
-        assert_eq!(
-            playback_mode_for_path("/mediakraken/metadata/m/noext"),
+            playback_mode_for_media("/mediakraken/metadata/m/x.mp4", None),
             "hls"
         );
         // Share paths always transcode, even for directly playable
-        // extensions: the web app cannot open them as local files.
+        // containers: the web app cannot open them as local files.
         assert_eq!(
-            playback_mode_for_path("smb://192.168.50.50/video/m/x.mp4"),
+            playback_mode_for_media("smb://192.168.50.50/video/m/x.mp4", Some(&mp4)),
             "hls"
         );
         assert_eq!(
-            playback_mode_for_path("nfs://192.168.50.50/media/m/x.mkv"),
+            playback_mode_for_media("nfs://192.168.50.50/media/m/x.mkv", Some(&mkv)),
             "hls"
         );
     }
@@ -792,12 +983,16 @@ mod tests {
     #[test]
     fn media_source_by_mode() {
         let guid = uuid::Uuid::new_v4();
+        let mp4 = probe_with_format("mov,mp4,m4a,3gp,3g2,mj2", probe_video_audio("h264", "aac"));
+        let mkv = probe_with_format("matroska,webm", probe_video_audio("h264", "ac3"));
+        // A .mkv that probes as MP4 plays direct; a .mkv that probes as
+        // Matroska transcodes — the extension never decides.
         assert_eq!(
-            media_source_for_path("/mediakraken/metadata/m/x.mp4", guid),
+            media_source_for_media("/mediakraken/metadata/m/x.mkv", Some(&mp4), guid),
             format!("/user/playback/stream/{guid}")
         );
         assert_eq!(
-            media_source_for_path("/mediakraken/metadata/m/x.mkv", guid),
+            media_source_for_media("/mediakraken/metadata/m/x.mkv", Some(&mkv), guid),
             format!("/user/playback/hls/{guid}/master.m3u8")
         );
     }

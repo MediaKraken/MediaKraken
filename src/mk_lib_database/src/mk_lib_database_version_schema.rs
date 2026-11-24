@@ -1210,6 +1210,26 @@ pub async fn mk_lib_database_update_schema(
         mk_lib_database_version_update(sqlx_pool, 84).await?;
     }
 
+    if version_no < 85 {
+        let mut transaction = sqlx_pool.begin().await?;
+        sqlx::query(
+            r#"CREATE TABLE IF NOT EXISTS public.mm_media_user_status
+            (
+                mm_media_user_status_guid uuid NOT NULL,
+                mm_media_guid uuid NOT NULL,
+                mm_media_timestamp bigint NOT NULL,
+                CONSTRAINT mm_media_user_status_guid_pkey PRIMARY KEY (mm_media_user_status_guid)
+            )"#,
+        )
+        .execute(&mut *transaction)
+        .await?;
+        sqlx::query(r#"ALTER TABLE mm_media ADD COLUMN IF NOT EXISTS mm_media_blake3 text;"#)
+            .execute(&mut *transaction)
+            .await?;
+        transaction.commit().await?;
+        mk_lib_database_version_update(sqlx_pool, 85).await?;
+    }
+
     // TODO, movie alt name, tv alt name and person alt name cleanup
 
     Ok(true)
