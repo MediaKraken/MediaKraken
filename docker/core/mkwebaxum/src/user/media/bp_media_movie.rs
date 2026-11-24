@@ -446,6 +446,7 @@ struct TemplateMediaFileList {
 #[template(path = "bss_user/media/bss_user_media_movie_detail.html")]
 struct TemplateMediaMovieDetailContext<'a> {
     template_data_json: &'a serde_json::Value,
+    template_metadata_guid: uuid::Uuid,
     #[allow(dead_code)]
     template_metadata_name_alt: Option<String>,
     template_metadata_poster: String,
@@ -462,7 +463,6 @@ struct TemplateMediaMovieDetailContext<'a> {
     template_metadata_genre: Vec<Genre>,
     template_metadata_cast: Vec<MovieCastMember>,
     template_metadata_crew: Vec<MovieCrewMember>,
-    #[allow(dead_code)]
     template_metadata_user_watched: serde_json::Value,
     #[allow(dead_code)]
     template_metadata_user_rating: serde_json::Value,
@@ -662,6 +662,7 @@ pub async fn user_media_movie_detail(
 
         let template = TemplateMediaMovieDetailContext {
             template_data_json: &movie_metadata.mm_metadata_movie_json,
+            template_metadata_guid: movie_metadata.mm_metadata_movie_guid,
             template_metadata_name_alt: movie_metadata.mm_metadata_movie_name_alt.clone(),
             template_metadata_poster: mm_poster,
             template_metadata_backdrop: "/static/image/Movie-icon.png".to_string(),

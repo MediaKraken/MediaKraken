@@ -1,7 +1,15 @@
 {% extends "layouts/base_user.html" %}
 
 {% block content %}
-<section class="max-w-6xl mx-auto px-4 py-6 sm:px-6" x-data="moviePage()">
+<section class="max-w-6xl mx-auto px-4 py-6 sm:px-6"
+    x-data="moviePage({
+        guid: '{{ template_metadata_guid }}',
+        favorite: {{ template_metadata_user_watched["favorite"] }},
+        watched: {{ template_metadata_user_watched["watched"] }},
+        good: {{ template_metadata_user_watched["good"] }},
+        bad: {{ template_metadata_user_watched["bad"] }},
+        trash: {{ template_metadata_user_watched["trash"] }}
+    })">
 
     <!-- HEADER -->
     <div class="grid gap-6 lg:grid-cols-[260px_1fr]">
@@ -221,34 +229,33 @@
 </section>
 
 <script>
-    function moviePage() {
+    function moviePage(initial) {
         return {
-            rating: 4,
             loaded: false,
-            favorite: false,
-            watched: false,
-            good: false,
-            bad: false,
-            trash: false,
+            ...initial,
             reviewsOpen: false,
 
-            genres: ['Action', 'Drama', 'Sci-Fi', 'Thriller'],
-            activeGenres: [],
-
-            reviews: [
-                { user: 'Alice', text: 'Amazing cinematography and story.' },
-                { user: 'Bob', text: 'A bit long, but worth it.' }
-            ],
+            reviews: [],
 
             toggle(stateName) {
                 this[stateName] = !this[stateName]
+                this.save()
             },
 
-            toggleGenre(genre) {
-                this.activeGenres.includes(genre)
-                    ? this.activeGenres = this.activeGenres.filter(g => g !== genre)
-                    : this.activeGenres.push(genre)
-            },
+            save: Alpine.debounce(function () {
+                fetch('/user/user_metadata_movie_status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        guid: this.guid,
+                        favorite: this.favorite,
+                        watched: this.watched,
+                        good: this.good,
+                        bad: this.bad,
+                        trash: this.trash
+                    })
+                })
+            }, 400),
 
             scroll(ref, dir) {
                 this.$refs[ref].scrollLeft += dir * 300

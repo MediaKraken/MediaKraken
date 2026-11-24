@@ -19,11 +19,68 @@ use sqlx::postgres::PgPool;
 #[template(path = "bss_error/bss_error_401.html")]
 struct TemplateError401Context {}
 
+/// One game system row on the metadata game system list page.
+///
+/// The shared-lib list/count queries use a pgroonga search operator and
+/// an outdated `gs_id` column name, so the list lives here (same
+/// approach as the media movie list).
+#[derive(Debug, sqlx::FromRow)]
+struct MetaGameSystemListRow {
+    gs_game_system_id: uuid::Uuid,
+    gs_game_system_name: String,
+    gs_year: Option<String>,
+}
+
+/// Count game systems using the list filter (`starts_with` is "", "#",
+/// or a single letter).
+async fn meta_game_system_count(sqlx_pool: &PgPool, starts_with: &str) -> Result<i64, sqlx::Error> {
+    let row: (i64,) = sqlx::query_as(
+        r#"select count(*)
+           from mm_metadata_game_systems_info
+           where (
+                $1 = ''
+                or ($1 = '#' and left(lower(gs_game_system_name), 1) !~ '^[a-z0-9]$')
+                or ($1 <> '#' and lower(gs_game_system_name) like lower($1) || '%')
+              )"#,
+    )
+    .bind(starts_with)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
+}
+
+/// Read game systems using the list filter, name ordered, paginated.
+async fn meta_game_system_read(
+    sqlx_pool: &PgPool,
+    starts_with: &str,
+    offset: i64,
+    limit: i64,
+) -> Result<Vec<MetaGameSystemListRow>, sqlx::Error> {
+    let rows: Vec<MetaGameSystemListRow> = sqlx::query_as(
+        r#"select gs_game_system_id,
+           coalesce(gs_game_system_name, '') as gs_game_system_name,
+           gs_game_system_json->>'year' as gs_year
+           from mm_metadata_game_systems_info
+           where (
+                $1 = ''
+                or ($1 = '#' and left(lower(gs_game_system_name), 1) !~ '^[a-z0-9]$')
+                or ($1 <> '#' and lower(gs_game_system_name) like lower($1) || '%')
+              )
+           order by lower(gs_game_system_name), gs_game_system_id
+           offset $2 limit $3"#,
+    )
+    .bind(starts_with)
+    .bind(offset)
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
+    Ok(rows)
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_game_system.html")]
 struct TemplateMetaGameSystemContext<'a> {
-    template_data:
-        &'a Vec<mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::DBMetaGameSystemList>,
+    template_data: &'a Vec<MetaGameSystemListRow>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     #[allow(dead_code)]
@@ -81,31 +138,50 @@ pub async fn user_metadata_game_system(
                 .await
                 .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
         let db_offset: i64 = (page * pagination_count) - pagination_count;
-        let total_pages: i64 =
-        mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_count(
-            &state.sqlx_pool_ro,
-            starts_with.clone().unwrap_or_default(),
-        )
-        .await
-        .unwrap();
-        let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
-            total_pages,
+        let starts_with_value = starts_with.clone().unwrap_or_default();
+        let total_items: i64 =
+            match meta_game_system_count(&state.sqlx_pool_ro, &starts_with_value).await {
+                Ok(total) => total,
+                Err(_) => {
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Html(String::from("Internal server error")).into_response(),
+                    );
+                }
+            };
+        let pagination_html = match mk_lib_common_pagination::mk_lib_common_paginate(
+            total_items,
             page,
             "/user/metadata/game_system".to_string(),
             starts_with.as_deref(),
             pagination_count,
         )
         .await
-        .unwrap();
-        let game_system_list =
-        mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_read(
+        {
+            Ok(html) => html,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
+        let game_system_list = match meta_game_system_read(
             &state.sqlx_pool_ro,
-            starts_with.clone().unwrap_or_default(),
+            &starts_with_value,
             db_offset,
             pagination_count,
         )
         .await
-        .unwrap();
+        {
+            Ok(list) => list,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let mut template_data_exists = false;
         if !game_system_list.is_empty() {
             template_data_exists = true;
@@ -156,14 +232,20 @@ pub async fn user_metadata_game_system_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let tmp_uuid = sqlx::types::Uuid::parse_str(&guid.to_string()).unwrap();
-        let detail_data = match mk_lib_database::database_metadata::mk_lib_database_metadata_game_system::mk_lib_database_metadata_game_system_detail(
-            &state.sqlx_pool_ro, tmp_uuid,
+        // The shared-lib detail query references the pre-rename `gs_id`
+        // column, so the query lives here (same approach as the media
+        // movie list).
+        let detail_data: serde_json::Value = match sqlx::query_as(
+            r#"select coalesce(gs_game_system_json, '{}'::jsonb)
+                   from mm_metadata_game_systems_info
+                   where gs_game_system_id = $1"#,
         )
+        .bind(guid)
+        .fetch_optional(&state.sqlx_pool_ro)
         .await
         {
-            Ok(data) => data,
-            Err(sqlx::Error::RowNotFound) => {
+            Ok(Some((data,))) => data,
+            Ok(None) => {
                 return (
                     StatusCode::NOT_FOUND,
                     Html(String::from("Not found")).into_response(),

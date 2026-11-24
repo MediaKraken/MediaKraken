@@ -18,7 +18,6 @@ struct TemplateError401Context {}
 #[template(path = "bss_user/bss_user_home.html")]
 struct TemplateUserHomeContext<'a> {
     template_data_new_media: &'a bool,
-    template_data_user_media_queue: &'a bool,
     page_title: Option<String>,
 }
 
@@ -53,7 +52,6 @@ pub async fn user_home(
         }
         let template = TemplateUserHomeContext {
             template_data_new_media: &new_media,
-            template_data_user_media_queue: &true,
             page_title: Some("MediaKraken".to_string()),
         };
         let reply_html = template.render().unwrap();

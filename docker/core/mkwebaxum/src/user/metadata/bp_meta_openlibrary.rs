@@ -97,11 +97,17 @@ pub async fn user_inter_openlibrary(
         );
     }
 
+    // The live `mm_openlib_work` table is the legacy OpenLibrary mirror
+    // (`type`, `key`, `revision`, `last_modified`, `data`); the
+    // `mm_openlib_work_id`/`mm_openlib_work_json` columns from the
+    // `CREATE TABLE IF NOT EXISTS` migration were never created because
+    // the table pre-existed. Order by the indexed `key` column.
     let db_offset = (page - 1) * PAGE_SIZE;
     let rows_result = sqlx::query_as::<_, OpenLibraryWorkRow>(
-        r#"select mm_openlib_work_id, mm_openlib_work_json
+        r#"select key as mm_openlib_work_id,
+           coalesce(data, '{}'::jsonb) as mm_openlib_work_json
            from mm_openlib_work
-           order by mm_openlib_work_id
+           order by key
            offset $1 limit $2"#,
     )
     .bind(db_offset)
@@ -163,10 +169,12 @@ pub async fn user_inter_openlibrary_detail(
         );
     };
 
+    // Legacy mirror columns, see the browse handler above.
     let row_result = sqlx::query_as::<_, OpenLibraryWorkRow>(
-        r#"select mm_openlib_work_id, mm_openlib_work_json
+        r#"select key as mm_openlib_work_id,
+           coalesce(data, '{}'::jsonb) as mm_openlib_work_json
            from mm_openlib_work
-           where mm_openlib_work_id = $1"#,
+           where key = $1"#,
     )
     .bind(&canonical_work_id)
     .fetch_optional(&state.sqlx_pool_ro)

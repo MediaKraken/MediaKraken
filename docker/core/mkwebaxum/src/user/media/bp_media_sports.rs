@@ -10,6 +10,7 @@ use axum::{
 };
 use axum_session_auth::*;
 use axum_session_sqlx::SessionPgPool;
+use mk_lib_common::mk_lib_common_enum_media_type::DLMediaType;
 use mk_lib_common::mk_lib_common_pagination;
 use sqlx::postgres::PgPool;
 
@@ -17,16 +18,71 @@ use sqlx::postgres::PgPool;
 #[template(path = "bss_error/bss_error_401.html")]
 struct TemplateError401Context {}
 
+/// One sports metadata row on the sports list page (local media only).
+#[derive(Debug, sqlx::FromRow)]
+struct MediaSportsListRow {
+    mm_metadata_sports_guid: uuid::Uuid,
+    mm_metadata_sports_name: String,
+}
+
 #[derive(Template)]
 #[template(path = "bss_user/media/bss_user_media_sports.html")]
 struct TemplateMediaSportsContext<'a> {
-    template_data:
-        &'a Vec<mk_lib_database::database_media::mk_lib_database_media_sports::DBMediaSportsList>,
+    template_data: &'a Vec<MediaSportsListRow>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     #[allow(dead_code)]
     page: &'a usize,
     page_title: Option<String>,
+}
+
+/// Count the sports metadata titles that have local media.
+///
+/// The shared lib `mk_lib_database_media_sports_count` is an empty-SQL stub
+/// in the deployed registry crate, so the query lives here (same approach as
+/// the media movie list).
+async fn media_sports_count(sqlx_pool: &PgPool) -> Result<i64, sqlx::Error> {
+    let row: (i64,) = sqlx::query_as(
+        r#"select count(distinct mm_metadata_sports_guid)
+           from mm_media, mm_metadata_sports
+           where mm_media_class_enum = $1
+           and mm_media_metadata_guid = mm_metadata_sports_guid"#,
+    )
+    .bind(DLMediaType::SPORTS)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
+}
+
+/// Read one representative sports metadata row per title, name ordered.
+///
+/// The shared lib `mk_lib_database_media_sports_read` is an empty-SQL stub
+/// in the deployed registry crate, so the query lives here (same approach as
+/// the media movie list).
+async fn media_sports_read(
+    sqlx_pool: &PgPool,
+    offset: i64,
+    limit: i64,
+) -> Result<Vec<MediaSportsListRow>, sqlx::Error> {
+    let rows: Vec<MediaSportsListRow> = sqlx::query_as(
+        r#"select temp.mm_metadata_sports_guid,
+           coalesce(mm_metadata_sports_name, '') as mm_metadata_sports_name
+           from (select distinct on (mm_metadata_sports_guid) mm_metadata_sports_guid
+                 from mm_media, mm_metadata_sports
+                 where mm_media_class_enum = $1
+                 and mm_media_metadata_guid = mm_metadata_sports_guid
+                 order by mm_metadata_sports_guid, mm_media_path) as temp
+           join mm_metadata_sports
+             on mm_metadata_sports.mm_metadata_sports_guid = temp.mm_metadata_sports_guid
+           order by LOWER(mm_metadata_sports_name), mm_metadata_sports_guid
+           offset $2 limit $3"#,
+    )
+    .bind(DLMediaType::SPORTS)
+    .bind(offset)
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
+    Ok(rows)
 }
 
 pub async fn user_media_sports(
@@ -53,31 +109,42 @@ pub async fn user_media_sports(
                 .await
                 .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
         let db_offset: i64 = (page * pagination_count) - pagination_count;
-        let total_pages: i64 =
-        mk_lib_database::database_media::mk_lib_database_media_sports::mk_lib_database_media_sports_count(
-            &state.sqlx_pool_ro,
-            String::new(),
-        )
-        .await
-        .unwrap();
-        let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
-            total_pages,
+        let total_items: i64 = match media_sports_count(&state.sqlx_pool_ro).await {
+            Ok(total) => total,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
+        let pagination_html = match mk_lib_common_pagination::mk_lib_common_paginate(
+            total_items,
             page,
             "/user/media/sports".to_string(),
             None,
             pagination_count,
         )
         .await
-        .unwrap();
+        {
+            Ok(html) => html,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let sports_list =
-        mk_lib_database::database_media::mk_lib_database_media_sports::mk_lib_database_media_sports_read(
-            &state.sqlx_pool_ro,
-            String::new(),
-            db_offset,
-            pagination_count,
-        )
-        .await
-        .unwrap();
+            match media_sports_read(&state.sqlx_pool_ro, db_offset, pagination_count).await {
+                Ok(list) => list,
+                Err(_) => {
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Html(String::from("Internal server error")).into_response(),
+                    );
+                }
+            };
         let mut template_data_exists = false;
         if !sports_list.is_empty() {
             template_data_exists = true;

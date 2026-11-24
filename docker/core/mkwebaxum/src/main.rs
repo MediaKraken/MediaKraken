@@ -114,6 +114,7 @@ pub mod user_media {
     pub mod bp_media_movie;
     pub mod bp_media_music;
     pub mod bp_media_music_video;
+    pub mod bp_media_new;
     pub mod bp_media_physical;
     pub mod bp_media_sports;
     pub mod bp_media_tv;
@@ -613,6 +614,14 @@ async fn main() {
         .route_with_tsr(
             "/user/media/music_video_detail/{guid}",
             get(user_media::bp_media_music_video::user_media_music_video_detail),
+        )
+        .route_with_tsr(
+            "/user/media/new",
+            get(user_media::bp_media_new::user_media_new_root),
+        )
+        .route_with_tsr(
+            "/user/media/new/{page}",
+            get(user_media::bp_media_new::user_media_new),
         )
         .route_with_tsr(
             "/user/media/physical/{page}",

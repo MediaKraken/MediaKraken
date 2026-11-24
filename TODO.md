@@ -1,27 +1,27 @@
-https://mk.mediakraken.media/user/media/iradio/1 should word wrap the station name
+https://mk.mediakraken.media/user/media/iradio/1 should word wrap the station name [DONE]
 
-media, new releases - show all new media added in the last seven days
+media, new releases - show all new media added in the last seven days [DONE]
 
-media movie detail page, favorite, watched, etc do not display correctly
+media movie detail page, favorite, watched, etc do not display correctly [DONE]
     will also need to be able to update those status's from there
 
-media sports page 500's
+media sports page 500's [DONE]
 
-on main user dashboard, remove dashboard section, remove 'items in your queue' section
+on main user dashboard, remove dashboard section, remove 'items in your queue' section [DONE]
 
-on main user dashboard, remove 'game systems' image/link
+on main user dashboard, remove 'game systems' image/link [DONE]
 
-metadata game 500's
+metadata game 500's [DONE]
 
-metadata game system details 500's
+metadata game system details 500's [DONE]
 
-metadata music 500's
+metadata music 500's [DONE]
 
-metadata openlibray load extrememly slow - then 500's
+metadata openlibray load extrememly slow - then 500's [DONE]
 
-metadata person detail 500's
+metadata person detail 500's [DONE]
 
-
+********** don't do  below this line**********
 for browser playback
     ffmpeg -i "/mnt/share/MediaKraken_Test_Media/Movie/16_BLOCKS (2006)/extras/16 Blocks (2006).mkv" \
         -map 0:v:0 -map 0:a:0 \

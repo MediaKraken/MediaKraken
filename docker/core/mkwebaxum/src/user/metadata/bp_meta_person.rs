@@ -257,7 +257,9 @@ pub async fn user_metadata_person(
 struct MetaPersonDetailRow {
     mm_metadata_person_meta_json: serde_json::Value,
     person_name: String,
-    photo_path: String,
+    /// Raw text column; the list page parses the same column with
+    /// `extract_person_image_path`, the detail page must too.
+    mm_metadata_person_image: Option<String>,
 }
 
 #[derive(Template)]
@@ -286,10 +288,13 @@ pub async fn user_metadata_person_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
+        // `mm_metadata_person_image` is a text column (JSON when present),
+        // so the `->>` jsonb operator cannot be used on it; parse in Rust
+        // like the list handler does.
         let row = sqlx::query_as::<_, MetaPersonDetailRow>(
-            r#"select mm_metadata_person_meta_json,
+            r#"select coalesce(mm_metadata_person_meta_json, '{}'::jsonb),
                       COALESCE(mm_metadata_person_name, '') as person_name,
-                      COALESCE(mm_metadata_person_image->>'Poster', '') as photo_path
+                      mm_metadata_person_image
                from mm_metadata_person
                where mm_metadata_person_guid = $1"#,
         )
@@ -297,11 +302,14 @@ pub async fn user_metadata_person_detail(
         .fetch_optional(&state.sqlx_pool_ro)
         .await;
         let template_data = match row {
-            Ok(Some(row)) => crate::user::detail_map::person(
-                &row.mm_metadata_person_meta_json,
-                &row.person_name,
-                &row.photo_path,
-            ),
+            Ok(Some(row)) => {
+                let photo_path = extract_person_image_path(row.mm_metadata_person_image);
+                crate::user::detail_map::person(
+                    &row.mm_metadata_person_meta_json,
+                    &row.person_name,
+                    &photo_path,
+                )
+            }
             Ok(None) => {
                 return (
                     StatusCode::NOT_FOUND,

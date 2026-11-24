@@ -23,8 +23,7 @@ struct TemplateError401Context {}
 #[derive(Template)]
 #[template(path = "bss_user/metadata/bss_user_metadata_game.html")]
 struct TemplateMetaGameContext<'a> {
-    template_data:
-        &'a Vec<mk_lib_database::database_metadata::mk_lib_database_metadata_game::DBMetaGameList>,
+    template_data: &'a Vec<MetaGameListRow>,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     #[allow(dead_code)]
@@ -182,6 +181,96 @@ aria-label="Next">&raquo;</a></li>"#,
     Ok(pagination_html)
 }
 
+/// One game row on the metadata game list page.
+///
+/// Same fields the template reads from the shared-lib `DBMetaGameList`;
+/// `gi_gc_category` is selected as NULL because the live schema has no
+/// such column (the shared-lib query referencing it fails at plan time,
+/// so the list lives here, same approach as the media movie list).
+#[derive(Debug, sqlx::FromRow)]
+struct MetaGameListRow {
+    gi_game_info_id: uuid::Uuid,
+    gi_game_info_name: String,
+    gi_year: Option<String>,
+    gs_game_system_name: String,
+    gi_gc_category: Option<String>,
+}
+
+/// Count games using the list filters (`starts_with` is "", "#", or a
+/// single letter; an empty status disables the status filter).
+async fn meta_game_filter_count(
+    sqlx_pool: &PgPool,
+    starts_with: &str,
+    status_filter: &str,
+) -> Result<i64, sqlx::Error> {
+    let row: (i64,) = sqlx::query_as(
+        r#"select count(*)
+           from mm_metadata_game_software_info
+           where (
+                $1 = ''
+                or ($1 = '#' and left(lower(gi_game_info_name), 1) !~ '^[a-z0-9]$')
+                or ($1 <> '#' and lower(gi_game_info_name) like lower($1) || '%')
+              )
+           and (
+                $2 = ''
+                or ($2 = 'favorite' and coalesce((gi_game_info_json->'user_status'->>'favorite')::boolean, false))
+                or ($2 = 'watched' and coalesce((gi_game_info_json->'user_status'->>'watched')::boolean, false))
+                or ($2 = 'unwatched' and not coalesce((gi_game_info_json->'user_status'->>'watched')::boolean, false))
+                or ($2 = 'good' and coalesce((gi_game_info_json->'user_status'->>'good')::boolean, false))
+                or ($2 = 'bad' and coalesce((gi_game_info_json->'user_status'->>'bad')::boolean, false))
+                or ($2 = 'trash' and coalesce((gi_game_info_json->'user_status'->>'trash')::boolean, false))
+              )"#,
+    )
+    .bind(starts_with)
+    .bind(status_filter)
+    .fetch_one(sqlx_pool)
+    .await?;
+    Ok(row.0)
+}
+
+/// Read games using the list filters, name ordered, paginated.
+async fn meta_game_filter_read(
+    sqlx_pool: &PgPool,
+    starts_with: &str,
+    status_filter: &str,
+    offset: i64,
+    limit: i64,
+) -> Result<Vec<MetaGameListRow>, sqlx::Error> {
+    let rows: Vec<MetaGameListRow> = sqlx::query_as(
+        r#"select gi.gi_game_info_id,
+           coalesce(gi.gi_game_info_name, '') as gi_game_info_name,
+           gi.gi_game_info_json->'machine'->>'year' as gi_year,
+           coalesce(gs.gs_game_system_name, '') as gs_game_system_name,
+           null::text as gi_gc_category
+           from mm_metadata_game_software_info gi
+           left join mm_metadata_game_systems_info gs
+             on gs.gs_game_system_id = gi.gi_game_info_system_id
+           where (
+                $1 = ''
+                or ($1 = '#' and left(lower(gi.gi_game_info_name), 1) !~ '^[a-z0-9]$')
+                or ($1 <> '#' and lower(gi.gi_game_info_name) like lower($1) || '%')
+              )
+           and (
+                $2 = ''
+                or ($2 = 'favorite' and coalesce((gi.gi_game_info_json->'user_status'->>'favorite')::boolean, false))
+                or ($2 = 'watched' and coalesce((gi.gi_game_info_json->'user_status'->>'watched')::boolean, false))
+                or ($2 = 'unwatched' and not coalesce((gi.gi_game_info_json->'user_status'->>'watched')::boolean, false))
+                or ($2 = 'good' and coalesce((gi.gi_game_info_json->'user_status'->>'good')::boolean, false))
+                or ($2 = 'bad' and coalesce((gi.gi_game_info_json->'user_status'->>'bad')::boolean, false))
+                or ($2 = 'trash' and coalesce((gi.gi_game_info_json->'user_status'->>'trash')::boolean, false))
+              )
+           order by lower(coalesce(gi.gi_game_info_name, '')), gi_year, gi.gi_game_info_id
+           offset $3 limit $4"#,
+    )
+    .bind(starts_with)
+    .bind(status_filter)
+    .bind(offset)
+    .bind(limit)
+    .fetch_all(sqlx_pool)
+    .await?;
+    Ok(rows)
+}
+
 pub async fn user_metadata_game(
     State(state): State<AppState>,
     method: Method,
@@ -210,18 +299,22 @@ pub async fn user_metadata_game(
                 .await
                 .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
         let db_offset: i64 = (page * pagination_count) - pagination_count;
-        let total_pages: i64 =
-        mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_count(
-           &state.sqlx_pool_ro,
-            String::new(),
-            starts_with.clone().unwrap_or_default(),
-            genre.clone().unwrap_or_default(),
-            status_filter.clone().unwrap_or_default(),
-        )
-        .await
-        .unwrap();
+        let starts_with_value = starts_with.clone().unwrap_or_default();
+        let status_value = status_filter.clone().unwrap_or_default();
+        let total_items: i64 =
+            match meta_game_filter_count(&state.sqlx_pool_ro, &starts_with_value, &status_value)
+                .await
+            {
+                Ok(total) => total,
+                Err(_) => {
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Html(String::from("Internal server error")).into_response(),
+                    );
+                }
+            };
         let pagination_html = build_game_pagination(
-            total_pages,
+            total_items,
             page,
             pagination_count,
             starts_with.as_deref(),
@@ -229,18 +322,23 @@ pub async fn user_metadata_game(
             status_filter.as_deref(),
         )
         .unwrap();
-        let game_list =
-        mk_lib_database::database_metadata::mk_lib_database_metadata_game::mk_lib_database_metadata_game_read(
-           &state.sqlx_pool_ro,
-            String::new(),
-            starts_with.clone().unwrap_or_default(),
-            genre.clone().unwrap_or_default(),
-            status_filter.clone().unwrap_or_default(),
+        let game_list = match meta_game_filter_read(
+            &state.sqlx_pool_ro,
+            &starts_with_value,
+            &status_value,
             db_offset,
             pagination_count,
         )
         .await
-        .unwrap();
+        {
+            Ok(list) => list,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let status_options = vec![
             FilterOption {
                 label: "Favorite".to_string(),
@@ -347,8 +445,9 @@ pub async fn user_metadata_game_detail(
                       COALESCE(gi.gi_game_info_localimage->>'Poster',
                                gi.gi_game_info_localimage->'Images'->>'Poster', '') as cover_path
                from mm_metadata_game_software_info gi
-               left join mm_metadata_game_systems_info gs on gs.gs_id = gi.gi_system_id
-               where gi.gi_id = $1"#,
+               left join mm_metadata_game_systems_info gs
+                 on gs.gs_game_system_id = gi.gi_game_info_system_id
+               where gi.gi_game_info_id = $1"#,
         )
         .bind(guid)
         .fetch_optional(&state.sqlx_pool_ro)
