@@ -1,6 +1,6 @@
 [package]
 name = "mk_lib_network"
-version = "0.0.265"
+version = "0.0.267"
 edition = "2024"
 
 [profile.release]
@@ -10,7 +10,7 @@ lto = true
 codegen-units = 1
 
 [dependencies]
-mk_lib_file = { version = "0.0.275", registry = "kellnr" }
+mk_lib_file = { version = "0.0.277", registry = "kellnr" }
 
 bytes = "1.12.1"
 cidr-utils = "0.7.1" # 0.6+ removed serde feature; 0.5.x Ipv4Cidr renamed
@@ -31,10 +31,14 @@ reqwest = { version = "0.13.4", default-features = false, features = [
     "json",
     "stream",
     "native-tls",
+    # gzip: Schedules Direct requires Accept-Encoding: gzip/deflate on every
+    # request; this makes the client send it and decompress responses.
+    "gzip",
 ] }
 reqwest-middleware = "0.5.2"
 reqwest-retry = "0.9.1"
 rss = "2.1.0"
+sha1 = "0.11.0"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"
 serialport = "4.9.0"

@@ -26,9 +26,9 @@ pub async fn mk_lib_database_meta_tv_live_read(
 #[derive(Debug, FromRow, Deserialize, Serialize)]
 pub struct MetaTVStationList {
     pub mm_tv_stations_id: uuid::Uuid,
-    mm_tv_station_name: String,
-    mm_tv_station_id: String,
-    mm_tv_station_channel: String,
+    pub mm_tv_station_name: String,
+    pub mm_tv_station_id: String,
+    pub mm_tv_station_channel: String,
 }
 
 pub async fn mk_lib_database_meta_tv_live_station_read(
@@ -40,6 +40,55 @@ pub async fn mk_lib_database_meta_tv_live_station_read(
     .fetch_all(sqlx_pool)
     .await?;
     Ok(table_rows)
+}
+
+/// Read one day of schedules for every station that has a row for that date.
+pub async fn mk_lib_database_meta_tv_live_day_read(
+    sqlx_pool: &sqlx::PgPool,
+    schedule_date: chrono::NaiveDate,
+) -> Result<Vec<DBMetaTVLiveList>, sqlx::Error> {
+    let rows: Vec<DBMetaTVLiveList> = sqlx::query_as(
+        r#"select mm_tv_station_name, mm_tv_station_channel, mm_tv_schedule_json
+        from mm_tv_stations, mm_tv_schedule
+        where mm_tv_schedule_station_id = mm_tv_station_id
+        and mm_tv_schedule_date = $1
+        order by LOWER(mm_tv_station_name)"#,
+    )
+    .bind(schedule_date)
+    .fetch_all(sqlx_pool)
+    .await?;
+    Ok(rows)
+}
+
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct DBMetaTVScheduleProgramList {
+    pub mm_tv_schedule_program_id: String,
+    pub mm_tv_schedule_program_json: serde_json::Value,
+}
+
+/// Read all stored program details (title/description metadata keyed by SD
+/// programID).
+pub async fn mk_lib_database_meta_tv_schedule_program_read(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<Vec<DBMetaTVScheduleProgramList>, sqlx::Error> {
+    let rows: Vec<DBMetaTVScheduleProgramList> = sqlx::query_as(
+        r#"select mm_tv_schedule_program_id, mm_tv_schedule_program_json from mm_tv_schedule_program"#,
+    )
+    .fetch_all(sqlx_pool)
+    .await?;
+    Ok(rows)
+}
+
+/// Earliest and latest schedule date on file, if any schedule rows exist.
+pub async fn mk_lib_database_meta_tv_schedule_date_range(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<Option<(chrono::NaiveDate, chrono::NaiveDate)>, sqlx::Error> {
+    let row: Option<(chrono::NaiveDate, chrono::NaiveDate)> = sqlx::query_as(
+        r#"select min(mm_tv_schedule_date), max(mm_tv_schedule_date) from mm_tv_schedule"#,
+    )
+    .fetch_optional(sqlx_pool)
+    .await?;
+    Ok(row)
 }
 
 pub async fn mk_lib_database_meta_tv_station_exists(

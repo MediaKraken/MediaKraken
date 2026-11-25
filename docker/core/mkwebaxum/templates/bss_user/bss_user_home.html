@@ -23,15 +23,6 @@
             </span>
         </a>
         {% endif %}
-        {% if !template_data_new_media %}
-        <div class="flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:col-span-2">
-            <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-zinc-300 dark:bg-zinc-600" aria-hidden="true"></span>
-            <span class="min-w-0">
-                <span class="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">All caught up</span>
-                <span class="block text-xs text-zinc-500 dark:text-zinc-400">No new media. Enjoy your library.</span>
-            </span>
-        </div>
-        {% endif %}
     </div>
 
     <h2 class="mt-6 text-lg font-semibold text-zinc-900 dark:text-zinc-100">Browse your library</h2>
@@ -55,6 +46,17 @@
                 </div>
                 <div class="p-3">
                     <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">TV Shows</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/media/live_tv" class="block" aria-label="Browse live TV guide">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/television_live.png?v=1" alt="Live TV artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Live TV</h3>
                 </div>
             </a>
         </li>
@@ -114,6 +116,17 @@
             </a>
         </li>
         <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/media/home_media/1" class="block" aria-label="Browse home media">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/vid_camera.png?v=1" alt="Home media artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Home Media</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
             <a href="/user/media/collection/1" class="block" aria-label="Browse collections">
                 <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
                     <img src="/static/image/rectangles_black.png?v=1" alt="Collections artwork" loading="lazy" decoding="async"
@@ -143,6 +156,17 @@
                 </div>
                 <div class="p-3">
                     <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">Internet</h3>
+                </div>
+            </a>
+        </li>
+        <li class="group overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+            <a href="/user/media/cctv" class="block" aria-label="Browse CCTV cameras">
+                <div class="relative aspect-[4/3] overflow-hidden bg-zinc-200 dark:bg-zinc-800">
+                    <img src="/static/image/surveillance-cctv-symbol-in-rounded-triangle.png?v=1" alt="CCTV artwork" loading="lazy" decoding="async"
+                        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                </div>
+                <div class="p-3">
+                    <h3 class="text-sm font-bold leading-tight text-zinc-900 dark:text-zinc-100">CCTV</h3>
                 </div>
             </a>
         </li>

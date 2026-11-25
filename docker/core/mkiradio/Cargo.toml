@@ -11,11 +11,11 @@ panic = "abort"        # Removes unwinding infrastructure, reducing binary size 
 strip = true           # Removes debug symbols from the binary to reduce size (optional)
 
 [dependencies]
-mk_lib_common = { version = "0.0.265", registry = "kellnr" }
-mk_lib_database = { version = "0.0.300", registry = "kellnr" }
-mk_lib_file = { version = "0.0.275", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.266", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.270", registry = "kellnr" }
+mk_lib_common = { version = "0.0.267", registry = "kellnr" }
+mk_lib_database = { version = "0.0.302", registry = "kellnr" }
+mk_lib_file = { version = "0.0.277", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.268", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.272", registry = "kellnr" }
 
 async-std = { version = "1.13.1", features = ["attributes"] }
 chrono = { version = "0.4.45", features = ["serde"] }

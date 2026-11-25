@@ -118,6 +118,7 @@ pub mod user_media {
     pub mod bp_media_physical;
     pub mod bp_media_sports;
     pub mod bp_media_tv;
+    pub mod bp_media_tv_live;
 }
 
 #[path = "user/metadata"]
@@ -586,6 +587,10 @@ async fn main() {
         .route_with_tsr(
             "/user/media/iradio/{page}",
             get(user_media::bp_media_iradio::user_media_iradio),
+        )
+        .route_with_tsr(
+            "/user/media/live_tv",
+            get(user_media::bp_media_tv_live::user_media_tv_live),
         )
         .route(
             "/user/metadata/object/{*object_key}",

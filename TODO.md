@@ -1,6 +1,17 @@
-convert theater_thin to use GBM - this will require framework change I think, what too choose?
+remove section from user home page "All caught up No new media. Enjoy your library."
 
+verify mkshedulesdirect against their current api
 
+design/code page for live tv using normal grid pattern that most apps use (channels, times, etc)
+
+readd live tv icon on main user page after tv shows, use television_live.png
+
+readd home media on main user page after music vidoes, use vi_camera.png as icon
+
+readd cctv on main user page, last itm in kist, use surveillance-cctv-symbol-in-rounded-triangle.png
+
+find the latest https://data.metabrainz.org/pub/musicbrainz/data/fullexport/20261125-002239/mbdump.tar.bz2
+    unzip/untar the file to /mediakraken
 
 ********** don't do  below this line**********
 recommended settings for browser stream

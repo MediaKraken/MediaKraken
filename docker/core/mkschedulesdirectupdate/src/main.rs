@@ -118,6 +118,17 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 //     # fetch all schedules for station
                 //     station_fetch.append(station_id['mm_tv_station_id'])
                 //
+                // # Current API (20141201) notes, verified against
+                // # https://github.com/SchedulesDirect/JSON-Service/wiki/API-20141201:
+                // #  - /token expects {"username": ..., "password": sha1-hex(password)}
+                // #    (40-char lowercase hex), not the plaintext password.
+                // #  - /schedules expects [{"stationID": "...", "date": ["YYYY-MM-DD", ...]}]
+                // #    per station (date optional -> today through last day of data),
+                // #    not a bare list of station IDs. Max 5000 stations per call.
+                // #  - /programs accepts a bare list of programIDs, max 5000 per call.
+                // #  - Every request must carry a versioned User-Agent and
+                // #    Accept-Encoding: gzip, deflate.
+                //
                 // # set here so it exists at the "end" of processing
                 // meta_program_fetch = []
                 // # grab station info from SD

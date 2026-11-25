@@ -1,5 +1,98 @@
 {% extends "layouts/base_user.html" %}
 
 {% block content %}
-<div></div>
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+    <div class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div class="space-y-2">
+                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Live TV</p>
+                <h1 class="text-3xl font-bold tracking-tight">Program Guide</h1>
+                <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+                    Electronic program guide for all configured stations. All times are shown in UTC.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+                {% if let Some(prev_date) = template_data_prev_date %}
+                <a href="/user/media/live_tv?date={{ prev_date }}" aria-label="Previous day"
+                    class="inline-flex items-center rounded-full border border-zinc-300 px-3 py-1.5 font-medium transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800">
+                    &larr; Previous day
+                </a>
+                {% endif %}
+                <span class="rounded-full border border-zinc-300 px-3 py-1 font-semibold text-zinc-700 dark:border-zinc-700 dark:text-zinc-200">{{ template_data_date_label }}</span>
+                {% if let Some(next_date) = template_data_next_date %}
+                <a href="/user/media/live_tv?date={{ next_date }}" aria-label="Next day"
+                    class="inline-flex items-center rounded-full border border-zinc-300 px-3 py-1.5 font-medium transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800">
+                    Next day &rarr;
+                </a>
+                {% endif %}
+                <a href="/user/media/live_tv" aria-label="Go to today"
+                    class="inline-flex items-center rounded-full border border-zinc-300 px-3 py-1.5 font-medium transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800">
+                    Today
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if template_data_has_stations %}
+    <div class="mt-4 overflow-x-auto rounded-xl border border-zinc-200 bg-white/70 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70">
+        <div class="relative" style="min-width: 1200px;">
+            <div class="flex border-b border-zinc-200 dark:border-zinc-800">
+                <div class="sticky left-0 z-10 flex h-8 w-40 shrink-0 items-center border-r border-zinc-200 bg-white px-3 dark:border-zinc-800 dark:bg-zinc-900">
+                    <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">Channel</span>
+                </div>
+                <div class="relative h-8 flex-1">
+                    {% for (hour_label, hour_left) in template_data_hours %}
+                    <span class="absolute top-1 whitespace-nowrap text-xs text-zinc-500 dark:text-zinc-400" style="left: {{ hour_left }}%;">{{ hour_label }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% for row in template_data_rows %}
+            <div class="flex border-b border-zinc-200 last:border-b-0 dark:border-zinc-800">
+                <div class="sticky left-0 z-10 w-40 shrink-0 border-r border-zinc-200 bg-white px-3 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+                    <span class="block text-sm font-bold text-zinc-900 dark:text-zinc-100">{{ row.station_channel }}</span>
+                    <span class="block truncate text-xs text-zinc-500 dark:text-zinc-400" title="{{ row.station_name }}">{{ row.station_name }}</span>
+                </div>
+                <div class="relative h-16 flex-1"
+                    style="background-image: repeating-linear-gradient(to right, rgba(128, 128, 128, 0.2) 0, rgba(128, 128, 128, 0.2) 1px, transparent 1px, transparent 4.16667%)">
+                    {% if row.programs.len() > 0 %}
+                    {% for program in row.programs %}
+                    {% if program.is_live %}
+                    <div class="absolute overflow-hidden rounded bg-red-600 text-white"
+                        style="top: 4px; bottom: 4px; left: {{ program.left_pct }}%; width: {{ program.width_pct }}%; min-width: 16px;">
+                        <div class="px-2 py-1">
+                            <span class="block truncate text-xs font-bold">{{ program.title }}</span>
+                            <span class="block truncate text-xs">LIVE &middot; {{ program.start_label }}</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="absolute overflow-hidden rounded border border-zinc-200 bg-zinc-100 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-200"
+                        style="top: 4px; bottom: 4px; left: {{ program.left_pct }}%; width: {{ program.width_pct }}%; min-width: 16px;">
+                        <div class="px-2 py-1">
+                            <span class="block truncate text-xs font-semibold">{{ program.title }}</span>
+                            <span class="block truncate text-xs text-zinc-500 dark:text-zinc-300">{{ program.start_label }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% else %}
+                    <span class="absolute text-xs text-zinc-500 dark:text-zinc-400" style="left: 12px; top: 6px;">No schedule data for this day</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if let Some(now_pct) = template_data_now_pct %}
+            <div class="absolute bottom-0 z-10 bg-red-600"
+                style="top: 2rem; left: calc(10rem + (100% - 10rem) * {{ now_pct }} / 100); width: 2px;"></div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <div class="mt-4 rounded-xl border border-zinc-200 bg-white/70 p-6 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70">
+        <p class="text-sm font-semibold text-zinc-700 dark:text-zinc-200">No stations configured</p>
+        <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">Run the Schedules Direct sync to populate the guide.</p>
+    </div>
+    {% endif %}
+</section>
 {% endblock %}
