@@ -129,6 +129,7 @@ async fn download_archive(
         return Ok(());
     }
 
+    println!("Downloading {archive} for {timestamp}...");
     let url = format!("{MUSICBRAINZ_FULLEXPORT_BASE}/{timestamp}/{archive}");
     let mut response = client.get(&url).send().await?;
     if !response.status().is_success() {
@@ -176,6 +177,8 @@ async fn extract_archive(
     }
 
     let tar_path = format!("{MB_DUMP_DIR}/{archive}");
+    let size_mb = tokio::fs::metadata(&tar_path).await?.len() / (1024 * 1024);
+    println!("Extracting {archive} ({size_mb} MB) into {MB_DUMP_DIR}... this can take a while");
     let output = tokio::process::Command::new("tar")
         .args(["-xjf", &tar_path, "-C", MB_DUMP_DIR])
         .output()
