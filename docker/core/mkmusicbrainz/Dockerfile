@@ -44,6 +44,7 @@ COPY --from=cargo-build-mkmusicbrainz /mediakraken/deps/* /
 # Import from builder.
 COPY --from=cargo-build-mkmusicbrainz /etc/passwd /etc/passwd
 COPY --from=cargo-build-mkmusicbrainz /etc/group /etc/group
+COPY --from=cargo-build-mkmusicbrainz /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --from=cargo-build-mkmusicbrainz /wait /wait
 COPY --from=cargo-build-mkmusicbrainz /usr/bin/psql /usr/bin/psql
 

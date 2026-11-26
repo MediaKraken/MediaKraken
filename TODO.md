@@ -1,19 +1,14 @@
-remove section from user home page "All caught up No new media. Enjoy your library."
-
-verify mkshedulesdirect against their current api
-
-design/code page for live tv using normal grid pattern that most apps use (channels, times, etc)
-
-readd live tv icon on main user page after tv shows, use television_live.png
-
-readd home media on main user page after music vidoes, use vi_camera.png as icon
-
-readd cctv on main user page, last itm in kist, use surveillance-cctv-symbol-in-rounded-triangle.png
-
-find the latest https://data.metabrainz.org/pub/musicbrainz/data/fullexport/20261125-002239/mbdump.tar.bz2
-    unzip/untar the file to /mediakraken
+in mkmusicbrainz, accept json commend for "Initial" and "Update"
+    for initial:
+        find the latest https://data.metabrainz.org/pub/musicbrainz/data/fullexport/20261125-002239/mbdump.tar.bz2
+            unzip/untar the file to /mediakraken
+            run all the queries/imports in the file into the above musicbrainz schema
 
 ********** don't do  below this line**********
+change cnpg setup/config to create schema musicbrainz owned by metaman
+    CREATE SCHEMA musicbrainz; <- do by hand
+    build usage rights for metaman
+
 recommended settings for browser stream
 for browser playback
     ffmpeg -i "/mnt/share/MediaKraken_Test_Media/Movie/16_BLOCKS (2006)/extras/16 Blocks (2006).mkv" \
