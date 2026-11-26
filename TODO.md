@@ -1,13 +1,12 @@
-in mkmusicbrainz, accept json commend for "Initial" and "Update"
-    for initial:
-        find the latest https://data.metabrainz.org/pub/musicbrainz/data/fullexport/20261125-002239/mbdump.tar.bz2
-            unzip/untar the file to /mediakraken
-            run all the queries/imports in the file into the above musicbrainz schema
+
 
 ********** don't do  below this line**********
 change cnpg setup/config to create schema musicbrainz owned by metaman
     CREATE SCHEMA musicbrainz; <- do by hand
     build usage rights for metaman
+    SET search_path = musicbrainz, mediakraken, public
+
+CREATE SCHEMA mediakraken;
 
 recommended settings for browser stream
 for browser playback

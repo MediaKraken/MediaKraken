@@ -495,7 +495,7 @@ dependencies = [
 
 [[package]]
 name = "mk_lib_image"
-version = "0.0.267"
+version = "0.0.268"
 dependencies = [
  "image",
  "tokio",

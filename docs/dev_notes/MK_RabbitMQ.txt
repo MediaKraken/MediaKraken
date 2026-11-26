@@ -41,3 +41,10 @@ content_type    application/json
 {
     "Type": "START_BULK_LOAD"
 }
+
+
+mkmusicbrainz
+content_type    application/json
+{
+    "Type": "Initial"
+}

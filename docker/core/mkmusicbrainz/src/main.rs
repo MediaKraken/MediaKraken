@@ -14,6 +14,10 @@ const MUSICBRAINZ_FULLEXPORT_BASE: &str =
 const MB_DUMP_DIR: &str = "/mediakraken/mbdump";
 const MB_DUMP_TAR: &str = "/mediakraken/mbdump/mbdump.tar.bz2";
 const MB_DUMP_TAR_PARTIAL: &str = "/mediakraken/mbdump/mbdump.tar.bz2.partial";
+// Markers record which fullexport each stage already completed for, so re-runs
+// against an unchanged LATEST don't re-download/re-extract the 4.6 GB tarball.
+const MB_DUMP_TAR_MARKER: &str = "/mediakraken/mbdump/mbdump.tar.bz2.latest";
+const MB_EXTRACT_MARKER: &str = "/mediakraken/mbdump/mbdump.extracted";
 
 fn validate_table_name(name: &str) -> Result<(), String> {
     if name.is_empty() {
@@ -42,10 +46,27 @@ fn validate_dump_timestamp(timestamp: &str) -> Result<(), String> {
     Ok(())
 }
 
+/// True if `marker_path` exists and contains exactly `timestamp`. Markers are
+/// written only after a stage (download/extraction) succeeds for a given
+/// fullexport, so a match means the stage can be skipped on re-runs.
+async fn marker_matches(marker_path: &str, timestamp: &str) -> bool {
+    match tokio::fs::read_to_string(marker_path).await {
+        Ok(contents) => contents.trim() == timestamp,
+        Err(_) => false,
+    }
+}
+
+/// Record that a stage completed for `timestamp`.
+async fn write_marker(marker_path: &str, timestamp: &str) -> Result<(), Box<dyn Error>> {
+    tokio::fs::write(marker_path, timestamp).await?;
+    Ok(())
+}
+
 /// Download the latest MusicBrainz full export and stage its table files for import.
 ///
 /// 1. Reads the `LATEST` pointer to find the newest `YYYYMMDD-HHMMSS` directory.
-/// 2. Streams `mbdump.tar.bz2` to the mounted volume (partial file, then rename).
+/// 2. Streams `mbdump.tar.bz2` to the mounted volume (partial file, then rename),
+///    skipped when the tarball is already present for this timestamp.
 /// 3. Extracts the `mbdump/` table files into the volume, stripping the `mbdump/`
 ///    prefix so they land at `/mediakraken/mbdump/{table}`.
 ///
@@ -60,48 +81,67 @@ async fn fetch_latest_mbdump() -> Result<String, Box<dyn Error>> {
     validate_dump_timestamp(&timestamp)?;
     println!("Latest MusicBrainz fullexport: {}", timestamp);
 
-    // 2. Stream the dump tarball to the volume.
-    let dump_url = format!(
-        "{}/{}/mbdump.tar.bz2",
-        MUSICBRAINZ_FULLEXPORT_BASE, timestamp
-    );
-    let mut response = client.get(&dump_url).send().await?;
-    if !response.status().is_success() {
-        return Err(format!(
-            "mbdump download failed with HTTP status: {}",
-            response.status()
-        )
-        .into());
+    // 2. Stream the dump tarball to the volume (skipped when already fetched
+    //    for this timestamp).
+    if marker_matches(MB_DUMP_TAR_MARKER, &timestamp).await
+        && tokio::fs::try_exists(MB_DUMP_TAR).await.unwrap_or(false)
+    {
+        println!("mbdump.tar.bz2 already present for {timestamp}, skipping download");
+    } else {
+        let dump_url = format!(
+            "{}/{}/mbdump.tar.bz2",
+            MUSICBRAINZ_FULLEXPORT_BASE, timestamp
+        );
+        let mut response = client.get(&dump_url).send().await?;
+        if !response.status().is_success() {
+            return Err(format!(
+                "mbdump download failed with HTTP status: {}",
+                response.status()
+            )
+            .into());
+        }
+
+        let mut file = tokio::fs::File::create(MB_DUMP_TAR_PARTIAL).await?;
+        while let Some(chunk) = response.chunk().await? {
+            file.write_all(&chunk).await?;
+        }
+        file.flush().await?;
+        drop(file);
+        tokio::fs::rename(MB_DUMP_TAR_PARTIAL, MB_DUMP_TAR).await?;
+        write_marker(MB_DUMP_TAR_MARKER, &timestamp).await?;
     }
 
-    let mut file = tokio::fs::File::create(MB_DUMP_TAR_PARTIAL).await?;
-    while let Some(chunk) = response.chunk().await? {
-        file.write_all(&chunk).await?;
-    }
-    file.flush().await?;
-    drop(file);
-    tokio::fs::rename(MB_DUMP_TAR_PARTIAL, MB_DUMP_TAR).await?;
-
-    // 3. Extract the mbdump/ table files, stripping the leading mbdump/ component.
-    let output = Command::new("tar")
-        .args([
-            "-xjf",
-            MB_DUMP_TAR,
-            "-C",
-            MB_DUMP_DIR,
-            "--strip-components=1",
-            "mbdump",
-        ])
-        .output()?;
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("mbdump extraction failed: {}", stderr).into());
+    // 3. Extract, stripping the leading mbdump/ component so table files land
+    //    directly in MB_DUMP_DIR (skipped when already extracted for this
+    //    timestamp).
+    //    Deliberately NO member list: the real archive has no bare `mbdump/`
+    //    directory member (it is built from an explicit file list), and busybox
+    //    tar then reports "mbdump: not found in archive" (non-zero exit) even
+    //    though every file was extracted. Top-level members (TIMESTAMP, README,
+    //    ...) have no path components to strip and are skipped silently.
+    if marker_matches(MB_EXTRACT_MARKER, &timestamp).await {
+        println!("mbdump already extracted for {timestamp}, skipping extraction");
+    } else {
+        let output = Command::new("tar")
+            .args([
+                "-xjf",
+                MB_DUMP_TAR,
+                "-C",
+                MB_DUMP_DIR,
+                "--strip-components=1",
+            ])
+            .output()?;
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(format!("mbdump extraction failed: {}", stderr).into());
+        }
+        write_marker(MB_EXTRACT_MARKER, &timestamp).await?;
     }
 
     Ok(timestamp)
 }
 
-async fn process_musicbrainz_dump(db_pass: String) -> Result<(), Box<dyn Error>> {
+async fn process_musicbrainz_dump(db_pass: String, db_user: String) -> Result<(), Box<dyn Error>> {
     // extensions, collations, types
     let _output = Command::new("psql")
         .env("PGPASSWORD", &db_pass)
@@ -109,7 +149,9 @@ async fn process_musicbrainz_dump(db_pass: String) -> Result<(), Box<dyn Error>>
             "-h",
             "pgcluster-with-metrics-rw.cnpg-system",
             "-U",
-            "postgres",
+            db_user.as_str(),
+            "-d",
+            "mkdatabase",
             "-f",
             "/scripts/Extensions.sql",
         ])
@@ -121,7 +163,9 @@ async fn process_musicbrainz_dump(db_pass: String) -> Result<(), Box<dyn Error>>
             "-h",
             "pgcluster-with-metrics-rw.cnpg-system",
             "-U",
-            "postgres",
+            db_user.as_str(),
+            "-d",
+            "mkdatabase",
             "-f",
             "/scripts/CreateCollations.sql",
         ])
@@ -134,7 +178,9 @@ async fn process_musicbrainz_dump(db_pass: String) -> Result<(), Box<dyn Error>>
             "-h",
             "pgcluster-with-metrics-rw.cnpg-system",
             "-U",
-            "postgres",
+            db_user.as_str(),
+            "-d",
+            "mkdatabase",
             "-f",
             "/scripts/CreateTypes.sql",
         ])
@@ -148,7 +194,9 @@ async fn process_musicbrainz_dump(db_pass: String) -> Result<(), Box<dyn Error>>
             "-h",
             "pgcluster-with-metrics-rw.cnpg-system",
             "-U",
-            "postgres",
+            db_user.as_str(),
+            "-d",
+            "mkdatabase",
             "-f",
             "/scripts/CreateTables.sql",
         ])
@@ -175,6 +223,7 @@ async fn process_musicbrainz_dump(db_pass: String) -> Result<(), Box<dyn Error>>
 async fn import_dump_tables(
     sqlx_pool_rw: &sqlx::PgPool,
     db_pass: &str,
+    db_user: &str,
 ) -> Result<(), Box<dyn Error>> {
     let pg_tables =
         mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(sqlx_pool_rw).await?;
@@ -201,9 +250,9 @@ async fn import_dump_tables(
                     "-h",
                     "pgcluster-with-metrics-rw.cnpg-system",
                     "-d",
-                    "postgres",
+                    "mkdatabase",
                     "-U",
-                    "postgres",
+                    db_user,
                     "-c",
                     &truncate_sql,
                 ])
@@ -233,9 +282,9 @@ async fn import_dump_tables(
                     "-h",
                     "pgcluster-with-metrics-rw.cnpg-system",
                     "-d",
-                    "postgres",
+                    "mkdatabase",
                     "-U",
-                    "postgres",
+                    db_user,
                     "-c",
                     &copy_sql,
                 ])
@@ -252,7 +301,7 @@ async fn import_dump_tables(
             // remove the table unless it start with mm_
             // the cascade should dump the sequences
             let sub = &table_name[..3];
-            if sub != "mm_" {
+            if sub != "mm_" and &table_name != "spatial_ref_sys" {
                 let drop_sql = format!("DROP TABLE {} CASCADE;", table_name);
                 let output = Command::new("psql")
                     .env("PGPASSWORD", db_pass)
@@ -260,9 +309,9 @@ async fn import_dump_tables(
                         "-h",
                         "pgcluster-with-metrics-rw.cnpg-system",
                         "-d",
-                        "postgres",
+                        "mkdatabase",
                         "-U",
-                        "postgres",
+                        db_user,
                         "-c",
                         &drop_sql,
                     ])
@@ -281,7 +330,7 @@ async fn import_dump_tables(
     Ok(())
 }
 
-async fn create_keys_indexes(db_pass: &str) -> Result<(), Box<dyn Error>> {
+async fn create_keys_indexes(db_pass: &str, db_user: &str) -> Result<(), Box<dyn Error>> {
     // creat keys and indexes
     let _output = Command::new("psql")
         .env("PGPASSWORD", db_pass)
@@ -289,7 +338,9 @@ async fn create_keys_indexes(db_pass: &str) -> Result<(), Box<dyn Error>> {
             "-h",
             "pgcluster-with-metrics-rw.cnpg-system",
             "-U",
-            "postgres",
+            db_user,
+            "-d",
+            "mkdatabase",
             "-f",
             "/scripts/CreatePrimaryKeys.sql",
         ])
@@ -314,7 +365,9 @@ async fn create_keys_indexes(db_pass: &str) -> Result<(), Box<dyn Error>> {
             "-h",
             "pgcluster-with-metrics-rw.cnpg-system",
             "-U",
-            "postgres",
+            db_user,
+            "-d",
+            "mkdatabase",
             "-f",
             "/scripts/CreateIndexes.sql",
         ])
@@ -358,6 +411,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await?;
 
     let _db_pass = env::var("POSTGRES_PASSWORD")?;
+    let _db_user = env::var("POSTGRES_USER")?;
 
     let pool = sqlx_pool_rw.clone();
     tokio::spawn(async move {
@@ -416,21 +470,28 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     continue;
                 }
             };
+            let db_user = match env::var("POSTGRES_USER") {
+                Ok(u) => u,
+                Err(e) => {
+                    eprintln!("Failed to get POSTGRES_USER: {}", e);
+                    continue;
+                }
+            };
 
             println!("MusicBrainz command: {}", command);
             if let Err(e) = fetch_latest_mbdump().await {
                 eprintln!("Error in fetch_latest_mbdump: {}", e);
                 continue;
             }
-            if let Err(e) = process_musicbrainz_dump(db_pass.clone()).await {
+            if let Err(e) = process_musicbrainz_dump(db_pass.clone(), db_user.clone()).await {
                 eprintln!("Error in process_musicbrainz_dump: {}", e);
                 continue;
             }
-            if let Err(e) = import_dump_tables(&pool, &db_pass).await {
+            if let Err(e) = import_dump_tables(&pool, &db_pass, &db_user).await {
                 eprintln!("Error in import_dump_tables: {}", e);
                 continue;
             }
-            if let Err(e) = create_keys_indexes(&db_pass).await {
+            if let Err(e) = create_keys_indexes(&db_pass, &db_user).await {
                 eprintln!("Error in create_keys_indexes: {}", e);
                 continue;
             }

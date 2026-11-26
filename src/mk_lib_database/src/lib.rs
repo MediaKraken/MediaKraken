@@ -55,8 +55,8 @@ pub mod database_metadata {
     pub mod mk_lib_database_metadata_image;
     pub mod mk_lib_database_metadata_movie;
     pub mod mk_lib_database_metadata_music;
-    pub mod mk_lib_database_metadata_music_brainz;
     pub mod mk_lib_database_metadata_music_video;
+    pub mod mk_lib_database_metadata_musicbrainz;
     pub mod mk_lib_database_metadata_openlib;
     pub mod mk_lib_database_metadata_openlib_copy;
     pub mod mk_lib_database_metadata_person;

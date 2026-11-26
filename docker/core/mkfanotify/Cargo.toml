@@ -11,9 +11,9 @@ panic = "abort"        # Removes unwinding infrastructure, reducing binary size 
 strip = true           # Removes debug symbols from the binary to reduce size (optional)
 
 [dependencies]
-mk_lib_database = { version = "0.0.302", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.268", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.272", registry = "kellnr" }
+mk_lib_database = { version = "0.0.303", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.269", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.273", registry = "kellnr" }
 
 chrono = { version = "0.4.45", features = ["serde"] }
 fanotify-rs = "0.3.1"
