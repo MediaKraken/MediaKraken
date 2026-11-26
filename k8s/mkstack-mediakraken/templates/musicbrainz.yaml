@@ -8,7 +8,7 @@ spec:
     - ReadWriteMany
   resources:
     requests:
-      storage: 50Gi
+      storage: 75Gi
   storageClassName: longhorn
 ---
 apiVersion: apps/v1
@@ -49,6 +49,16 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: db-password
+                  key: password
+            - name: POSTGRES_USER_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: db-password-admin
+                  key: username
+            - name: POSTGRES_PASSWORD_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: db-password-admin
                   key: password
             - name: DEBUG
               valueFrom:

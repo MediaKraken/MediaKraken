@@ -51,7 +51,5 @@ COPY --from=cargo-build-mkmusicbrainz /usr/bin/psql /usr/bin/psql
 # Copy our build
 COPY --from=cargo-build-mkmusicbrainz /mediakraken/target/mkmusicbrainz /mkmusicbrainz
 
-COPY scripts /scripts
-
 # Use an unprivileged user.
 USER mediakraken:mediakraken

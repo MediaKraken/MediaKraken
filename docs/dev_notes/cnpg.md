@@ -31,3 +31,10 @@ kubectl -n cnpg-system delete pvc pvc-ed4203fc-3ece-43ab-9e32-2e4acafb761e
 kubectl -n cnpg-system patch cluster pgcluster-with-metrics \
   --type='merge' \
   -p '{"spec":{"instances":3}}'
+
+
+******** upgrade *********
+kubectl apply --server-side -f \
+  https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.30/releases/cnpg-1.30.2.yaml
+
+kubectl rollout status deployment -n cnpg-system cnpg-controller-manager

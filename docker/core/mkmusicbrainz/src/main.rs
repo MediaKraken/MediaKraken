@@ -2,36 +2,59 @@ use serde_json::Value;
 use std::env;
 use std::error::Error;
 use std::path::Path;
-use std::process::{Command, Stdio};
 use tokio::io::AsyncWriteExt;
 use tokio::sync::Notify;
 
-// MusicBrainz full export. The fullexport index exposes a `LATEST` pointer file
-// whose contents are the newest `YYYYMMDD-HHMMSS` directory name.
+// The MusicBrainz fullexport index exposes a `LATEST` pointer file whose
+// contents are the newest `YYYYMMDD-HHMMSS` directory name.
 const MUSICBRAINZ_FULLEXPORT_BASE: &str =
     "https://data.metabrainz.org/pub/musicbrainz/data/fullexport";
-// The dump and its extracted tables live on the mounted MusicBrainz volume.
+// The fullexport archives contain data files only (no SQL); the schema DDL is
+// fetched from the musicbrainz-server repository at runtime so it always
+// matches the dump (their README asks for a compatible server version).
+const MUSICBRAINZ_DDL_BASE: &str =
+    "https://raw.githubusercontent.com/metabrainz/musicbrainz-server/master/admin/sql";
+// The dumps and their extracted tables live on the mounted MusicBrainz volume.
 const MB_DUMP_DIR: &str = "/mediakraken/mbdump";
-const MB_DUMP_TAR: &str = "/mediakraken/mbdump/mbdump.tar.bz2";
-const MB_DUMP_TAR_PARTIAL: &str = "/mediakraken/mbdump/mbdump.tar.bz2.partial";
-// Markers record which fullexport each stage already completed for, so re-runs
-// against an unchanged LATEST don't re-download/re-extract the 4.6 GB tarball.
-const MB_DUMP_TAR_MARKER: &str = "/mediakraken/mbdump/mbdump.tar.bz2.latest";
-const MB_EXTRACT_MARKER: &str = "/mediakraken/mbdump/mbdump.extracted";
+// All four archives carry the same top-level `mbdump/` prefix and their table
+// sets are disjoint, so extracting all of them merges into a single data dir.
+const MB_DUMP_DATA_DIR: &str = "/mediakraken/mbdump/mbdump";
+// Fetched DDL scripts (scratch, re-fetched on every run).
+const MB_DDL_DIR: &str = "/tmp/mbddl";
+// psql talks to the cluster writer directly (the sqlx pools use pgbouncer).
+const PG_HOST_RW: &str = "pgcluster-with-metrics-rw.cnpg-system";
+const PG_DATABASE: &str = "mkdatabase";
 
-fn validate_table_name(name: &str) -> Result<(), String> {
-    if name.is_empty() {
-        return Err("Table name cannot be empty".to_string());
-    }
-    // Allow alphanumeric, underscore, dot (for schema.table)
-    if !name
-        .chars()
-        .all(|c| c.is_alphanumeric() || c == '_' || c == '.')
-    {
-        return Err(format!("Table name contains invalid characters: {}", name));
-    }
-    Ok(())
-}
+// The four archives that make up a full export.
+const DUMP_ARCHIVES: [&str; 4] = [
+    "mbdump.tar.bz2",
+    "mbdump-derived.tar.bz2",
+    "mbdump-cdstubs.tar.bz2",
+    "mbdump-cover-art-archive.tar.bz2",
+];
+
+// DDL scripts to fetch, relative to musicbrainz-server's admin/sql/.
+const DDL_SCRIPTS: [&str; 14] = [
+    "Extensions.sql",
+    "CreateCollations.sql",
+    "CreateTypes.sql",
+    "CreateTables.sql",
+    "CreateFunctions.sql",
+    "CreateSearchConfiguration.sql",
+    "CreatePrimaryKeys.sql",
+    "CreateIndexes.sql",
+    "CreateSearchIndexes.sql",
+    "SetSequences.sql",
+    "caa/CreateTables.sql",
+    "caa/CreatePrimaryKeys.sql",
+    "caa/CreateIndexes.sql",
+    "caa/SetSequences.sql",
+];
+
+// PGOPTIONS values must not contain spaces (the string is parsed like a
+// command line).
+const SEARCH_PATH_MUSICBRAINZ: &str = "musicbrainz,public";
+const SEARCH_PATH_CAA: &str = "cover_art_archive,public";
 
 /// Validate a fullexport directory name (`YYYYMMDD-HHMMSS`) before it is used
 /// to build a download URL, so a malformed `LATEST` value can't inject a path.
@@ -41,9 +64,34 @@ fn validate_dump_timestamp(timestamp: &str) -> Result<(), String> {
         && timestamp.as_bytes()[8] == b'-'
         && timestamp.chars().skip(9).all(|c| c.is_ascii_digit());
     if !ok {
-        return Err(format!("Invalid fullexport timestamp: {}", timestamp));
+        return Err(format!("Invalid fullexport timestamp: {timestamp}"));
     }
     Ok(())
+}
+
+/// A safe SQL identifier (schema/table/role name) that can be interpolated
+/// into SQL or a file name without quoting.
+fn is_identifier(name: &str) -> bool {
+    let mut chars = name.chars();
+    matches!(chars.next(), Some('_' | 'a'..='z' | 'A'..='Z'))
+        && chars.all(|c| {
+            c.is_ascii_lowercase() || c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_'
+        })
+}
+
+/// A dump file is either `table` (core/derived/cdstubs, which go into the
+/// musicbrainz schema) or `schema.table` (cover-art-archive files, e.g.
+/// `cover_art_archive.cover_art`).
+fn split_dump_name(name: &str) -> Option<(&str, &str)> {
+    let (schema, table) = match name.split_once('.') {
+        Some(parts) => parts,
+        None => ("musicbrainz", name),
+    };
+    if is_identifier(schema) && is_identifier(table) {
+        Some((schema, table))
+    } else {
+        None
+    }
 }
 
 /// True if `marker_path` exists and contains exactly `timestamp`. Markers are
@@ -57,343 +105,461 @@ async fn marker_matches(marker_path: &str, timestamp: &str) -> bool {
 }
 
 /// Record that a stage completed for `timestamp`.
-async fn write_marker(marker_path: &str, timestamp: &str) -> Result<(), Box<dyn Error>> {
+async fn write_marker(
+    marker_path: &str,
+    timestamp: &str,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
     tokio::fs::write(marker_path, timestamp).await?;
     Ok(())
 }
 
-/// Download the latest MusicBrainz full export and stage its table files for import.
-///
-/// 1. Reads the `LATEST` pointer to find the newest `YYYYMMDD-HHMMSS` directory.
-/// 2. Streams `mbdump.tar.bz2` to the mounted volume (partial file, then rename),
-///    skipped when the tarball is already present for this timestamp.
-/// 3. Extracts the `mbdump/` table files into the volume, stripping the `mbdump/`
-///    prefix so they land at `/mediakraken/mbdump/{table}`.
-///
-/// Returns the resolved timestamp for logging.
-async fn fetch_latest_mbdump() -> Result<String, Box<dyn Error>> {
-    let client = reqwest::Client::new();
-
-    // 1. Resolve the latest fullexport timestamp.
-    let latest_url = format!("{}/LATEST", MUSICBRAINZ_FULLEXPORT_BASE);
-    let latest_body = client.get(&latest_url).send().await?.text().await?;
-    let timestamp = latest_body.trim().to_string();
-    validate_dump_timestamp(&timestamp)?;
-    println!("Latest MusicBrainz fullexport: {}", timestamp);
-
-    // 2. Stream the dump tarball to the volume (skipped when already fetched
-    //    for this timestamp).
-    if marker_matches(MB_DUMP_TAR_MARKER, &timestamp).await
-        && tokio::fs::try_exists(MB_DUMP_TAR).await.unwrap_or(false)
+/// Download one archive for `timestamp`, skipping it when a previous run
+/// already fetched it (marker and file must both be present).
+async fn download_archive(
+    client: &reqwest::Client,
+    timestamp: &str,
+    archive: &str,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let tar_path = format!("{MB_DUMP_DIR}/{archive}");
+    let marker_path = format!("{MB_DUMP_DIR}/{archive}.latest");
+    if marker_matches(&marker_path, timestamp).await
+        && tokio::fs::try_exists(&tar_path).await.unwrap_or(false)
     {
-        println!("mbdump.tar.bz2 already present for {timestamp}, skipping download");
-    } else {
-        let dump_url = format!(
-            "{}/{}/mbdump.tar.bz2",
-            MUSICBRAINZ_FULLEXPORT_BASE, timestamp
-        );
-        let mut response = client.get(&dump_url).send().await?;
+        println!("{archive} already present for {timestamp}, skipping download");
+        return Ok(());
+    }
+
+    let url = format!("{MUSICBRAINZ_FULLEXPORT_BASE}/{timestamp}/{archive}");
+    let mut response = client.get(&url).send().await?;
+    if !response.status().is_success() {
+        return Err(format!(
+            "{archive} download failed with HTTP status: {}",
+            response.status()
+        )
+        .into());
+    }
+
+    // Stream to a partial file, then rename into place, so an interrupted
+    // download can't leave a truncated tarball behind.
+    let partial_path = format!("{MB_DUMP_DIR}/{archive}.partial");
+    let mut file = tokio::fs::File::create(&partial_path).await?;
+    while let Some(chunk) = response.chunk().await? {
+        file.write_all(&chunk).await?;
+    }
+    file.flush().await?;
+    drop(file);
+    tokio::fs::rename(&partial_path, &tar_path).await?;
+    write_marker(&marker_path, timestamp).await?;
+    println!("Downloaded {archive} for {timestamp}");
+    Ok(())
+}
+
+/// Extract one archive into MB_DUMP_DIR (skipped when already extracted for
+/// `timestamp`).
+///
+/// Deliberately no `--strip-components`: every archive carries the `mbdump/`
+/// top-level prefix, and extracting without stripping merges the four table
+/// sets into one data dir (the per-archive header files TIMESTAMP/README/...
+/// land at the volume root and are harmless).
+///
+/// Deliberately no member list: the real archives have no bare `mbdump/`
+/// directory member, and busybox tar then reports "mbdump: not found in
+/// archive" (non-zero exit) even though every file was extracted.
+async fn extract_archive(
+    timestamp: &str,
+    archive: &str,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let marker_path = format!("{MB_DUMP_DIR}/{archive}.extracted");
+    if marker_matches(&marker_path, timestamp).await {
+        println!("{archive} already extracted for {timestamp}, skipping extraction");
+        return Ok(());
+    }
+
+    let tar_path = format!("{MB_DUMP_DIR}/{archive}");
+    let output = tokio::process::Command::new("tar")
+        .args(["-xjf", &tar_path, "-C", MB_DUMP_DIR])
+        .output()
+        .await?;
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("extraction of {archive} failed: {stderr}").into());
+    }
+    write_marker(&marker_path, timestamp).await?;
+    println!("Extracted {archive} for {timestamp}");
+    Ok(())
+}
+
+/// Fetch the schema DDL from musicbrainz-server master into MB_DDL_DIR.
+async fn fetch_ddl_scripts(client: &reqwest::Client) -> Result<(), Box<dyn Error + Send + Sync>> {
+    // Start clean so a half-fetched run can never leave stale scripts behind.
+    match tokio::fs::remove_dir_all(MB_DDL_DIR).await {
+        Ok(()) => {}
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {}
+        Err(e) => return Err(e.into()),
+    }
+    for script in DDL_SCRIPTS {
+        let url = format!("{MUSICBRAINZ_DDL_BASE}/{script}");
+        let response = client.get(&url).send().await?;
         if !response.status().is_success() {
             return Err(format!(
-                "mbdump download failed with HTTP status: {}",
+                "fetching {script} failed with HTTP status: {}",
                 response.status()
             )
             .into());
         }
-
-        let mut file = tokio::fs::File::create(MB_DUMP_TAR_PARTIAL).await?;
-        while let Some(chunk) = response.chunk().await? {
-            file.write_all(&chunk).await?;
+        let body = response.bytes().await?;
+        let path = format!("{MB_DDL_DIR}/{script}");
+        if let Some(parent) = Path::new(&path).parent() {
+            tokio::fs::create_dir_all(parent).await?;
         }
-        file.flush().await?;
-        drop(file);
-        tokio::fs::rename(MB_DUMP_TAR_PARTIAL, MB_DUMP_TAR).await?;
-        write_marker(MB_DUMP_TAR_MARKER, &timestamp).await?;
+        tokio::fs::write(&path, body).await?;
     }
-
-    // 3. Extract, stripping the leading mbdump/ component so table files land
-    //    directly in MB_DUMP_DIR (skipped when already extracted for this
-    //    timestamp).
-    //    Deliberately NO member list: the real archive has no bare `mbdump/`
-    //    directory member (it is built from an explicit file list), and busybox
-    //    tar then reports "mbdump: not found in archive" (non-zero exit) even
-    //    though every file was extracted. Top-level members (TIMESTAMP, README,
-    //    ...) have no path components to strip and are skipped silently.
-    if marker_matches(MB_EXTRACT_MARKER, &timestamp).await {
-        println!("mbdump already extracted for {timestamp}, skipping extraction");
-    } else {
-        let output = Command::new("tar")
-            .args([
-                "-xjf",
-                MB_DUMP_TAR,
-                "-C",
-                MB_DUMP_DIR,
-                "--strip-components=1",
-            ])
-            .output()?;
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(format!("mbdump extraction failed: {}", stderr).into());
-        }
-        write_marker(MB_EXTRACT_MARKER, &timestamp).await?;
-    }
-
-    Ok(timestamp)
-}
-
-async fn process_musicbrainz_dump(db_pass: String, db_user: String) -> Result<(), Box<dyn Error>> {
-    // extensions, collations, types
-    let _output = Command::new("psql")
-        .env("PGPASSWORD", &db_pass)
-        .args([
-            "-h",
-            "pgcluster-with-metrics-rw.cnpg-system",
-            "-U",
-            db_user.as_str(),
-            "-d",
-            "mkdatabase",
-            "-f",
-            "/scripts/Extensions.sql",
-        ])
-        .stdout(Stdio::piped())
-        .output()?;
-    let _output = Command::new("psql")
-        .env("PGPASSWORD", &db_pass)
-        .args([
-            "-h",
-            "pgcluster-with-metrics-rw.cnpg-system",
-            "-U",
-            db_user.as_str(),
-            "-d",
-            "mkdatabase",
-            "-f",
-            "/scripts/CreateCollations.sql",
-        ])
-        .stdout(Stdio::piped())
-        .output()?;
-
-    let _output = Command::new("psql")
-        .env("PGPASSWORD", &db_pass)
-        .args([
-            "-h",
-            "pgcluster-with-metrics-rw.cnpg-system",
-            "-U",
-            db_user.as_str(),
-            "-d",
-            "mkdatabase",
-            "-f",
-            "/scripts/CreateTypes.sql",
-        ])
-        .stdout(Stdio::piped())
-        .output()?;
-
-    // create tables
-    let _output = Command::new("psql")
-        .env("PGPASSWORD", &db_pass)
-        .args([
-            "-h",
-            "pgcluster-with-metrics-rw.cnpg-system",
-            "-U",
-            db_user.as_str(),
-            "-d",
-            "mkdatabase",
-            "-f",
-            "/scripts/CreateTables.sql",
-        ])
-        .stdout(Stdio::piped())
-        .output()?;
-
-    // no db dumps for caa
-    // let _output = Command::new("psql")
-    //     .args([
-    //         "-h",
-    //         "pgcluster-with-metrics-rw.cnpg-system",
-    //         "-U",
-    //         "postgres",
-    //         "-f",
-    //         "/scripts/caa/CreateTables.sql",
-    //     ])
-    //     .stdout(Stdio::piped())
-    //     .output()
-    //     ?;
-
+    println!(
+        "Fetched {} DDL scripts into {MB_DDL_DIR}",
+        DDL_SCRIPTS.len()
+    );
     Ok(())
 }
 
-async fn import_dump_tables(
-    sqlx_pool_rw: &sqlx::PgPool,
-    db_pass: &str,
+fn ddl_path(script: &str) -> String {
+    format!("{MB_DDL_DIR}/{script}")
+}
+
+/// Spawn psql against the cluster writer. Either `file` or `command` (or
+/// both) may be given; the caller decides whether a non-zero exit is fatal.
+async fn run_psql(
+    user: &str,
+    pass: &str,
+    search_path: Option<&str>,
+    file: Option<&str>,
+    command: Option<&str>,
+) -> Result<std::process::Output, Box<dyn Error + Send + Sync>> {
+    let mut cmd = tokio::process::Command::new("psql");
+    cmd.env("PGPASSWORD", pass);
+    if let Some(search_path) = search_path {
+        cmd.env("PGOPTIONS", format!("-c search_path={search_path}"));
+    }
+    let mut args = vec![
+        "-h".to_string(),
+        PG_HOST_RW.to_string(),
+        "-U".to_string(),
+        user.to_string(),
+        "-d".to_string(),
+        PG_DATABASE.to_string(),
+    ];
+    if let Some(file) = file {
+        args.extend(["-f".to_string(), file.to_string()]);
+    }
+    if let Some(command) = command {
+        args.extend(["-c".to_string(), command.to_string()]);
+    }
+    Ok(cmd.args(args).output().await?)
+}
+
+/// Checked psql invocation: a non-zero exit becomes an error with stderr.
+async fn checked_psql(
+    user: &str,
+    pass: &str,
+    search_path: Option<&str>,
+    file: Option<&str>,
+    command: Option<&str>,
+    label: &str,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let output = run_psql(user, pass, search_path, file, command).await?;
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("{label} failed: {}", stderr.trim()).into());
+    }
+    Ok(())
+}
+
+/// Run a DDL script file as a fatal stage. The scripts manage their own
+/// ON_ERROR_STOP, so a non-zero exit means the schema is broken and the run
+/// must not continue into the data import.
+async fn run_psql_script(
+    user: &str,
+    pass: &str,
+    search_path: Option<&str>,
+    file: &str,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    checked_psql(
+        user,
+        pass,
+        search_path,
+        Some(file),
+        None,
+        &format!("psql -f {file}"),
+    )
+    .await?;
+    println!("Ran {file}");
+    Ok(())
+}
+
+/// (Re)create the musicbrainz and cover_art_archive schemas, owned by the app
+/// user, and run the pre-import DDL (extensions, collations, types, tables,
+/// functions, search configuration).
+///
+/// The drop-up-front keeps the run idempotent: the fetched DDL is not
+/// re-runnable (no IF NOT EXISTS on types/collations), and the import
+/// rebuilds everything from scratch on every Initial/Update anyway.
+async fn setup_schemas(
+    admin_user: &str,
+    admin_pass: &str,
     db_user: &str,
-) -> Result<(), Box<dyn Error>> {
-    let pg_tables =
-        mk_lib_database::mk_lib_database_postgresql::mk_lib_database_tables(sqlx_pool_rw).await?;
-    for row_data in pg_tables.iter() {
-        // loop through tables and see if dump files exist
-        let table_name = row_data.table_name.replace("public.", "");
-        if let Err(e) = validate_table_name(&table_name) {
-            eprintln!("Skipping invalid table name: {}", e);
-            continue;
-        }
-        println!("Table: {}", table_name);
-        // TODO remove all l_* tables?   don't know what these are for
-        // TODO remove all event* tables
-        // TODO remove all link* tables
-        if Path::new(&format!("/mediakraken/mbdump/{}", table_name)).exists() {
-            println!("Table Found");
-            // Clear existing rows first so re-imports (Update) don't duplicate data.
-            // The MusicBrainz schema has no enforced FK constraints, so a plain
-            // TRUNCATE is safe regardless of table order.
-            let truncate_sql = format!("TRUNCATE {};", table_name);
-            let output = Command::new("psql")
-                .env("PGPASSWORD", db_pass)
-                .args([
-                    "-h",
-                    "pgcluster-with-metrics-rw.cnpg-system",
-                    "-d",
-                    "mkdatabase",
-                    "-U",
-                    db_user,
-                    "-c",
-                    &truncate_sql,
-                ])
-                .output()?;
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            if !stdout.is_empty() {
-                println!("Output: {}", stdout);
-            }
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            if !stderr.is_empty() {
-                eprintln!("Error: {}", stderr);
-            }
-            let copy_sql = format!(
-                "\\copy {} from '/mediakraken/mbdump/{}';",
-                table_name, table_name
-            );
-            if let Some(invalid) = copy_sql
-                .chars()
-                .find(|c| !c.is_alphanumeric() && !c.is_ascii_punctuation() && !c.is_whitespace())
-            {
-                eprintln!("Invalid character in SQL command: {}", invalid);
-                continue;
-            }
-            let output = Command::new("psql")
-                .env("PGPASSWORD", db_pass)
-                .args([
-                    "-h",
-                    "pgcluster-with-metrics-rw.cnpg-system",
-                    "-d",
-                    "mkdatabase",
-                    "-U",
-                    db_user,
-                    "-c",
-                    &copy_sql,
-                ])
-                .output()?;
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            if !stdout.is_empty() {
-                println!("Output: {}", stdout);
-            }
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            if !stderr.is_empty() {
-                eprintln!("Error: {}", stderr);
-            }
-        } else {
-            // remove the table unless it start with mm_
-            // the cascade should dump the sequences
-            let sub = &table_name[..3];
-            if sub != "mm_" and &table_name != "spatial_ref_sys" {
-                let drop_sql = format!("DROP TABLE {} CASCADE;", table_name);
-                let output = Command::new("psql")
-                    .env("PGPASSWORD", db_pass)
-                    .args([
-                        "-h",
-                        "pgcluster-with-metrics-rw.cnpg-system",
-                        "-d",
-                        "mkdatabase",
-                        "-U",
-                        db_user,
-                        "-c",
-                        &drop_sql,
-                    ])
-                    .output()?;
-                let stdout = String::from_utf8_lossy(&output.stdout);
-                if !stdout.is_empty() {
-                    println!("Output: {}", stdout);
-                }
-                let stderr = String::from_utf8_lossy(&output.stderr);
-                if !stderr.is_empty() {
-                    eprintln!("Error: {}", stderr);
-                }
-            }
-        }
+    db_pass: &str,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    if !is_identifier(db_user) {
+        return Err(format!("POSTGRES_USER {db_user:?} is not a safe identifier").into());
     }
+    // The app user owns both schemas (a superuser created them with
+    // AUTHORIZATION), so it can drop them. No-op on a first run.
+    checked_psql(
+        db_user,
+        db_pass,
+        None,
+        None,
+        Some("DROP SCHEMA IF EXISTS musicbrainz CASCADE; DROP SCHEMA IF EXISTS cover_art_archive CASCADE;"),
+        "dropping schemas",
+    )
+    .await?;
+    // Creating schemas for another role requires a superuser; AUTHORIZATION
+    // hands ownership to the app user.
+    let create_sql = format!(
+        "CREATE SCHEMA IF NOT EXISTS musicbrainz AUTHORIZATION {db_user}; CREATE SCHEMA IF NOT EXISTS cover_art_archive AUTHORIZATION {db_user};"
+    );
+    checked_psql(
+        admin_user,
+        admin_pass,
+        None,
+        None,
+        Some(create_sql.as_str()),
+        "creating schemas",
+    )
+    .await?;
+
+    // cube/earthdistance/unaccent + helper functions need a superuser.
+    run_psql_script(
+        admin_user,
+        admin_pass,
+        Some(SEARCH_PATH_MUSICBRAINZ),
+        &ddl_path("Extensions.sql"),
+    )
+    .await?;
+    // Everything below runs as the app user.
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_MUSICBRAINZ),
+        &ddl_path("CreateCollations.sql"),
+    )
+    .await?;
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_MUSICBRAINZ),
+        &ddl_path("CreateTypes.sql"),
+    )
+    .await?;
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_MUSICBRAINZ),
+        &ddl_path("CreateTables.sql"),
+    )
+    .await?;
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_CAA),
+        &ddl_path("caa/CreateTables.sql"),
+    )
+    .await?;
+    // Includes mb_simple_tsvector/mb_lower, which the search indexes use.
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_MUSICBRAINZ),
+        &ddl_path("CreateFunctions.sql"),
+    )
+    .await?;
+    // The GIN search indexes reference the mb_simple text search
+    // configuration, so it must exist before they are built.
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_MUSICBRAINZ),
+        &ddl_path("CreateSearchConfiguration.sql"),
+    )
+    .await?;
     Ok(())
 }
 
-async fn create_keys_indexes(db_pass: &str, db_user: &str) -> Result<(), Box<dyn Error>> {
-    // creat keys and indexes
-    let _output = Command::new("psql")
-        .env("PGPASSWORD", db_pass)
-        .args([
-            "-h",
-            "pgcluster-with-metrics-rw.cnpg-system",
-            "-U",
-            db_user,
-            "-d",
-            "mkdatabase",
-            "-f",
-            "/scripts/CreatePrimaryKeys.sql",
-        ])
-        .stdout(Stdio::piped())
-        .output()?;
-    // no db dumps for caa
-    // let _output = Command::new("psql")
-    //     .args([
-    //         "-h",
-    //         "pgcluster-with-metrics-rw.cnpg-system",
-    //         "-U",
-    //         "postgres",
-    //         "-f",
-    //         "/scripts/caa/CreatePrimaryKeys.sql",
-    //     ])
-    //     .stdout(Stdio::piped())
-    //     .output()
-    //     ?;
-    let _output = Command::new("psql")
-        .env("PGPASSWORD", db_pass)
-        .args([
-            "-h",
-            "pgcluster-with-metrics-rw.cnpg-system",
-            "-U",
-            db_user,
-            "-d",
-            "mkdatabase",
-            "-f",
-            "/scripts/CreateIndexes.sql",
-        ])
-        .stdout(Stdio::piped())
-        .output()?;
-    // no db dumps for caa
-    // let _output = Command::new("psql")
-    //     .args([
-    //         "-h",
-    //         "pgcluster-with-metrics-rw.cnpg-system",
-    //         "-U",
-    //         "postgres",
-    //         "-f",
-    //         "/scripts/caa/CreateIndexes.sql",
-    //     ])
-    //     .stdout(Stdio::piped())
-    //     .output()
-    //     ?;
+/// COPY every dump file into its schema-qualified table. A failing table is
+/// logged and skipped (the dump has no FK constraints, so one bad table does
+/// not poison the rest); the list of failures is returned for the final
+/// summary.
+async fn import_dump_data(
+    db_user: &str,
+    db_pass: &str,
+) -> Result<Vec<String>, Box<dyn Error + Send + Sync>> {
+    let mut names = Vec::new();
+    let mut dir = tokio::fs::read_dir(MB_DUMP_DATA_DIR).await?;
+    while let Some(entry) = dir.next_entry().await? {
+        if entry
+            .file_type()
+            .await
+            .map(|ft| ft.is_file())
+            .unwrap_or(false)
+        {
+            names.push(entry.file_name().to_string_lossy().into_owned());
+        }
+    }
+    names.sort();
+    if names.is_empty() {
+        return Err(format!("no dump files found in {MB_DUMP_DATA_DIR}").into());
+    }
+    println!(
+        "Importing {} dump files from {MB_DUMP_DATA_DIR}",
+        names.len()
+    );
 
+    let mut failed = Vec::new();
+    for name in &names {
+        let Some((schema, table)) = split_dump_name(name) else {
+            eprintln!("Skipping unexpected dump file: {name}");
+            continue;
+        };
+        let path = format!("{MB_DUMP_DATA_DIR}/{name}");
+        let target = format!("{schema}.{table}");
+        let copy_sql = format!("\\copy {target} FROM '{path}'");
+        let output = run_psql(db_user, db_pass, None, None, Some(copy_sql.as_str())).await?;
+        if output.status.success() {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            println!("Copied {target} ({})", stdout.trim());
+        } else {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            eprintln!("FAILED copying {target}: {}", stderr.trim());
+            failed.push(name.clone());
+        }
+    }
+    Ok(failed)
+}
+
+/// Primary keys, plain indexes, sequences and the GIN search indexes. Runs
+/// after the data copy; the search index build is by far the slowest step.
+async fn create_keys_indexes_sequences(
+    db_user: &str,
+    db_pass: &str,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_MUSICBRAINZ),
+        &ddl_path("CreatePrimaryKeys.sql"),
+    )
+    .await?;
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_MUSICBRAINZ),
+        &ddl_path("CreateIndexes.sql"),
+    )
+    .await?;
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_CAA),
+        &ddl_path("caa/CreatePrimaryKeys.sql"),
+    )
+    .await?;
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_CAA),
+        &ddl_path("caa/CreateIndexes.sql"),
+    )
+    .await?;
+    // Keep the SERIAL sequences above the dumped ids so future INSERTs
+    // cannot collide with them.
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_MUSICBRAINZ),
+        &ddl_path("SetSequences.sql"),
+    )
+    .await?;
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_CAA),
+        &ddl_path("caa/SetSequences.sql"),
+    )
+    .await?;
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_MUSICBRAINZ),
+        &ddl_path("CreateSearchIndexes.sql"),
+    )
+    .await?;
+    Ok(())
+}
+
+/// One full Initial/Update run: fetch the four archives for the current
+/// LATEST, rebuild the schemas from the freshly fetched DDL, and COPY all of
+/// the data in.
+async fn run_musicbrainz_import(
+    db_user: &str,
+    db_pass: &str,
+    admin_user: &str,
+    admin_pass: &str,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    let client = reqwest::Client::new();
+
+    // 1. Resolve the latest fullexport timestamp.
+    let latest_url = format!("{MUSICBRAINZ_FULLEXPORT_BASE}/LATEST");
+    let latest_body = client.get(&latest_url).send().await?.text().await?;
+    let timestamp = latest_body.trim().to_string();
+    validate_dump_timestamp(&timestamp)?;
+    println!("Latest MusicBrainz fullexport: {timestamp}");
+
+    // 2. Download and extract all four archives (per-archive markers keep
+    //    re-runs from re-doing finished stages).
+    for archive in DUMP_ARCHIVES {
+        download_archive(&client, &timestamp, archive).await?;
+    }
+    for archive in DUMP_ARCHIVES {
+        extract_archive(&timestamp, archive).await?;
+    }
+
+    // 3. Fetch the DDL for this run.
+    fetch_ddl_scripts(&client).await?;
+
+    // 4. (Re)build the schema.
+    setup_schemas(admin_user, admin_pass, db_user, db_pass).await?;
+
+    // 5. Import the data.
+    let failed = import_dump_data(db_user, db_pass).await?;
+
+    // 6. Keys, indexes, sequences, search indexes.
+    create_keys_indexes_sequences(db_user, db_pass).await?;
+
+    if failed.is_empty() {
+        println!("MusicBrainz import completed for {timestamp}");
+    } else {
+        eprintln!(
+            "MusicBrainz import for {timestamp} finished with {} failed table(s): {failed:?}",
+            failed.len()
+        );
+    }
     Ok(())
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    // connect to db and do a version check
-    let (sqlx_pool_rw, sqlx_pool_ro) =
+    // connect to db and do a version check (the rw pool is unused for now:
+    // all database work in this service goes through psql)
+    let (_sqlx_pool_rw, sqlx_pool_ro) =
         mk_lib_database::mk_lib_database::mk_lib_database_open_pool(4, 120)
             .await
             .map_err(|e| format!("failed to open database pool: {e}"))?;
@@ -403,6 +569,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
     .await;
 
+    // Fail fast when the database credentials are missing/misconfigured.
+    let db_user = env::var("POSTGRES_USER")?;
+    let db_pass = env::var("POSTGRES_PASSWORD")?;
+    let admin_user = env::var("POSTGRES_USER_ADMIN")?;
+    let admin_pass = env::var("POSTGRES_PASSWORD_ADMIN")?;
+
     let (_rabbit_connection, rabbit_channel) =
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_connect("mkmusicbrainz").await?;
 
@@ -410,10 +582,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_consumer("mkmusicbrainz", &rabbit_channel)
             .await?;
 
-    let _db_pass = env::var("POSTGRES_PASSWORD")?;
-    let _db_user = env::var("POSTGRES_USER")?;
-
-    let pool = sqlx_pool_rw.clone();
+    let db_user_rabbit = db_user.clone();
+    let db_pass_rabbit = db_pass.clone();
+    let admin_user_rabbit = admin_user.clone();
+    let admin_pass_rabbit = admin_pass.clone();
     tokio::spawn(async move {
         while let Some(msg) = rabbit_consumer.recv().await {
             let delivery_tag = match msg.deliver {
@@ -447,7 +619,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
             // Commands are dispatched on the `Type` field, matching the other
             // MediaKraken consumers. Only "Initial" and "Update" are accepted;
-            // anything else is discarded to avoid a poison-message redelivery loop.
+            // anything else is discarded to avoid a poison-message redelivery
+            // loop.
             let command = json_message
                 .get("Type")
                 .and_then(Value::as_str)
@@ -463,42 +636,29 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 continue;
             }
 
-            let db_pass = match env::var("POSTGRES_PASSWORD") {
-                Ok(p) => p,
-                Err(e) => {
-                    eprintln!("Failed to get POSTGRES_PASSWORD: {}", e);
-                    continue;
+            println!("MusicBrainz command: {command}");
+            match run_musicbrainz_import(
+                &db_user_rabbit,
+                &db_pass_rabbit,
+                &admin_user_rabbit,
+                &admin_pass_rabbit,
+            )
+            .await
+            {
+                Ok(()) => {
+                    let _result = mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(
+                        &rabbit_channel,
+                        delivery_tag,
+                    )
+                    .await;
                 }
-            };
-            let db_user = match env::var("POSTGRES_USER") {
-                Ok(u) => u,
                 Err(e) => {
-                    eprintln!("Failed to get POSTGRES_USER: {}", e);
-                    continue;
+                    // Leave the message unacked so a pod restart redelivers it;
+                    // the pipeline is idempotent (per-stage markers + full
+                    // schema rebuild), so a retry is safe.
+                    eprintln!("MusicBrainz import run failed: {e}");
                 }
-            };
-
-            println!("MusicBrainz command: {}", command);
-            if let Err(e) = fetch_latest_mbdump().await {
-                eprintln!("Error in fetch_latest_mbdump: {}", e);
-                continue;
             }
-            if let Err(e) = process_musicbrainz_dump(db_pass.clone(), db_user.clone()).await {
-                eprintln!("Error in process_musicbrainz_dump: {}", e);
-                continue;
-            }
-            if let Err(e) = import_dump_tables(&pool, &db_pass, &db_user).await {
-                eprintln!("Error in import_dump_tables: {}", e);
-                continue;
-            }
-            if let Err(e) = create_keys_indexes(&db_pass, &db_user).await {
-                eprintln!("Error in create_keys_indexes: {}", e);
-                continue;
-            }
-
-            // # ??  why  RunSQLScript($DB, 'CreateSearchIndexes.sql', 'Creating search indexes ...');
-            let _result =
-                mk_lib_rabbitmq::mk_lib_rabbitmq::rabbitmq_ack(&rabbit_channel, delivery_tag).await;
         }
     });
 
@@ -512,75 +672,47 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_validate_table_name_valid_simple() {
-        assert!(validate_table_name("artists").is_ok());
+    fn test_is_identifier_valid() {
+        assert!(is_identifier("musicbrainz"));
+        assert!(is_identifier("_private"));
+        assert!(is_identifier("cover_art_archive"));
+        assert!(is_identifier("Table123"));
     }
 
     #[test]
-    fn test_validate_table_name_valid_underscore() {
-        assert!(validate_table_name("my_table").is_ok());
+    fn test_is_identifier_invalid() {
+        assert!(!is_identifier(""));
+        assert!(!is_identifier("123abc"));
+        assert!(!is_identifier("with space"));
+        assert!(!is_identifier("with.dot"));
+        assert!(!is_identifier("with-dash"));
+        assert!(!is_identifier("with$sign"));
     }
 
     #[test]
-    fn test_validate_table_name_valid_schema_table() {
-        assert!(validate_table_name("public.artists").is_ok());
+    fn test_split_dump_name_plain_table() {
+        assert_eq!(split_dump_name("artist"), Some(("musicbrainz", "artist")));
     }
 
     #[test]
-    fn test_validate_table_name_valid_numbers() {
-        assert!(validate_table_name("table123").is_ok());
+    fn test_split_dump_name_schema_table() {
+        assert_eq!(
+            split_dump_name("cover_art_archive.cover_art"),
+            Some(("cover_art_archive", "cover_art"))
+        );
     }
 
     #[test]
-    fn test_validate_table_name_empty() {
-        let result = validate_table_name("");
-        assert!(result.is_err());
-        assert!(result.unwrap_err().contains("cannot be empty"));
-    }
-
-    #[test]
-    fn test_validate_table_name_special_chars() {
-        assert!(validate_table_name("table-name").is_err());
-    }
-
-    #[test]
-    fn test_validate_table_name_space() {
-        assert!(validate_table_name("table name").is_err());
-    }
-
-    #[test]
-    fn test_validate_table_name_sql_injection() {
-        assert!(validate_table_name("table; DROP TABLE artists").is_err());
-    }
-
-    #[test]
-    fn test_validate_table_name_slash() {
-        assert!(validate_table_name("table/name").is_err());
-    }
-
-    #[test]
-    fn test_validate_table_name_backslash() {
-        assert!(validate_table_name("table\\name").is_err());
-    }
-
-    #[test]
-    fn test_validate_table_name_quotes() {
-        assert!(validate_table_name("table'name").is_err());
-    }
-
-    #[test]
-    fn test_validate_table_name_double_dot() {
-        assert!(validate_table_name("schema..table").is_ok());
-    }
-
-    #[test]
-    fn test_validate_table_name_leading_dot() {
-        assert!(validate_table_name(".table").is_ok());
-    }
-
-    #[test]
-    fn test_validate_table_name_trailing_dot() {
-        assert!(validate_table_name("table.").is_ok());
+    fn test_split_dump_name_invalid() {
+        assert_eq!(split_dump_name(""), None);
+        assert_eq!(split_dump_name("cover_art_archive."), None);
+        assert_eq!(split_dump_name(".cover_art"), None);
+        assert_eq!(split_dump_name("schema..table"), None);
+        assert_eq!(split_dump_name("cover_art_archive/x"), None);
+        assert_eq!(
+            split_dump_name("cover_art_archive.table; DROP TABLE x"),
+            None
+        );
     }
 
     #[test]

@@ -1,6 +1,33 @@
+complete rebuild of mkmusicbrainz
+    1) I'll setup new env to allow postgres user to be able to create schema/etc
+        POSTGRES_USER_ADMIN
+        POSTGRES_PASSWORD_ADMIN
+    2) Initial/Update are still driven by rabbitmq message
+    3) create musicbrainz schema if not exists in mkdatabase
+    4) user metaman will be the owner of the new schema
+    5) using file located https://data.metabrainz.org/pub/musicbrainz/data/fullexport/LATEST
+        download/unarchive the following files..then run all the files in them to populate postgresql
+        mbdump.tar.bz2
+        mbdump-derived.tar.bz2
+        mbdump-cdstubs.tar.bz2
+        mbdump-cover-art-archive.tar.bz2
 
 
 ********** don't do  below this line**********
+kubectl -n mediakraken create secret generic db-password-admin \
+  --from-literal=username=postgres \
+  --from-literal=password=metamanadmin
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-password-admin
+  namespace: mediakraken
+type: Opaque
+stringData:
+  username: postgress
+  password: metamanadmin
+
 change cnpg setup/config to create schema musicbrainz owned by metaman
     CREATE SCHEMA musicbrainz; <- do by hand
     build usage rights for metaman
