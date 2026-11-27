@@ -1,51 +1,92 @@
 {% extends "layouts/base_user.html" %}
 
 {% block content %}
-<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
-  <h1 id="music-grid-heading" class="sr-only">Music album list</h1>
-  {% include "filters/pagination_letters.html" %}
+<section class="max-w-4xl mx-auto px-4 py-6 sm:px-6">
+  <a href="/user/metadata/music_band/{{ album.mb_album_band_id }}/1"
+     class="mb-4 inline-flex items-center gap-2 text-sm font-medium text-indigo-600 transition-colors hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
+    <span aria-hidden="true">&larr;</span> Back to {{ album.mb_album_band_name }}
+  </a>
 
-  {% if template_data_exists %}
-  {% if pagination_bar != "" %}
-  {{ pagination_bar|safe }}
-  {% endif %}
-  <ul role="list" class="grid gap-4 sm:gap-5
-     grid-cols-2
-     sm:grid-cols-3
-     md:grid-cols-4
-     lg:grid-cols-5
-     xl:grid-cols-6">
-    {% for row_data in template_data %}
-    <li class="group relative overflow-hidden rounded-xl border border-transparent bg-white shadow-sm transition-all duration-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-      <a href="/user/metadata/music_detail/{{row_data.mm_metadata_album_guid}}" class="block h-full">
-        <div class="relative aspect-square overflow-hidden rounded-t-xl bg-zinc-100 dark:bg-zinc-800">
-          <img
-            src="/static/image/headphone.png"
-            alt="Album artwork placeholder for {{ row_data.mm_metadata_album_artist }} - {{ row_data.mm_metadata_album_name }}"
-            loading="lazy"
-            decoding="async"
-            width="300"
-            height="300"
-            class="h-full w-full object-contain p-8 transition-transform duration-300 group-hover:scale-[1.02]" />
-        </div>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+      {{ album.mb_album_name }}
+    </h1>
+    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{{ album.mb_album_band_name }}</p>
 
-        <div class="space-y-1 p-3">
-          <h2 class="text-sm font-bold leading-tight text-zinc-900 line-clamp-2 dark:text-zinc-100">
-            {{ row_data.mm_metadata_album_name }}
-          </h2>
-          <p class="text-[11px] text-zinc-500 line-clamp-2 dark:text-zinc-400">
-            {{ row_data.mm_metadata_album_artist }}
-          </p>
-        </div>
-      </a>
-    </li>
-    {% endfor %}
-  </ul>
-  {% if pagination_bar != "" %}
-  {{ pagination_bar|safe }}
-  {% endif %}
-  {% else %}
-  <p class="text-sm text-zinc-500 dark:text-zinc-400">No music album metadata found.</p>
-  {% endif %}
+    <div class="mt-3 flex flex-wrap gap-1.5 text-xs">
+      {% if album.mb_album_release_group_type != "" %}
+      <span class="rounded-full bg-zinc-100 px-2.5 py-0.5 font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+        {{ album.mb_album_release_group_type }}
+      </span>
+      {% endif %}
+      {% if album.mb_album_release_status != "" %}
+      {% if album.mb_album_release_status != "Official" %}
+      <span class="rounded-full bg-amber-100 px-2.5 py-0.5 font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+        {{ album.mb_album_release_status }}
+      </span>
+      {% endif %}
+      {% endif %}
+      {% if album.mb_album_language != "" %}
+      <span class="rounded-full bg-zinc-100 px-2.5 py-0.5 font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+        {{ album.mb_album_language }}
+      </span>
+      {% endif %}
+      <span class="rounded-full bg-zinc-100 px-2.5 py-0.5 font-medium tabular-nums text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+        {{ track_count }} tracks
+      </span>
+      {% if total_runtime != "" %}
+      <span class="rounded-full bg-zinc-100 px-2.5 py-0.5 font-medium tabular-nums text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+        {{ total_runtime }}
+      </span>
+      {% endif %}
+    </div>
+
+    {% if album.mb_album_comment != "" %}
+    <p class="mt-3 text-sm text-zinc-600 dark:text-zinc-400">{{ album.mb_album_comment }}</p>
+    {% endif %}
+    {% if album.mb_album_barcode != "" %}
+    <p class="mt-2 text-xs text-zinc-400 dark:text-zinc-500">Barcode: {{ album.mb_album_barcode }}</p>
+    {% endif %}
+  </div>
+
+  <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div class="flex items-center justify-between border-b border-zinc-100 px-4 py-3 dark:border-zinc-800">
+      <h2 class="text-sm font-semibold tracking-wide text-zinc-700 dark:text-zinc-200">Tracklist</h2>
+    </div>
+    {% if tracks.len() > 0 %}
+    <table class="w-full text-left text-sm">
+      <thead class="sr-only">
+        <tr>
+          <th scope="col">Number</th>
+          <th scope="col">Title</th>
+          <th scope="col">Length</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-zinc-100 dark:divide-zinc-800">
+        {% for row_data in tracks %}
+        {% if row_data.new_medium %}
+        <tr class="bg-zinc-50 dark:bg-zinc-800/60">
+          <td colspan="3" class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+            {{ row_data.medium_label }}
+          </td>
+        </tr>
+        {% endif %}
+        <tr class="transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/40">
+          <td class="w-14 px-4 py-2 tabular-nums text-zinc-400 dark:text-zinc-500">{{ row_data.number }}</td>
+          <td class="px-2 py-2">
+            <span class="font-medium text-zinc-900 dark:text-zinc-100">{{ row_data.name }}</span>
+            {% if row_data.artist != "" %}
+            <span class="ml-2 text-xs text-zinc-500 dark:text-zinc-400">{{ row_data.artist }}</span>
+            {% endif %}
+          </td>
+          <td class="w-16 px-4 py-2 text-right tabular-nums text-zinc-500 dark:text-zinc-400">{{ row_data.length }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="px-4 py-6 text-sm text-zinc-500 dark:text-zinc-400">No tracks found for this album.</p>
+    {% endif %}
+  </div>
 </section>
 {% endblock %}

@@ -693,8 +693,12 @@ async fn main() {
             get(user_metadata::bp_meta_music::user_metadata_music),
         )
         .route_with_tsr(
-            "/user/metadata/music_detail/{guid}",
-            get(user_metadata::bp_meta_music::user_metadata_music_detail),
+            "/user/metadata/music_band/{credit_id}/{page}",
+            get(user_metadata::bp_meta_music::user_metadata_music_band),
+        )
+        .route_with_tsr(
+            "/user/metadata/music_album/{release_id}",
+            get(user_metadata::bp_meta_music::user_metadata_music_album),
         )
         .route_with_tsr(
             "/user/metadata/music_video/{page}",

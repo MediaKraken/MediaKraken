@@ -19,68 +19,12 @@ use sqlx::postgres::PgPool;
 #[template(path = "bss_error/bss_error_401.html")]
 struct TemplateError401Context {}
 
-/// One album row on the metadata music list page.
-///
-/// The shared-lib list/count queries target MusicBrainz `release`/`artist`
-/// tables that do not exist in the MediaKraken database, so the list lives
-/// here (same approach as the media movie list).
-#[derive(Debug, sqlx::FromRow)]
-struct MetaMusicListRow {
-    mm_metadata_album_guid: uuid::Uuid,
-    mm_metadata_album_name: String,
-    mm_metadata_album_artist: String,
-}
-
-/// Count albums using the list filter (`starts_with` is "", "#", or a
-/// single letter).
-async fn meta_music_album_count(sqlx_pool: &PgPool, starts_with: &str) -> Result<i64, sqlx::Error> {
-    let row: (i64,) = sqlx::query_as(
-        r#"select count(*)
-           from mm_metadata_album
-           where (
-                $1 = ''
-                or ($1 = '#' and left(lower(coalesce(mm_metadata_album_name, '')), 1) !~ '^[a-z0-9]$')
-                or ($1 <> '#' and lower(coalesce(mm_metadata_album_name, '')) like lower($1) || '%')
-              )"#,
-    )
-    .bind(starts_with)
-    .fetch_one(sqlx_pool)
-    .await?;
-    Ok(row.0)
-}
-
-/// Read albums using the list filter, name ordered, paginated.
-async fn meta_music_album_read(
-    sqlx_pool: &PgPool,
-    starts_with: &str,
-    offset: i64,
-    limit: i64,
-) -> Result<Vec<MetaMusicListRow>, sqlx::Error> {
-    let rows: Vec<MetaMusicListRow> = sqlx::query_as(
-        r#"select mm_metadata_album_guid,
-           coalesce(mm_metadata_album_name, '') as mm_metadata_album_name,
-           coalesce(mm_metadata_album_json->>'artist-credit-phrase', '') as mm_metadata_album_artist
-           from mm_metadata_album
-           where (
-                $1 = ''
-                or ($1 = '#' and left(lower(coalesce(mm_metadata_album_name, '')), 1) !~ '^[a-z0-9]$')
-                or ($1 <> '#' and lower(coalesce(mm_metadata_album_name, '')) like lower($1) || '%')
-              )
-           order by lower(coalesce(mm_metadata_album_name, '')), mm_metadata_album_guid
-           offset $2 limit $3"#,
-    )
-    .bind(starts_with)
-    .bind(offset)
-    .bind(limit)
-    .fetch_all(sqlx_pool)
-    .await?;
-    Ok(rows)
-}
-
 #[derive(Template)]
-#[template(path = "bss_user/metadata/bss_user_metadata_music_album.html")]
-struct TemplateMetaMusicContext<'a> {
-    template_data: &'a Vec<MetaMusicListRow>,
+#[template(path = "bss_user/metadata/bss_user_metadata_music.html")]
+struct TemplateMetaMusicBandListContext<'a> {
+    template_data: &'a Vec<
+        mk_lib_database::database_metadata::mk_lib_database_metadata_musicbrainz::DBMetaMusicBrainzBand,
+    >,
     template_data_exists: &'a bool,
     pagination_bar: &'a String,
     #[allow(dead_code)]
@@ -112,6 +56,8 @@ fn normalize_starts_with(raw: Option<&str>) -> Option<String> {
     Some("#".to_string())
 }
 
+/// Band list: artist credits that have at least one release, with a letter
+/// filter and pagination.
 pub async fn user_metadata_music(
     State(state): State<AppState>,
     method: Method,
@@ -139,16 +85,21 @@ pub async fn user_metadata_music(
                 .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
         let db_offset: i64 = (page * pagination_count) - pagination_count;
         let starts_with_value = starts_with.clone().unwrap_or_default();
-        let total_items: i64 =
-            match meta_music_album_count(&state.sqlx_pool_ro, &starts_with_value).await {
-                Ok(total) => total,
-                Err(_) => {
-                    return (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        Html(String::from("Internal server error")).into_response(),
-                    );
-                }
-            };
+        let total_items =
+            mk_lib_database::database_metadata::mk_lib_database_metadata_musicbrainz::mk_lib_database_metadata_musicbrainz_band_count(
+                &state.sqlx_pool_ro,
+                &starts_with_value,
+            )
+            .await;
+        let total_items = match total_items {
+            Ok(total) => total,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let pagination_html = match mk_lib_common_pagination::mk_lib_common_paginate(
             total_items,
             page,
@@ -166,14 +117,14 @@ pub async fn user_metadata_music(
                 );
             }
         };
-        let music_list = match meta_music_album_read(
+        let band_list = mk_lib_database::database_metadata::mk_lib_database_metadata_musicbrainz::mk_lib_database_metadata_musicbrainz_band_read(
             &state.sqlx_pool_ro,
             &starts_with_value,
             db_offset,
             pagination_count,
         )
-        .await
-        {
+        .await;
+        let band_list = match band_list {
             Ok(list) => list,
             Err(_) => {
                 return (
@@ -183,12 +134,12 @@ pub async fn user_metadata_music(
             }
         };
         let mut template_data_exists = false;
-        if !music_list.is_empty() {
+        if !band_list.is_empty() {
             template_data_exists = true;
         }
         let page_usize = page as usize;
-        let template = TemplateMetaMusicContext {
-            template_data: &music_list,
+        let template = TemplateMetaMusicBandListContext {
+            template_data: &band_list,
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
             #[allow(dead_code)]
@@ -206,25 +157,26 @@ pub async fn user_metadata_music(
     }
 }
 
-#[derive(sqlx::FromRow)]
-struct MetaMusicDetailRow {
-    mm_metadata_album_json: serde_json::Value,
-    album_name: String,
-    localimage: serde_json::Value,
-}
-
 #[derive(Template)]
-#[template(path = "bss_user/metadata/bss_user_metadata_music_album_detail.html")]
-struct TemplateMetaMusicDetailContext {
-    template_data: serde_json::Value,
+#[template(path = "bss_user/metadata/bss_user_metadata_music_band.html")]
+struct TemplateMetaMusicBandContext<'a> {
+    band: &'a mk_lib_database::database_metadata::mk_lib_database_metadata_musicbrainz::DBMetaMusicBrainzBand,
+    template_data: &'a Vec<
+        mk_lib_database::database_metadata::mk_lib_database_metadata_musicbrainz::DBMetaMusicBrainzAlbum,
+    >,
+    template_data_exists: &'a bool,
+    pagination_bar: &'a String,
+    #[allow(dead_code)]
+    page: &'a usize,
     page_title: Option<String>,
 }
 
-pub async fn user_metadata_music_detail(
+/// Band detail: one artist credit's releases ("albums"), paginated.
+pub async fn user_metadata_music_band(
     State(state): State<AppState>,
     method: Method,
     auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-    Path(guid): Path<uuid::Uuid>,
+    Path((credit_id, page)): Path<(i32, i64)>,
 ) -> impl IntoResponse {
     let current_user = auth.current_user.clone().unwrap_or_default();
     if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
@@ -239,31 +191,40 @@ pub async fn user_metadata_music_detail(
         let reply_html = template.render().unwrap();
         (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        let row = sqlx::query_as::<_, MetaMusicDetailRow>(
-            r#"select mm_metadata_album_json,
-                      COALESCE(mm_metadata_album_name, '') as album_name,
-                      COALESCE(mm_metadata_album_localimage, 'null'::jsonb) as localimage
-               from mm_metadata_album
-               where mm_metadata_album_guid = $1"#,
-        )
-        .bind(guid)
-        .fetch_optional(&state.sqlx_pool_ro)
-        .await;
-        let template_data = match row {
-            Ok(Some(row)) => {
-                let cover_path = crate::user::detail_map::album_cover_path(&row.localimage);
-                crate::user::detail_map::album(
-                    &row.mm_metadata_album_json,
-                    &row.album_name,
-                    cover_path,
-                )
-            }
-            Ok(None) => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    Html(String::from("Not found")).into_response(),
-                );
-            }
+        let band =
+            match mk_lib_database::database_metadata::mk_lib_database_metadata_musicbrainz::mk_lib_database_metadata_musicbrainz_band(
+                &state.sqlx_pool_ro,
+                credit_id,
+            )
+            .await
+            {
+                Ok(Some(band)) => band,
+                Ok(None) => {
+                    return (
+                        StatusCode::NOT_FOUND,
+                        Html(String::from("Not found")).into_response(),
+                    );
+                }
+                Err(_) => {
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Html(String::from("Internal server error")).into_response(),
+                    );
+                }
+            };
+        let pagination_count =
+            user_preferences::load_user_pagination_count(&state.sqlx_pool_ro, current_user.id)
+                .await
+                .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
+        let db_offset: i64 = (page * pagination_count) - pagination_count;
+        let total_items =
+            mk_lib_database::database_metadata::mk_lib_database_metadata_musicbrainz::mk_lib_database_metadata_musicbrainz_album_count(
+                &state.sqlx_pool_ro,
+                credit_id,
+            )
+            .await;
+        let total_items = match total_items {
+            Ok(total) => total,
             Err(_) => {
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
@@ -271,103 +232,212 @@ pub async fn user_metadata_music_detail(
                 );
             }
         };
-        let template = TemplateMetaMusicDetailContext {
-            template_data,
-            page_title: Some("MediaKraken Metadata Music Detail".to_string()),
+        let pagination_html = match mk_lib_common_pagination::mk_lib_common_paginate(
+            total_items,
+            page,
+            format!("/user/metadata/music_band/{credit_id}"),
+            None,
+            pagination_count,
+        )
+        .await
+        {
+            Ok(html) => html,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
+        let album_list =
+            mk_lib_database::database_metadata::mk_lib_database_metadata_musicbrainz::mk_lib_database_metadata_musicbrainz_album_read(
+                &state.sqlx_pool_ro,
+                credit_id,
+                db_offset,
+                pagination_count,
+            )
+            .await;
+        let album_list = match album_list {
+            Ok(list) => list,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
+        let mut template_data_exists = false;
+        if !album_list.is_empty() {
+            template_data_exists = true;
+        }
+        let page_usize = page as usize;
+        let template = TemplateMetaMusicBandContext {
+            band: &band,
+            template_data: &album_list,
+            template_data_exists: &template_data_exists,
+            pagination_bar: &pagination_html,
+            #[allow(dead_code)]
+            page: &page_usize,
+            page_title: Some(format!("MediaKraken Metadata: {}", band.mb_band_name)),
         };
         let reply_html = template.render().unwrap();
         (StatusCode::OK, Html(reply_html).into_response())
     }
 }
 
-/*
+/// One rendered tracklist row; `medium_label`/`new_medium` drive the
+/// "Disc N" separator rows (only the first track of each medium has
+/// `new_medium` set).
+#[derive(Debug)]
+struct TemplateMetaMusicAlbumTrackRow {
+    medium_label: String,
+    new_medium: bool,
+    number: String,
+    name: String,
+    artist: String,
+    length: String,
+}
 
-blueprint_user_metadata_music = Blueprint('name_blueprint_user_metadata_music', url_prefix='/user')blueprint_user_metadata_music.route('/user_meta_music_album_list', methods=['GET', 'POST'])
-@common_global.jinja_template.template('bss_user/metadata/bss_user_metadata_music_album.html')
-@common_global.auth.login_required
-pub async fn url_bp_user_metadata_music_album_list(request):
-    """
-    Display metadata of album list
-    """
-    page, offset = common_pagination_bootstrap.com_pagination_page_calc(request)
-    media = []
-    db_connection = await request.app.db_pool.acquire()
-    for album_data in await request.app.db_functions.db_meta_music_album_list(offset,
-                                                                              int(
-                                                                                  request.ctx.session[
-                                                                                      'per_page']),
-                                                                              request.ctx.session[
-                                                                                  'search_text'],
-                                                                              db_connection=db_connection):
-        await mk_lib_logging::mk_lib_logging_loki::mk_logging_loki_push(message_type='info',
-                                                                         message_text={
-                                                                             'album_data': album_data,
-                                                                             'id': album_data[
-                                                                                 'mm_metadata_album_guid'],
-                                                                             'name': album_data[
-                                                                                 'mm_metadata_album_name'],
-                                                                             'json': album_data[
-                                                                                 'mm_metadata_album_json']})
-        if album_data['mm_metadata_person_person_image'] != None:
-            if 'musicbrainz' in album_data['mm_metadata_album_image']['Images']:
-                try:
-                    album_image = album_data['mm_metadata_album_image']['Images']['musicbrainz']
-                except:
-                    album_image = "img/music_album_missing.png"
-            else:
-                album_image = "img/music_album_missing.png"
-        else:
-            album_image = "img/music_album_missing.png"
-            media.append(
-                (album_data['mm_metadata_album_guid'], album_data['mm_metadata_album_name'],
-                 album_image))
-    request.ctx.session['search_page'] = 'meta_album'
-    pagination = common_pagination_bootstrap.com_pagination_boot_html(page,
-                                                                      url='/user/user_meta_music_album_list',
-                                                                      item_count=await request.app.db_functions.db_table_count(
-                                                                          table_name='mm_metadata_album',
-                                                                          db_connection=db_connection),
-                                                                      client_items_per_page=
-                                                                      int(request.ctx.session[
-                                                                              'per_page']),
-                                                                      format_number=True)
-    await request.app.db_pool.release(db_connection)
-    return {
-        'media': media,
-        'pagination_bar': pagination,
+#[derive(Template)]
+#[template(path = "bss_user/metadata/bss_user_metadata_music_album.html")]
+struct TemplateMetaMusicAlbumContext {
+    album: mk_lib_database::database_metadata::mk_lib_database_metadata_musicbrainz::DBMetaMusicBrainzAlbumDetail,
+    tracks: Vec<TemplateMetaMusicAlbumTrackRow>,
+    track_count: i64,
+    total_runtime: String,
+    page_title: Option<String>,
+}
+
+/// Track length in ms to `m:ss` ("" when unknown).
+fn format_track_length(ms: Option<i32>) -> String {
+    let Some(ms) = ms.filter(|ms| *ms > 0) else {
+        return String::new();
+    };
+    let total_seconds = (ms / 1000) as i64;
+    format!("{}:{:02}", total_seconds / 60, total_seconds % 60)
+}
+
+/// Total album runtime to `m:ss` (or `h:mm:ss` past one hour), "" when
+/// every track lacks a length.
+fn format_total_runtime(total_ms: i64) -> String {
+    if total_ms <= 0 {
+        return String::new();
     }
-
-
-@blueprint_user_metadata_music.route('/user_meta_music_album_song_list', methods=['GET', 'POST'])
-@common_global.jinja_template.template(
-    'bss_user/metadata/bss_user_metadata_music_album_detail.html')
-@common_global.auth.login_required
-pub async fn metadata_music_album_song_list(request):
-    """
-    Display metadata music song list
-    """
-    page, offset = common_pagination_bootstrap.com_pagination_page_calc(request)
-    request.ctx.session['search_page'] = 'meta_music_song'
-    db_connection = await request.app.db_pool.acquire()
-    pagination = common_pagination_bootstrap.com_pagination_boot_html(page,
-                                                                      url='/user/user_meta_music_album_song_list',
-                                                                      item_count=await request.app.db_functions.db_table_count(
-                                                                          table_name='mm_metadata_music',
-                                                                          db_connection=db_connection),
-                                                                      client_items_per_page=
-                                                                      int(request.ctx.session[
-                                                                              'per_page']),
-                                                                      format_number=True)
-    media_data = await request.app.db_functions.db_meta_music_song_list(offset,
-                                                                        int(request.ctx.session[
-                                                                                'per_page']),
-                                                                        request.ctx.session[
-                                                                            'search_text'],
-                                                                        db_connection=db_connection)
-    await request.app.db_pool.release(db_connection)
-    return {
-        'media': media_data,
-        'pagination_bar': pagination,
+    let total_seconds = total_ms / 1000;
+    if total_seconds >= 3600 {
+        format!(
+            "{}:{:02}:{:02}",
+            total_seconds / 3600,
+            (total_seconds % 3600) / 60,
+            total_seconds % 60
+        )
+    } else {
+        format!("{}:{:02}", total_seconds / 60, total_seconds % 60)
     }
+}
 
- */
+/// Album detail: release header plus its full tracklist.
+pub async fn user_metadata_music_album(
+    State(state): State<AppState>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Path(release_id): Path<i32>,
+) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        let template = TemplateError401Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
+    } else {
+        let album =
+            match mk_lib_database::database_metadata::mk_lib_database_metadata_musicbrainz::mk_lib_database_metadata_musicbrainz_album(
+                &state.sqlx_pool_ro,
+                release_id,
+            )
+            .await
+            {
+                Ok(Some(album)) => album,
+                Ok(None) => {
+                    return (
+                        StatusCode::NOT_FOUND,
+                        Html(String::from("Not found")).into_response(),
+                    );
+                }
+                Err(_) => {
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        Html(String::from("Internal server error")).into_response(),
+                    );
+                }
+            };
+        let track_rows =
+            mk_lib_database::database_metadata::mk_lib_database_metadata_musicbrainz::mk_lib_database_metadata_musicbrainz_album_tracks(
+                &state.sqlx_pool_ro,
+                release_id,
+            )
+            .await;
+        let track_rows = match track_rows {
+            Ok(rows) => rows,
+            Err(_) => {
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
+
+        // A track's artist is only shown when it differs from the album's
+        // artist credit phrase (guest/featured artists).
+        let credit_phrase = album.mb_album_band_name.clone();
+        let mut tracks = Vec::with_capacity(track_rows.len());
+        let mut total_ms = 0i64;
+        let mut last_medium = 0i32;
+        for track in track_rows {
+            let new_medium = track.mb_medium_position != last_medium;
+            last_medium = track.mb_medium_position;
+            if let Some(length) = track.mb_track_length_ms {
+                total_ms += length as i64;
+            }
+            let artist =
+                if track.mb_track_artist.is_empty() || track.mb_track_artist == credit_phrase {
+                    String::new()
+                } else {
+                    track.mb_track_artist
+                };
+            let medium_label = if new_medium {
+                let mut label = format!("Disc {}", track.mb_medium_position);
+                if !track.mb_medium_format.is_empty() {
+                    label.push_str(&format!(" · {}", track.mb_medium_format));
+                }
+                label
+            } else {
+                String::new()
+            };
+            tracks.push(TemplateMetaMusicAlbumTrackRow {
+                medium_label,
+                new_medium,
+                number: track.mb_track_number,
+                name: track.mb_track_name,
+                artist,
+                length: format_track_length(track.mb_track_length_ms),
+            });
+        }
+
+        let template = TemplateMetaMusicAlbumContext {
+            album,
+            track_count: tracks.len() as i64,
+            total_runtime: format_total_runtime(total_ms),
+            tracks,
+            page_title: Some("MediaKraken Metadata Music Album".to_string()),
+        };
+        let reply_html = template.render().unwrap();
+        (StatusCode::OK, Html(reply_html).into_response())
+    }
+}

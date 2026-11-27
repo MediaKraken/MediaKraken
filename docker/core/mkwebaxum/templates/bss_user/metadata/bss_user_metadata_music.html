@@ -1,0 +1,39 @@
+{% extends "layouts/base_user.html" %}
+
+{% block content %}
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+  <h1 id="music-band-heading" class="sr-only">Music band list</h1>
+  {% include "filters/pagination_letters.html" %}
+
+  {% if template_data_exists %}
+  {% if pagination_bar != "" %}
+  {{ pagination_bar|safe }}
+  {% endif %}
+  <ul role="list" class="grid gap-3
+      grid-cols-1
+      sm:grid-cols-2
+      md:grid-cols-3
+      lg:grid-cols-4">
+    {% for row_data in template_data %}
+    <li>
+      <a href="/user/metadata/music_band/{{ row_data.mb_band_id }}/1"
+         class="flex items-center justify-between gap-3 rounded-xl border border-transparent bg-white px-4 py-3 shadow-sm transition-all duration-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
+        <span class="min-w-0 truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          {{ row_data.mb_band_name }}
+        </span>
+        <span title="Releases"
+              class="shrink-0 rounded-full bg-zinc-100 px-2 py-0.5 text-xs tabular-nums text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+          {{ row_data.mb_band_release_count }}
+        </span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% if pagination_bar != "" %}
+  {{ pagination_bar|safe }}
+  {% endif %}
+  {% else %}
+  <p class="text-sm text-zinc-500 dark:text-zinc-400">No bands found.</p>
+  {% endif %}
+</section>
+{% endblock %}

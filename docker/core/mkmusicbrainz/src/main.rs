@@ -509,6 +509,43 @@ async fn create_keys_indexes_sequences(
     Ok(())
 }
 
+/// MediaKraken-specific objects backing the mkwebaxum metadata music pages.
+/// The upstream dump schema omits the `medium(release)` and `track(medium)`
+/// FK indexes (the album tracklist would seq-scan both tables), and the band
+/// list needs `mkstack_bands` — artist credits with at least one release,
+/// pre-aggregated — instead of probing the 13M-row release table on every
+/// page turn. The schemas are dropped and rebuilt on every import, so these
+/// are plain creates (re-run on every Initial/Update).
+async fn create_mkstack_objects(
+    db_user: &str,
+    db_pass: &str,
+) -> Result<(), Box<dyn Error + Send + Sync>> {
+    const MKSTACK_SQL: &str = r#"
+create index mkstack_medium_release_idx on medium (release);
+create index mkstack_track_medium_idx on track (medium);
+create materialized view mkstack_bands as
+    select ac.id,
+           ac.name,
+           count(r.id) as release_count
+      from artist_credit ac
+      join release r on r.artist_credit = ac.id
+     group by ac.id, ac.name;
+create index mkstack_bands_name_idx on mkstack_bands (lower(name), id);
+create index mkstack_bands_releases_idx on mkstack_bands (release_count desc, name);
+"#;
+    checked_psql(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_MUSICBRAINZ),
+        None,
+        Some(MKSTACK_SQL),
+        "creating mkstack objects",
+    )
+    .await?;
+    println!("Created mkstack objects (mkstack_bands matview + indexes)");
+    Ok(())
+}
+
 /// One full Initial/Update run: fetch the four archives for the current
 /// LATEST, rebuild the schemas from the freshly fetched DDL, and COPY all of
 /// the data in.
@@ -547,6 +584,9 @@ async fn run_musicbrainz_import(
 
     // 6. Keys, indexes, sequences, search indexes.
     create_keys_indexes_sequences(db_user, db_pass).await?;
+
+    // 7. MediaKraken-specific objects (band list matview + FK indexes).
+    create_mkstack_objects(db_user, db_pass).await?;
 
     if failed.is_empty() {
         println!("MusicBrainz import completed for {timestamp}");

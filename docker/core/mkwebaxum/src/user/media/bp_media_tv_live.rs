@@ -99,7 +99,7 @@ fn parse_schedule_json(schedule_json: &Value) -> Vec<ParsedProgram> {
             continue;
         };
         let start_minutes = (utc.naive_utc() - midnight).num_minutes();
-        if start_minutes < 0 || start_minutes >= MINUTES_PER_DAY {
+        if !(0..MINUTES_PER_DAY).contains(&start_minutes) {
             continue;
         }
         programs.push(ParsedProgram {
@@ -272,7 +272,7 @@ async fn build_live_tv_response(
                         (start_seconds / 60) % 60
                     );
                     let is_live = now_is_selected_day
-                        && now_minutes.map_or(false, |minutes| {
+                        && now_minutes.is_some_and(|minutes| {
                             minutes >= program.start_minutes
                                 && minutes < program.start_minutes + (duration / 60).max(1)
                         });

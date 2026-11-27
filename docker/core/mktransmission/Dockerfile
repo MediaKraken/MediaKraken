@@ -1,14 +1,10 @@
-# https://github.com/rlesouef/alpine-transmission
-
-FROM alpine:3.21.3
-
-LABEL maintainer="Open Source Services [opensourceservices.fr]"
+FROM alpine:3.24.4
 
 COPY src/ .
 
 RUN apk add --no-cache \
-  busybox==1.37.0-r12 \
-  transmission-daemon==4.0.6-r0 \
+  busybox==1.37.0-r31 \
+  transmission-daemon==4.1.2-r0 \
   && mkdir -p /transmission/downloads \
   && mkdir -p /transmission/incomplete \
   && mkdir -p /etc/transmission-daemon \

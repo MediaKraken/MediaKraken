@@ -12,7 +12,7 @@ strip = true           # Removes debug symbols from the binary to reduce size (o
 
 [dependencies]
 mk_lib_common = { version = "0.0.268", registry = "kellnr" }
-mk_lib_database = { version = "0.0.303", registry = "kellnr" }
+mk_lib_database = { version = "0.0.304", registry = "kellnr" }
 mk_lib_logging = { version = "0.0.269", registry = "kellnr" }
 mk_lib_metadata = { version = "0.0.281", registry = "kellnr" }
 mk_lib_network = { version = "0.0.268", registry = "kellnr" }

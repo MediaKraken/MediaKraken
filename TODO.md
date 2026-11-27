@@ -19,6 +19,27 @@ mkwebaxum
 
     admin page, settings, need to be able to save the settings to mm_options_and_status, mm_options_json
 
+    iradio page.....selecting new page shouldn't kill the playing station
+
+    iradio page...when selecting play from list....should autostart the stream playback
+
+    https://mk.mediakraken.media/user/search should default to all, and don't reset the type after each search
+
+    global search doesn't seem to return any values
+
+    https://mk.mediakraken.media/user/hardware
+        like the Philips Hue section add the following sections
+        add Chromecast
+        add HDHomeRun
+        add GlobalCache
+        add DNLA
+        add OnVif Cameras
+
+mk_lib_metadata
+    in upcmdb.rs add code to do all supported api calls for url in the file
+    in upcdiscdb.rs add code to submit ups and screen srape the results and return json
+    in ean-db.rs add code to do all the support api alls for url in the file
+
 ********** don't do  below this line**********
 kubectl -n mediakraken create secret generic db-password-admin \
   --from-literal=username=postgres \
