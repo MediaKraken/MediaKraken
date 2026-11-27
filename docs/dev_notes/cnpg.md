@@ -33,8 +33,10 @@ kubectl -n cnpg-system patch cluster pgcluster-with-metrics \
   -p '{"spec":{"instances":3}}'
 
 
-******** upgrade *********
+******** upgrade cnpg *********
 kubectl apply --server-side -f \
   https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/release-1.30/releases/cnpg-1.30.2.yaml
 
 kubectl rollout status deployment -n cnpg-system cnpg-controller-manager
+
+********* upgrade pg *********

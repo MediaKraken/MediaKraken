@@ -1,17 +1,23 @@
-complete rebuild of mkmusicbrainz
-    1) I'll setup new env to allow postgres user to be able to create schema/etc
-        POSTGRES_USER_ADMIN
-        POSTGRES_PASSWORD_ADMIN
-    2) Initial/Update are still driven by rabbitmq message
-    3) create musicbrainz schema if not exists in mkdatabase
-    4) user metaman will be the owner of the new schema
-    5) using file located https://data.metabrainz.org/pub/musicbrainz/data/fullexport/LATEST
-        download/unarchive the following files..then run all the files in them to populate postgresql
-        mbdump.tar.bz2
-        mbdump-derived.tar.bz2
-        mbdump-cdstubs.tar.bz2
-        mbdump-cover-art-archive.tar.bz2
+mkwebaxum
+    in admin, database page.  split out the record count and size into the 3 schemas
+        mediakraken, musicbrainz and covert_art_archive
+        then have a grand total of all three together at the bottom
 
+    remove hostip from server info in admin dashboard
+
+    admin dashboard, in active users....show data of users who are currently signed in.
+
+    admin dashboard, backups.....show available backups for cnpg
+
+    admin dashboadm reporting: break u into two seperate pages
+        known media - which is what displays now
+        unmatched media - files that are in mm_media but no metadata attached (ie, not id'd)
+
+    admin upc import
+        allow admin to add upc via scanner or pasting codes into textbox
+        allow admin to upload file with upc codes
+
+    admin page, settings, need to be able to save the settings to mm_options_and_status, mm_options_json
 
 ********** don't do  below this line**********
 kubectl -n mediakraken create secret generic db-password-admin \
@@ -25,7 +31,7 @@ metadata:
   namespace: mediakraken
 type: Opaque
 stringData:
-  username: postgress
+  username: postgres
   password: metamanadmin
 
 change cnpg setup/config to create schema musicbrainz owned by metaman

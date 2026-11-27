@@ -377,21 +377,22 @@ async fn setup_schemas(
         &ddl_path("caa/CreateTables.sql"),
     )
     .await?;
+    // mb_simple_tsvector (created by CreateFunctions.sql) is a SQL-language
+    // function whose body references this configuration; Postgres validates
+    // such references at creation time, so the configuration must exist first.
+    run_psql_script(
+        db_user,
+        db_pass,
+        Some(SEARCH_PATH_MUSICBRAINZ),
+        &ddl_path("CreateSearchConfiguration.sql"),
+    )
+    .await?;
     // Includes mb_simple_tsvector/mb_lower, which the search indexes use.
     run_psql_script(
         db_user,
         db_pass,
         Some(SEARCH_PATH_MUSICBRAINZ),
         &ddl_path("CreateFunctions.sql"),
-    )
-    .await?;
-    // The GIN search indexes reference the mb_simple text search
-    // configuration, so it must exist before they are built.
-    run_psql_script(
-        db_user,
-        db_pass,
-        Some(SEARCH_PATH_MUSICBRAINZ),
-        &ddl_path("CreateSearchConfiguration.sql"),
     )
     .await?;
     Ok(())
