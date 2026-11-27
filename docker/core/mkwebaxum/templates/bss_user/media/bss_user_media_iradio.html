@@ -1,7 +1,7 @@
 {% extends "layouts/base_user.html" %}
 
 {% block content %}
-<section class="w-full px-4 py-6 text-zinc-900 dark:text-zinc-100" x-data="{ currentUrl: '', currentName: '' }">
+<section class="w-full px-4 py-6 text-zinc-900 dark:text-zinc-100" x-data="iradioPage()">
     <div class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
         <div class="space-y-2">
             <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Media Library</p>
@@ -12,53 +12,116 @@
         </div>
     </div>
 
+    <!-- Stable player area: page changes below never touch this, so the
+         currently playing station keeps playing while browsing pages. -->
     <div class="mt-4 rounded-xl border border-zinc-200 bg-white/70 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <h2 class="text-sm font-semibold tracking-wide text-zinc-700 dark:text-zinc-200">Now playing</h2>
                 <p class="text-sm text-zinc-500 dark:text-zinc-400" x-text="currentName || 'No station selected'"></p>
             </div>
-            <audio x-ref="player" controls preload="none" class="w-full sm:w-[28rem]" :src="currentUrl"></audio>
+            <audio x-ref="player" controls preload="none" class="w-full sm:w-[28rem]"></audio>
         </div>
     </div>
 
-    {% if template_data_exists %}
-    {% if pagination_bar != "" %}
-    {{ pagination_bar|safe }}
-    {% endif %}
+    <div id="iradio-content">
+        {% if template_data_exists %}
+        {% if pagination_bar != "" %}
+        {{ pagination_bar|safe }}
+        {% endif %}
 
-    <div class="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <ul role="list" class="divide-y divide-zinc-200 dark:divide-zinc-800">
-            {% for station in template_data %}
-            <li class="flex items-center gap-4 p-4">
-                <button
-                    type="button"
-                    class="inline-flex shrink-0 items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-                    aria-label="Play station"
-                    @click="currentUrl='{{ station.mm_radio_address }}'; currentName='{% if let Some(station_name) = station.mm_radio_name %}{{ station_name }}{% else %}Unnamed Station{% endif %}'; $refs.player.load(); $refs.player.play().catch(() => {})"
-                >
-                    Play
-                </button>
-                <div class="min-w-0 flex-1">
-                    <p class="break-words text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-                        {% if let Some(station_name) = station.mm_radio_name %}
-                        {{ station_name }}
-                        {% else %}
-                        Unnamed Station
-                        {% endif %}
-                    </p>
-                    <p class="text-xs break-words text-zinc-500 dark:text-zinc-400">{{ station.mm_radio_address }}</p>
-                </div>
-            </li>
-            {% endfor %}
-        </ul>
+        <div class="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <ul role="list" class="divide-y divide-zinc-200 dark:divide-zinc-800">
+                {% for station in template_data %}
+                <li class="flex items-center gap-4 p-4">
+                    <button
+                        type="button"
+                        class="inline-flex shrink-0 items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        aria-label="Play station"
+                        data-url="{{ station.mm_radio_address }}"
+                        data-name="{% if let Some(station_name) = station.mm_radio_name %}{{ station_name }}{% else %}Unnamed Station{% endif %}"
+                        @click="playStation($event.currentTarget.dataset.url, $event.currentTarget.dataset.name)"
+                    >
+                        Play
+                    </button>
+                    <div class="min-w-0 flex-1">
+                        <p class="break-words text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                            {% if let Some(station_name) = station.mm_radio_name %}
+                            {{ station_name }}
+                            {% else %}
+                            Unnamed Station
+                            {% endif %}
+                        </p>
+                        <p class="text-xs break-words text-zinc-500 dark:text-zinc-400">{{ station.mm_radio_address }}</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {% if pagination_bar != "" %}
+        {{ pagination_bar|safe }}
+        {% endif %}
+        {% else %}
+        <p class="mt-4 text-sm text-zinc-500 dark:text-zinc-400">No iRadio stations found.</p>
+        {% endif %}
     </div>
-
-    {% if pagination_bar != "" %}
-    {{ pagination_bar|safe }}
-    {% endif %}
-    {% else %}
-    <p class="mt-4 text-sm text-zinc-500 dark:text-zinc-400">No iRadio stations found.</p>
-    {% endif %}
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function iradioPage() {
+        return {
+            currentUrl: '',
+            currentName: '',
+
+            init() {
+                // Intercept iRadio pagination links so the page swaps in
+                // place and the <audio> element (outside #iradio-content)
+                // is never torn down mid-playback.
+                document.addEventListener('click', (event) => {
+                    const link = event.target.closest('a[href*="/user/media/iradio/"]');
+                    if (!link || !link.closest('#iradio-content')) return;
+                    event.preventDefault();
+                    this.loadPage(link.href, true);
+                });
+                window.addEventListener('popstate', () => {
+                    this.loadPage(window.location.href, false);
+                });
+            },
+
+            playStation(url, name) {
+                const player = this.$refs.player;
+                if (!player || !url) return;
+                // Set src directly instead of only the reactive binding so
+                // playback starts on the new stream in the same tick.
+                player.src = url;
+                this.currentUrl = url;
+                this.currentName = name || 'Unnamed Station';
+                player.play().catch(() => {});
+            },
+
+            loadPage(url, pushState) {
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then((response) => {
+                        if (!response.ok) { window.location.assign(url); return null; }
+                        return response.text();
+                    })
+                    .then((html) => {
+                        if (!html) return;
+                        const parsed = new DOMParser().parseFromString(html, 'text/html');
+                        const newContent = parsed.querySelector('#iradio-content');
+                        const current = document.querySelector('#iradio-content');
+                        if (!newContent || !current) { window.location.assign(url); return; }
+                        current.replaceWith(newContent.cloneNode(true));
+                        if (pushState) {
+                            history.pushState({ path: url }, '', url);
+                        }
+                    })
+                    .catch(() => window.location.assign(url));
+            }
+        }
+    }
+</script>
 {% endblock %}

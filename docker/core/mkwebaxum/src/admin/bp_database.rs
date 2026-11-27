@@ -18,13 +18,23 @@ struct TemplateError403Context {
     is_admin: bool,
 }
 
+/// One database schema and its tables, for the per-schema record count and
+/// size breakdown on the admin database page.
+#[derive(Debug)]
+struct AdminDBStatsSchemaGroup {
+    schema_name: String,
+    row_count_tables: Vec<mk_lib_database::mk_lib_database_postgresql::PGTableRows>,
+    size_tables: Vec<mk_lib_database::mk_lib_database_postgresql::PGTableSizeSchema>,
+    total_rows: f64,
+    total_size: i64,
+}
+
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_db_statistics.html")]
 struct AdminDBStatsTemplate<'a> {
     template_data_db_version: &'a String,
-    template_data_db_size: &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGTableSize>,
+    template_data_db_schemas: &'a Vec<AdminDBStatsSchemaGroup>,
     template_data_db_size_total: &'a i64,
-    template_data_db_count: &'a Vec<mk_lib_database::mk_lib_database_postgresql::PGTableRows>,
     template_data_db_count_total: &'a f64,
     template_data_db_workers: &'a String,
     template_data_number_format_language: &'a String,
@@ -59,8 +69,8 @@ pub async fn admin_database(
             )
             .await
             .unwrap();
-        let pg_table_size =
-            mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_size(
+        let pg_table_size_by_schema =
+            mk_lib_database::mk_lib_database_postgresql::mk_lib_database_table_size_by_schema(
                 &state.sqlx_pool_ro,
             )
             .await
@@ -107,11 +117,55 @@ pub async fn admin_database(
         )
         .await
         .unwrap_or_else(|_| user_preferences::DEFAULT_NUMBER_FORMAT_LANGUAGE.to_string());
+
+        // Group the record count and table size rows by schema so each schema
+        // (mediakraken, musicbrainz, covert_art_archive, ...) gets its own
+        // section; data-driven, so new schemas appear automatically.
+        let mut schema_groups: Vec<AdminDBStatsSchemaGroup> = Vec::new();
+        for row in pg_table_row_count {
+            let schema = row.table_schema_name.clone();
+            let count = row.table_rows;
+            if let Some(group) = schema_groups
+                .iter_mut()
+                .find(|group| group.schema_name == schema)
+            {
+                group.row_count_tables.push(row);
+                group.total_rows += count;
+            } else {
+                schema_groups.push(AdminDBStatsSchemaGroup {
+                    schema_name: schema,
+                    row_count_tables: vec![row],
+                    size_tables: Vec::new(),
+                    total_rows: count,
+                    total_size: 0,
+                });
+            }
+        }
+        for row in pg_table_size_by_schema {
+            let schema = row.table_schema_name.clone();
+            let size = row.table_size;
+            if let Some(group) = schema_groups
+                .iter_mut()
+                .find(|group| group.schema_name == schema)
+            {
+                group.size_tables.push(row);
+                group.total_size += size;
+            } else {
+                schema_groups.push(AdminDBStatsSchemaGroup {
+                    schema_name: schema,
+                    row_count_tables: Vec::new(),
+                    size_tables: vec![row],
+                    total_rows: 0.0,
+                    total_size: size,
+                });
+            }
+        }
+        schema_groups.sort_by(|a, b| a.schema_name.cmp(&b.schema_name));
+
         let template = AdminDBStatsTemplate {
             template_data_db_version: &pg_version,
-            template_data_db_size: &pg_table_size,
+            template_data_db_schemas: &schema_groups,
             template_data_db_size_total: &pg_table_size_total,
-            template_data_db_count: &pg_table_row_count,
             template_data_db_count_total: &pg_table_row_count_total,
             template_data_db_workers: &pg_worker_count,
             template_data_number_format_language: &number_format_language,

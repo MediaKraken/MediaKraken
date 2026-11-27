@@ -30,6 +30,8 @@ pub mod metadata_provider {
     pub mod coverartarchive;
     #[cfg(feature = "discid")]
     pub mod discid;
+    #[path = "ean-db.rs"]
+    pub mod ean_db;
     pub mod ebay;
     pub mod flickr;
     pub mod giant_bomb;
@@ -56,7 +58,9 @@ pub mod metadata_provider {
     pub mod thesportsdb;
     pub mod tmdb;
     pub mod twitch;
+    pub mod upcdiscdb;
     pub mod upcitemdb;
+    pub mod upcmdb;
     pub mod vimeo;
     pub mod youtube;
 }

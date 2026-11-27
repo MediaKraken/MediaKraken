@@ -55,14 +55,23 @@ pub async fn user_media_home_media(
                 .await
                 .unwrap_or(user_preferences::DEFAULT_PAGINATION_COUNT);
         let db_offset: i64 = (page * pagination_count) - pagination_count;
-        let total_pages: i64 =
-        mk_lib_database::database_media::mk_lib_database_media_home_media::mk_lib_database_media_home_media_count(
-           &state.sqlx_pool_ro,
-            String::new(),
-        )
-        .await
-        .unwrap();
-        let pagination_html = mk_lib_common_pagination::mk_lib_common_paginate(
+        let total_pages =
+            mk_lib_database::database_media::mk_lib_database_media_home_media::mk_lib_database_media_home_media_count(
+                &state.sqlx_pool_ro,
+                String::new(),
+            )
+            .await;
+        let total_pages = match total_pages {
+            Ok(total) => total,
+            Err(error) => {
+                tracing::error!(%error, "home media count failed");
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
+        let pagination_html = match mk_lib_common_pagination::mk_lib_common_paginate(
             total_pages,
             page,
             "/user/media/home_media".to_string(),
@@ -70,16 +79,34 @@ pub async fn user_media_home_media(
             pagination_count,
         )
         .await
-        .unwrap();
+        {
+            Ok(html) => html,
+            Err(error) => {
+                tracing::error!(%error, "home media pagination failed");
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let home_list =
-        mk_lib_database::database_media::mk_lib_database_media_home_media::mk_lib_database_media_home_media_read(
-           &state.sqlx_pool_ro,
-            String::new(),
-            db_offset,
-            pagination_count,
-        )
-        .await
-        .unwrap();
+            mk_lib_database::database_media::mk_lib_database_media_home_media::mk_lib_database_media_home_media_read(
+                &state.sqlx_pool_ro,
+                String::new(),
+                db_offset,
+                pagination_count,
+            )
+            .await;
+        let home_list = match home_list {
+            Ok(list) => list,
+            Err(error) => {
+                tracing::error!(%error, "home media read failed");
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Html(String::from("Internal server error")).into_response(),
+                );
+            }
+        };
         let mut template_data_exists = false;
         if !home_list.is_empty() {
             template_data_exists = true;

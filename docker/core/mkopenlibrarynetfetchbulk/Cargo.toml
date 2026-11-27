@@ -11,12 +11,12 @@ panic = "abort"        # Removes unwinding infrastructure, reducing binary size 
 strip = true           # Removes debug symbols from the binary to reduce size (optional)
 
 [dependencies]
-mk_lib_compression = { version = "0.0.267", registry = "kellnr" }
-mk_lib_database = { version = "0.0.303", registry = "kellnr" }
-mk_lib_file = { version = "0.0.278", registry = "kellnr", features = ["s3"] }
-mk_lib_logging = { version = "0.0.269", registry = "kellnr" }
-mk_lib_network = { version = "0.0.268", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.273", registry = "kellnr" }
+mk_lib_compression = { version = "0.0.271", registry = "kellnr" }
+mk_lib_database = { version = "0.0.308", registry = "kellnr" }
+mk_lib_file = { version = "0.0.282", registry = "kellnr", features = ["s3"] }
+mk_lib_logging = { version = "0.0.273", registry = "kellnr" }
+mk_lib_network = { version = "0.0.272", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.277", registry = "kellnr" }
 
 anyhow = "1.0.102"
 async-compression = { version = "0.4.42", features = ["tokio", "gzip"] }

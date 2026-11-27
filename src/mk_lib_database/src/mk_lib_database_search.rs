@@ -25,7 +25,7 @@ pub async fn mk_lib_database_search(
             let rows: Vec<(uuid::Uuid, String, f64)> = sqlx::query_as(
                 r#"SELECT mm_metadata_movie_guid,
                 mm_metadata_movie_name,
-                similarity(mm_metadata_movie_name, $1) AS sml
+                similarity(mm_metadata_movie_name, $1)::float8 AS sml
                 FROM mm_metadata_movie
                 WHERE mm_metadata_movie_name % $2
                 ORDER BY sml DESC, LOWER(mm_metadata_movie_name)"#,
@@ -53,7 +53,7 @@ pub async fn mk_lib_database_search(
             let rows: Vec<(uuid::Uuid, String, f64)> = sqlx::query_as(
                 r#"SELECT mm_metadata_tvshow_guid,
                 mm_metadata_tvshow_name,
-                similarity(mm_metadata_tvshow_name, $1) AS sml
+                similarity(mm_metadata_tvshow_name, $1)::float8 AS sml
                 FROM mm_metadata_tvshow
                 WHERE mm_metadata_tvshow_name % $2
                 ORDER BY sml DESC, LOWER(mm_metadata_tvshow_name)"#,
@@ -81,7 +81,7 @@ pub async fn mk_lib_database_search(
             let rows: Vec<(uuid::Uuid, String, f64)> = sqlx::query_as(
                 r#"SELECT mm_metadata_album_guid,
                 mm_metadata_album_name,
-                similarity(mm_metadata_album_name, $1) AS sml
+                similarity(mm_metadata_album_name, $1)::float8 AS sml
                 FROM mm_metadata_album
                 WHERE mm_metadata_album_name % $2
                 ORDER BY sml DESC, LOWER(mm_metadata_album_name)"#,
@@ -112,7 +112,7 @@ pub async fn mk_lib_database_search(
             let rows: Vec<(uuid::Uuid, String, f64)> = sqlx::query_as(
                 r#"SELECT mm_metadata_book_guid,
                 mm_metadata_book_name,
-                similarity(mm_metadata_book_name, $1) AS sml
+                similarity(mm_metadata_book_name, $1)::float8 AS sml
                 FROM mm_metadata_book
                 WHERE mm_metadata_book_name % $2
                 ORDER BY sml DESC, LOWER(mm_metadata_book_name)"#,
@@ -140,7 +140,7 @@ pub async fn mk_lib_database_search(
             let rows: Vec<(uuid::Uuid, String, f64)> = sqlx::query_as(
                 r#"SELECT gi_game_info_id,
                 gi_game_info_name,
-                similarity(gi_game_info_name, $1) AS sml
+                similarity(gi_game_info_name, $1)::float8 AS sml
                 FROM mm_metadata_game_software_info
                 WHERE gi_game_info_name % $2
                 ORDER BY sml DESC, LOWER(gi_game_info_name)"#,

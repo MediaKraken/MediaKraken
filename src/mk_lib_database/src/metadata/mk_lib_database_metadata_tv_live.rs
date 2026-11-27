@@ -35,7 +35,11 @@ pub async fn mk_lib_database_meta_tv_live_station_read(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Vec<MetaTVStationList>, sqlx::Error> {
     let table_rows: Vec<MetaTVStationList> = sqlx::query_as(
-        r#"select mm_tv_stations_id, mm_tv_station_name, mm_tv_station_id, mm_tv_station_channel from mm_tv_stations"#,
+        r#"select mm_tv_stations_id,
+        coalesce(mm_tv_station_name, '') as mm_tv_station_name,
+        coalesce(mm_tv_station_id, '') as mm_tv_station_id,
+        coalesce(mm_tv_station_channel, '') as mm_tv_station_channel
+        from mm_tv_stations"#,
     )
     .fetch_all(sqlx_pool)
     .await?;
@@ -48,11 +52,13 @@ pub async fn mk_lib_database_meta_tv_live_day_read(
     schedule_date: chrono::NaiveDate,
 ) -> Result<Vec<DBMetaTVLiveList>, sqlx::Error> {
     let rows: Vec<DBMetaTVLiveList> = sqlx::query_as(
-        r#"select mm_tv_station_name, mm_tv_station_channel, mm_tv_schedule_json
+        r#"select coalesce(mm_tv_station_name, '') as mm_tv_station_name,
+        coalesce(mm_tv_station_channel, '') as mm_tv_station_channel,
+        coalesce(mm_tv_schedule_json, '{}'::jsonb) as mm_tv_schedule_json
         from mm_tv_stations, mm_tv_schedule
         where mm_tv_schedule_station_id = mm_tv_station_id
         and mm_tv_schedule_date = $1
-        order by LOWER(mm_tv_station_name)"#,
+        order by LOWER(coalesce(mm_tv_station_name, ''))"#,
     )
     .bind(schedule_date)
     .fetch_all(sqlx_pool)
@@ -83,12 +89,17 @@ pub async fn mk_lib_database_meta_tv_schedule_program_read(
 pub async fn mk_lib_database_meta_tv_schedule_date_range(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<Option<(chrono::NaiveDate, chrono::NaiveDate)>, sqlx::Error> {
-    let row: Option<(chrono::NaiveDate, chrono::NaiveDate)> = sqlx::query_as(
+    // min()/max() always return exactly one row, with NULL values when the
+    // table is empty, so decode nullable columns and collapse to None.
+    let row: Option<(Option<chrono::NaiveDate>, Option<chrono::NaiveDate>)> = sqlx::query_as(
         r#"select min(mm_tv_schedule_date), max(mm_tv_schedule_date) from mm_tv_schedule"#,
     )
     .fetch_optional(sqlx_pool)
     .await?;
-    Ok(row)
+    match row {
+        Some((Some(min_date), Some(max_date))) => Ok(Some((min_date, max_date))),
+        _ => Ok(None),
+    }
 }
 
 pub async fn mk_lib_database_meta_tv_station_exists(

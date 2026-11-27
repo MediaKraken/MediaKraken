@@ -1,0 +1,31 @@
+{% extends "layouts/base_user.html" %}
+
+{#
+  Context (TemplateUserHardwareOnvifContext):
+    page_title: Option<String>
+
+  OnVif camera discovery is not wired up yet: the onvif module is not
+  compiled into the published hardware library, so this page shows that
+  state.
+#}
+
+{% block content %}
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+    <div class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
+        <div class="space-y-2">
+            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Hardware</p>
+            <h1 class="text-3xl font-bold tracking-tight">OnVif Cameras</h1>
+            <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+                OnVif IP cameras on your network.
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-4 rounded-xl border border-dashed border-zinc-300 bg-white/50 p-10 text-center shadow-sm dark:border-zinc-700 dark:bg-zinc-900/50">
+        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">OnVif camera discovery is not wired up yet.</p>
+        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            Discovered cameras will be listed here once MediaKraken supports them.
+        </p>
+    </div>
+</section>
+{% endblock %}

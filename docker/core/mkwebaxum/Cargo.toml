@@ -11,13 +11,14 @@ panic = "abort"        # Removes unwinding infrastructure, reducing binary size 
 strip = true           # Removes debug symbols from the binary to reduce size (optional)
 
 [dependencies]
-mk_lib_common = { version = "0.0.268", registry = "kellnr" }
-mk_lib_database = { version = "0.0.304", registry = "kellnr" }
-mk_lib_logging = { version = "0.0.269", registry = "kellnr" }
-mk_lib_metadata = { version = "0.0.281", registry = "kellnr" }
-mk_lib_network = { version = "0.0.268", registry = "kellnr" }
-mk_lib_rabbitmq = { version = "0.0.273", registry = "kellnr" }
-mk_lib_share = { version = "0.0.277", registry = "kellnr" }
+mk_lib_common = { version = "0.0.272", registry = "kellnr" }
+mk_lib_database = { version = "0.0.308", registry = "kellnr" }
+mk_lib_hardware = { version = "0.0.278", registry = "kellnr" }
+mk_lib_logging = { version = "0.0.273", registry = "kellnr" }
+mk_lib_metadata = { version = "0.0.285", registry = "kellnr" }
+mk_lib_network = { version = "0.0.272", registry = "kellnr" }
+mk_lib_rabbitmq = { version = "0.0.277", registry = "kellnr" }
+mk_lib_share = { version = "0.0.281", registry = "kellnr" }
 
 askama = "0.16.0"
 askama_axum = "0.4.0"
@@ -50,6 +51,7 @@ ipnetwork = "0.21.1"
 lazy_static = "1.5.0"
 libc = "0.2.189"
 num-format = { version = "0.4.4", features = ["with-system-locale"] }
+parse-torrent-title = "2.0.10"
 paginator = "0.2.7"
 redis_pool = "0.10.1"
 redis = { version = "1.6.0" }

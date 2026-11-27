@@ -37,12 +37,17 @@ struct TemplateHomeScanListContext {
     template_scan_percentage: String,
 }
 
+#[derive(Serialize)]
+struct TemplateHomeActiveUserContext {
+    template_active_user_name: String,
+    template_active_user_expires: String,
+}
+
 #[derive(Template)]
 #[template(path = "bss_admin/bss_admin_home.html")]
 struct TemplateHomeContext<'a> {
     template_data_server_info_server_name: &'a serde_json::Value,
     template_data_server_uptime: &'a String,
-    template_data_server_host_ip: &'a String,
     template_data_server_info_server_ip_external: &'a String,
     template_data_server_info_server_version: &'a String,
     template_data_count_media_files: i64,
@@ -56,6 +61,7 @@ struct TemplateHomeContext<'a> {
     template_server_streams: &'a Vec<TemplateHomeStreamListContext>,
     #[allow(dead_code)]
     template_server_users: &'a Vec<mk_lib_database::mk_lib_database_user::DBUserList>,
+    template_data_active_users: &'a Vec<TemplateHomeActiveUserContext>,
     #[allow(dead_code)]
     template_data_scan_info: &'a Vec<TemplateHomeScanListContext>,
     page_title: Option<String>,
@@ -143,6 +149,49 @@ pub async fn admin_home(
         )
         .await
         .unwrap();
+        // Currently signed-in users: unexpired rows from the axum-session
+        // store (mm_session) mapped back to usernames. The session column
+        // holds the plain SessionData JSON
+        // {"data":{"user_auth_session_id":"<user id>"},"longterm":bool}.
+        let mut active_users: Vec<TemplateHomeActiveUserContext> = Vec::new();
+        let session_rows = sqlx::query(
+            r#"SELECT id, expires, session FROM mm_session
+               WHERE expires IS NULL OR expires > (extract(epoch from now()))::bigint
+               ORDER BY expires NULLS LAST"#,
+        )
+        .fetch_all(&state.sqlx_pool_ro)
+        .await
+        .unwrap_or_default();
+        for row in session_rows {
+            let session_json = row.try_get::<String, _>("session").unwrap_or_default();
+            let session_value: serde_json::Value =
+                serde_json::from_str(&session_json).unwrap_or_default();
+            let Some(user_id_str) = session_value["data"]["user_auth_session_id"].as_str() else {
+                continue;
+            };
+            let Ok(user_id) = user_id_str.parse::<i64>() else {
+                continue;
+            };
+            let Some(user) =
+                mk_lib_database::mk_lib_database_user::User::get_user(user_id, &state.sqlx_pool_ro)
+                    .await
+                    .ok()
+                    .flatten()
+            else {
+                continue;
+            };
+            let expires = row.try_get::<Option<i64>, _>("expires").unwrap_or(None);
+            let expires_display = match expires {
+                Some(timestamp) => chrono::DateTime::<chrono::Utc>::from_timestamp(timestamp, 0)
+                    .map(|dt| dt.format("%Y-%m-%d %H:%M:%S").to_string())
+                    .unwrap_or_else(|| "unknown".to_string()),
+                None => "no expiry".to_string(),
+            };
+            active_users.push(TemplateHomeActiveUserContext {
+                template_active_user_name: user.username,
+                template_active_user_expires: expires_display,
+            });
+        }
         let template = TemplateHomeContext {
             template_data_server_info_server_name: &option_json["MediaKrakenServer"]["Server Name"],
             // following boottime only compiles #[cfg(not(windows))] in this case is fine
@@ -153,7 +202,6 @@ pub async fn admin_home(
                 boot_duration.num_minutes() % 60,
                 boot_duration.num_seconds() % 60,
             ),
-            template_data_server_host_ip: &"255.255.255.255".to_string(),
             template_data_server_info_server_ip_external: &external_ip,
             template_data_server_info_server_version:
                 &mk_lib_common::mk_lib_common_version::WEB_VERSION.to_string(),
@@ -165,6 +213,7 @@ pub async fn admin_home(
             template_server_notifications: &notification_list,
             template_server_streams: &server_streams,
             template_server_users: &user_list,
+            template_data_active_users: &active_users,
             template_data_scan_info: &server_scans,
             page_title: Some("MediaKraken Admin".to_string()),
         };

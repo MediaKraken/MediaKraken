@@ -38,7 +38,10 @@
           <span class="ml-2 text-sm font-medium">Logging</span>
         </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300 dark:hover:bg-zinc-800" :class="{ 'bg-gray-300 dark:bg-zinc-800': activePath.startsWith('/admin/report_known_media') }" :aria-current="activePath.startsWith('/admin/report_known_media') ? 'page' : null" href="/admin/report_known_media/1">
           {% include "icons/clipboard_list.svg" %}
-          <span class="ml-2 text-sm font-medium">Reporting</span>
+          <span class="ml-2 text-sm font-medium">Known Media</span>
+        </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300 dark:hover:bg-zinc-800" :class="{ 'bg-gray-300 dark:bg-zinc-800': activePath.startsWith('/admin/report_unmatched_media') }" :aria-current="activePath.startsWith('/admin/report_unmatched_media') ? 'page' : null" href="/admin/report_unmatched_media/1">
+          {% include "icons/clipboard_list.svg" %}
+          <span class="ml-2 text-sm font-medium">Unmatched Media</span>
         </a> <a class="relative flex items-center w-full h-12 px-3 mt-2 rounded hover:bg-gray-300 dark:hover:bg-zinc-800" :class="{ 'bg-gray-300 dark:bg-zinc-800': activePath === '/admin/settings' }" :aria-current="activePath === '/admin/settings' ? 'page' : null" href="/admin/settings">
           {% include "icons/cogs.svg" %}
           <span class="ml-2 text-sm font-medium">Settings</span>

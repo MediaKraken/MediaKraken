@@ -1,5 +1,5 @@
 use reqwest::Client;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::fs;
 
 const K8S_SERVICE_ACCOUNT_TOKEN_PATH: &str = "/var/run/secrets/kubernetes.io/serviceaccount/token";
@@ -72,4 +72,116 @@ pub async fn mk_lib_network_kubernetes_worker_node_ips()
         .collect();
 
     Ok(worker_node_ips)
+}
+
+#[derive(Debug, Deserialize)]
+struct KubernetesCnpgBackupList {
+    #[serde(default)]
+    items: Vec<KubernetesCnpgBackup>,
+}
+
+#[derive(Debug, Deserialize)]
+struct KubernetesCnpgBackup {
+    metadata: KubernetesCnpgBackupMetadata,
+    #[serde(default)]
+    spec: KubernetesCnpgBackupSpec,
+    #[serde(default)]
+    status: KubernetesCnpgBackupStatus,
+}
+
+#[derive(Debug, Deserialize)]
+struct KubernetesCnpgBackupMetadata {
+    name: String,
+    #[serde(default)]
+    namespace: String,
+    #[serde(default, rename = "creationTimestamp")]
+    creation_timestamp: Option<String>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+struct KubernetesCnpgBackupSpec {
+    #[serde(default)]
+    method: Option<String>,
+    #[serde(default)]
+    cluster: Option<KubernetesCnpgBackupCluster>,
+}
+
+#[derive(Debug, Deserialize)]
+struct KubernetesCnpgBackupCluster {
+    #[serde(default)]
+    name: Option<String>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+struct KubernetesCnpgBackupStatus {
+    #[serde(default)]
+    phase: Option<String>,
+    #[serde(default)]
+    error: Option<String>,
+    #[serde(default, rename = "startedAt")]
+    started_at: Option<String>,
+    #[serde(default, rename = "stoppedAt")]
+    stopped_at: Option<String>,
+    #[serde(default, rename = "backupId")]
+    backup_id: Option<String>,
+    #[serde(default, rename = "destinationPath")]
+    destination_path: Option<String>,
+}
+
+/// A CloudNativePG backup as reported by the Kubernetes API
+/// (apis/postgresql.cnpg.io/v1/namespaces/{namespace}/backups).
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct CnpgBackup {
+    pub name: String,
+    pub namespace: String,
+    pub creation_timestamp: Option<String>,
+    pub cluster_name: Option<String>,
+    pub method: Option<String>,
+    pub phase: Option<String>,
+    pub error: Option<String>,
+    pub started_at: Option<String>,
+    pub stopped_at: Option<String>,
+    pub backup_id: Option<String>,
+    pub destination_path: Option<String>,
+}
+
+/// List the CloudNativePG backups in the given namespace.
+pub async fn mk_lib_network_kubernetes_cnpg_backups(
+    namespace: &str,
+) -> Result<Vec<CnpgBackup>, Box<dyn std::error::Error>> {
+    let token = fs::read_to_string(K8S_SERVICE_ACCOUNT_TOKEN_PATH)?;
+    let ca_cert_pem = fs::read(K8S_SERVICE_ACCOUNT_CA_PATH)?;
+    let ca_cert = reqwest::Certificate::from_pem(&ca_cert_pem)?;
+
+    let client = Client::builder().add_root_certificate(ca_cert).build()?;
+    let response = client
+        .get(format!(
+            "{K8S_API_SERVER}/apis/postgresql.cnpg.io/v1/namespaces/{namespace}/backups"
+        ))
+        .bearer_auth(token.trim())
+        .send()
+        .await?
+        .error_for_status()?;
+
+    let list = response.json::<KubernetesCnpgBackupList>().await?;
+
+    let backups = list
+        .items
+        .into_iter()
+        .map(|backup| CnpgBackup {
+            name: backup.metadata.name,
+            namespace: backup.metadata.namespace,
+            creation_timestamp: backup.metadata.creation_timestamp,
+            cluster_name: backup.spec.cluster.and_then(|cluster| cluster.name),
+            method: backup.spec.method,
+            phase: backup.status.phase,
+            error: backup.status.error,
+            started_at: backup.status.started_at,
+            stopped_at: backup.status.stopped_at,
+            backup_id: backup.status.backup_id,
+            destination_path: backup.status.destination_path,
+        })
+        .collect();
+
+    Ok(backups)
 }

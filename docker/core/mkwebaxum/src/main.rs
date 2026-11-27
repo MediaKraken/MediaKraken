@@ -59,6 +59,7 @@ pub mod admin {
     pub mod bp_server_links;
     pub mod bp_settings;
     pub mod bp_torrent;
+    pub mod bp_upc_import;
     pub mod bp_user;
 }
 
@@ -433,7 +434,7 @@ async fn main() {
             get(api::bp_api_title_search::api_title_search),
         )
         .route_with_tsr("/admin", get(admin::bp_home::admin_home))
-        .route_with_tsr("/admin/backup", get(admin::bp_backup::admin_backup))
+        .route_with_tsr("/admin/backup/{page}", get(admin::bp_backup::admin_backup))
         .route_with_tsr("/admin/cron", get(admin::bp_cron::admin_cron))
         .route_with_tsr(
             "/admin/cron_run/{guid}",
@@ -477,12 +478,24 @@ async fn main() {
                 .post(admin::bp_server_links::admin_server_links_post),
         )
         .route_with_tsr("/admin/s3", get(admin::bp_s3::admin_s3))
-        .route_with_tsr("/admin/settings", get(admin::bp_settings::admin_settings))
+        .route_with_tsr(
+            "/admin/settings",
+            get(admin::bp_settings::admin_settings).post(admin::bp_settings::admin_settings_post),
+        )
         .route_with_tsr(
             "/admin/report_known_media/{page}",
             get(admin::bp_reports::admin_report_known_media),
         )
+        .route_with_tsr(
+            "/admin/report_unmatched_media/{page}",
+            get(admin::bp_reports::admin_report_unmatched_media),
+        )
         .route_with_tsr("/admin/torrent", get(admin::bp_torrent::admin_torrent))
+        .route_with_tsr(
+            "/admin/upc",
+            get(admin::bp_upc_import::admin_upc_import)
+                .post(admin::bp_upc_import::admin_upc_import_post),
+        )
         .route_with_tsr(
             "/admin/torrent_add",
             post(admin::bp_torrent::admin_torrent_add),
@@ -764,6 +777,26 @@ async fn main() {
         .route_with_tsr(
             "/user/hardware/phue",
             get(user::bp_hardware::user_hardware_phue),
+        )
+        .route_with_tsr(
+            "/user/hardware/chromecast",
+            get(user::bp_hardware::user_hardware_chromecast),
+        )
+        .route_with_tsr(
+            "/user/hardware/tvtuner",
+            get(user::bp_hardware::user_hardware_tvtuner),
+        )
+        .route_with_tsr(
+            "/user/hardware/globalcache",
+            get(user::bp_hardware::user_hardware_globalcache),
+        )
+        .route_with_tsr(
+            "/user/hardware/dlna",
+            get(user::bp_hardware::user_hardware_dlna),
+        )
+        .route_with_tsr(
+            "/user/hardware/onvif",
+            get(user::bp_hardware::user_hardware_onvif),
         )
         .route_with_tsr("/user/home", get(user::bp_home::user_home))
         .route_with_tsr("/user/profile", get(user::bp_profile::user_profile))

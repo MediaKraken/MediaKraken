@@ -26,7 +26,6 @@
               <div class="p-4 space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
                 <p><b>Server Name:</b> {{ template_data_server_info_server_name|unquote_json }}</p>
                 <p><b>Host Uptime:</b> {{ template_data_server_uptime }}</p>
-                <p><b>Host IP:</b> {{ template_data_server_host_ip }}</p>
                 <p><b>IP External:</b> {{ template_data_server_info_server_ip_external }}</p>
                 <p><b>Version:</b> {{ template_data_server_info_server_version }}</p>
               </div>
@@ -86,13 +85,45 @@
         </div>
 
         <!-- Reusable table sections -->
-        {% for section in ["Active Streams", "Active Users", "Media Scanning"] %}
         <section class="mt-8">
           <fieldset class="mb-2">
-            <legend class="font-semibold text-zinc-900 dark:text-zinc-100">{{ section }}</legend>
+            <legend class="font-semibold text-zinc-900 dark:text-zinc-100">Active Streams</legend>
           </fieldset>
         </section>
-        {% endfor %}
+
+        <section class="mt-8">
+          <fieldset class="mb-2">
+            <legend class="font-semibold text-zinc-900 dark:text-zinc-100">Active Users</legend>
+          </fieldset>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300">
+              <thead class="bg-zinc-50 dark:bg-zinc-800">
+                <tr>
+                  <th class="border border-zinc-200 dark:border-zinc-800 px-2 py-1 text-left">User</th>
+                  <th class="border border-zinc-200 dark:border-zinc-800 px-2 py-1 text-left">Session Expires (UTC)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row_data in template_data_active_users %}
+                <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                  <td class="border border-zinc-200 dark:border-zinc-800 px-2 py-1">{{ row_data.template_active_user_name }}</td>
+                  <td class="border border-zinc-200 dark:border-zinc-800 px-2 py-1">{{ row_data.template_active_user_expires }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td class="border border-zinc-200 dark:border-zinc-800 px-2 py-1" colspan="2">No active sessions</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="mt-8">
+          <fieldset class="mb-2">
+            <legend class="font-semibold text-zinc-900 dark:text-zinc-100">Media Scanning</legend>
+          </fieldset>
+        </section>
 
       </main>
 

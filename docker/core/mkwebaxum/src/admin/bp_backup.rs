@@ -29,7 +29,23 @@ struct TemplateBackupContext<'a> {
     #[allow(dead_code)]
     pagination_bar: &'a String,
     page: &'a usize,
+    template_data_cnpg_backups: &'a Vec<TemplateBackupCnpgContext>,
+    template_cnpg_error: &'a String,
     page_title: Option<String>,
+}
+
+/// One CloudNativePG backup row for the admin backup page.
+#[derive(Debug)]
+struct TemplateBackupCnpgContext {
+    template_cnpg_name: String,
+    template_cnpg_cluster: String,
+    template_cnpg_method: String,
+    template_cnpg_phase: String,
+    template_cnpg_created: String,
+    template_cnpg_started: String,
+    template_cnpg_stopped: String,
+    template_cnpg_error: String,
+    template_cnpg_destination: String,
 }
 
 pub async fn admin_backup(
@@ -83,6 +99,40 @@ pub async fn admin_backup(
         if !backup_list.is_empty() {
             template_data_exists = true;
         }
+        // CloudNativePG backups come from the Kubernetes API. If the service
+        // account token is unavailable or the API rejects the request, show
+        // the error instead of failing the whole page.
+        let (cnpg_backups, cnpg_error) =
+            match mk_lib_network::mk_lib_network_kubernetes::mk_lib_network_kubernetes_cnpg_backups(
+                "cnpg-system",
+            )
+            .await
+            {
+                Ok(backups) => (
+                    backups
+                        .iter()
+                        .map(|backup| TemplateBackupCnpgContext {
+                            template_cnpg_name: backup.name.clone(),
+                            template_cnpg_cluster: backup.cluster_name.clone().unwrap_or_default(),
+                            template_cnpg_method: backup.method.clone().unwrap_or_default(),
+                            template_cnpg_phase: backup.phase.clone().unwrap_or_default(),
+                            template_cnpg_created: backup
+                                .creation_timestamp
+                                .clone()
+                                .unwrap_or_default(),
+                            template_cnpg_started: backup.started_at.clone().unwrap_or_default(),
+                            template_cnpg_stopped: backup.stopped_at.clone().unwrap_or_default(),
+                            template_cnpg_error: backup.error.clone().unwrap_or_default(),
+                            template_cnpg_destination: backup
+                                .destination_path
+                                .clone()
+                                .unwrap_or_default(),
+                        })
+                        .collect::<Vec<_>>(),
+                    String::new(),
+                ),
+                Err(error) => (Vec::new(), error.to_string()),
+            };
         let page_usize = page as usize;
         let template = TemplateBackupContext {
             template_data: &backup_list,
@@ -90,6 +140,8 @@ pub async fn admin_backup(
             template_data_exists: &template_data_exists,
             pagination_bar: &pagination_html,
             page: &page_usize,
+            template_data_cnpg_backups: &cnpg_backups,
+            template_cnpg_error: &cnpg_error,
             page_title: Some("MediaKraken Admin Backup".to_string()),
         };
         let reply_html = template.render().unwrap();

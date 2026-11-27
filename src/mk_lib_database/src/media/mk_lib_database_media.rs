@@ -53,7 +53,8 @@ pub async fn mk_lib_database_media_unmatched_read(
 ) -> Result<Vec<DBMediaUnmatchedList>, sqlx::Error> {
     let table_rows: Vec<DBMediaUnmatchedList> = sqlx::query_as(
         r#"select mm_media_guid,
-        mm_media_path from mm_media
+        coalesce(mm_media_path, '') as mm_media_path
+        from mm_media
         where mm_media_metadata_guid is NULL
         order by mm_media_path offset $1 limit $2"#,
     )

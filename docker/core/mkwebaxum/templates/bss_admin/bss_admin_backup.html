@@ -13,7 +13,7 @@
   <main class="flex-1 p-6" x-data="backupPage()">
 
     <!-- Backup Configuration -->
-    <form action="/admin/backup" method="post" class="space-y-10">
+    <form action="/admin/backup/1" method="post" class="space-y-10">
 
       <section class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow p-6">
         <h2 class="text-xl font-semibold mb-4 text-zinc-900 dark:text-zinc-100">Backup Configuration</h2>
@@ -116,6 +116,57 @@
         {% endif %}
       </section>
     </form>
+
+    <!-- CloudNativePG Backups -->
+    <section class="mt-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded shadow p-6">
+      <h2 class="text-xl font-semibold mb-4 text-zinc-900 dark:text-zinc-100">CloudNativePG Backups</h2>
+
+      {% if template_cnpg_error != "" %}
+      <p class="text-red-600 dark:text-red-400">
+        Unable to load CloudNativePG backups: {{ template_cnpg_error }}
+      </p>
+      {% else %}
+      {% if template_data_cnpg_backups.len() > 0 %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300">
+          <thead class="bg-zinc-50 dark:bg-zinc-800">
+            <tr class="text-left text-sm font-semibold text-zinc-700 dark:text-zinc-200">
+              <th class="px-3 py-2">Backup</th>
+              <th class="px-3 py-2">Cluster</th>
+              <th class="px-3 py-2">Method</th>
+              <th class="px-3 py-2">Phase</th>
+              <th class="px-3 py-2">Created</th>
+              <th class="px-3 py-2">Started</th>
+              <th class="px-3 py-2">Stopped</th>
+              <th class="px-3 py-2">Destination</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+            {% for row_data in template_data_cnpg_backups %}
+            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+              <td class="px-3 py-2">
+                {{ row_data.template_cnpg_name }}
+                {% if row_data.template_cnpg_error != "" %}
+                <p class="text-red-600 dark:text-red-400 text-xs">{{ row_data.template_cnpg_error }}</p>
+                {% endif %}
+              </td>
+              <td class="px-3 py-2">{{ row_data.template_cnpg_cluster }}</td>
+              <td class="px-3 py-2">{{ row_data.template_cnpg_method }}</td>
+              <td class="px-3 py-2">{{ row_data.template_cnpg_phase }}</td>
+              <td class="px-3 py-2">{{ row_data.template_cnpg_created }}</td>
+              <td class="px-3 py-2">{{ row_data.template_cnpg_started }}</td>
+              <td class="px-3 py-2">{{ row_data.template_cnpg_stopped }}</td>
+              <td class="px-3 py-2 font-mono text-xs break-all">{{ row_data.template_cnpg_destination }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-zinc-500 dark:text-zinc-400">No CloudNativePG backups found.</p>
+      {% endif %}
+      {% endif %}
+    </section>
 
     <!-- Delete Modal -->
     <div x-show="showDelete"

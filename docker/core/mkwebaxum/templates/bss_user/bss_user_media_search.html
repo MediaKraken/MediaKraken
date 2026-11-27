@@ -3,12 +3,25 @@
 {#
   Context (UserSearchTemplate):
     page_title: Option<String>
+    template_search_query: &String
+    template_active_filters: &Vec<String>
+    template_search_error: &String
+    template_sections: &Vec<SearchSection> (label, hits: Vec<SearchHit>)
 
-  The form below targets the registered GET /user/search route.
-  The handler expects SearchParams { q: String, filter: Vec<String> },
-  so the input uses name="q" and each checkbox uses name="filter".
-  The handler currently returns an empty result set.
+  The form targets the registered GET /user/search route.
+  The input uses name="q" and each checkbox uses name="filter".
+  With no filter selected the handler searches every media type, and the
+  submitted filters are echoed back so the selection survives a search.
 #}
+
+{% macro filter_checkbox(value, label) -%}
+<label class="flex cursor-pointer items-center gap-2">
+    <input type="checkbox" name="filter" value="{{ value }}"
+        class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950"
+        {% if template_active_filters.contains(&value.to_string()) %}checked{% endif %}>
+    {{ label }}
+</label>
+{%- endmacro %}
 
 {% block content %}
 <section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
@@ -17,7 +30,8 @@
             <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Search</p>
             <h1 class="text-3xl font-bold tracking-tight">Title Search</h1>
             <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
-                Search across your library by title. Pick one or more media types to narrow the results.
+                Search across your library by title. Pick one or more media types to narrow the results;
+                nothing selected searches everything.
             </p>
         </div>
     </div>
@@ -30,6 +44,7 @@
                     id="title-search"
                     name="q"
                     type="text"
+                    value="{{ template_search_query }}"
                     placeholder="Start typing a title…"
                     class="mt-2 block w-full max-w-xl rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
                 >
@@ -37,41 +52,12 @@
             <div>
                 <p class="text-sm font-semibold tracking-wide text-zinc-700 dark:text-zinc-200">Media types</p>
                 <div class="mt-2 flex flex-wrap gap-3 text-sm text-zinc-600 dark:text-zinc-300">
-                    <label class="flex cursor-pointer items-center gap-2">
-                        <input type="checkbox" name="filter" value="movie"
-                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
-                        Movies
-                    </label>
-                    <label class="flex cursor-pointer items-center gap-2">
-                        <input type="checkbox" name="filter" value="book"
-                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
-                        Books
-                    </label>
-                    <label class="flex cursor-pointer items-center gap-2">
-                        <input type="checkbox" name="filter" value="game"
-                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
-                        Games
-                    </label>
-                    <label class="flex cursor-pointer items-center gap-2">
-                        <input type="checkbox" name="filter" value="music"
-                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
-                        Music
-                    </label>
-                    <label class="flex cursor-pointer items-center gap-2">
-                        <input type="checkbox" name="filter" value="tv"
-                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
-                        TV
-                    </label>
-                    <label class="flex cursor-pointer items-center gap-2">
-                        <input type="checkbox" name="filter" value="sports"
-                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
-                        Sports
-                    </label>
-                    <label class="flex cursor-pointer items-center gap-2">
-                        <input type="checkbox" name="filter" value="all"
-                            class="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-950">
-                        All
-                    </label>
+                    {{ filter_checkbox("all", "All") }}
+                    {{ filter_checkbox("movie", "Movies") }}
+                    {{ filter_checkbox("tv", "TV") }}
+                    {{ filter_checkbox("music", "Music") }}
+                    {{ filter_checkbox("publication", "Books") }}
+                    {{ filter_checkbox("game", "Games") }}
                 </div>
             </div>
             <div>
@@ -83,5 +69,39 @@
             </div>
         </form>
     </div>
+
+    {% if template_search_error != "" %}
+    <div class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+         role="alert">
+        {{ template_search_error }}
+    </div>
+    {% elif template_search_query != "" %}
+    <div class="mt-4 space-y-4">
+        {% if template_sections.is_empty() %}
+        <div class="rounded-xl border border-zinc-200 bg-white/70 p-6 text-sm text-zinc-500 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/70 dark:text-zinc-400">
+            No results for “{{ template_search_query }}”.
+        </div>
+        {% else %}
+        {% for section in template_sections %}
+        <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <h2 class="border-b border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950/60 dark:text-zinc-200">
+                {{ section.label }} ({{ section.hits.len() }})
+            </h2>
+            <ul role="list" class="divide-y divide-zinc-200 dark:divide-zinc-800">
+                {% for hit in section.hits %}
+                <li class="flex items-center justify-between gap-4 px-4 py-3">
+                    <a href="{{ hit.url }}"
+                       class="min-w-0 flex-1 truncate text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
+                        {{ hit.name }}
+                    </a>
+                    <span class="shrink-0 text-xs text-zinc-400 dark:text-zinc-500">{{ hit.similarity }} match</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    {% endif %}
 </section>
 {% endblock %}

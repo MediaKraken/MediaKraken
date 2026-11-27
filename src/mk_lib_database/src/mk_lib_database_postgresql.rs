@@ -114,6 +114,38 @@ pub async fn mk_lib_database_table_size_total(
     Ok(row.0)
 }
 
+#[derive(Debug, FromRow, Deserialize, Serialize)]
+pub struct PGTableSizeSchema {
+    pub table_schema_name: String,
+    pub table_name: String,
+    pub table_size: i64,
+}
+
+/// Table sizes per schema (same row set as `mk_lib_database_table_size`,
+/// plus the schema each table lives in).
+pub async fn mk_lib_database_table_size_by_schema(
+    sqlx_pool: &sqlx::PgPool,
+) -> Result<Vec<PGTableSizeSchema>, sqlx::Error> {
+    let table_rows: Vec<PGTableSizeSchema> = sqlx::query_as(
+        r#"
+        SELECT
+            n.nspname AS table_schema_name,
+            c.relname AS table_name,
+            pg_total_relation_size(c.oid)::bigint AS table_size
+        FROM pg_class c
+        LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname NOT IN ('pg_catalog', 'information_schema')
+          AND c.relkind <> 'i'
+          AND n.nspname !~ '^pg_toast'
+        ORDER BY pg_total_relation_size(c.oid) DESC
+        "#,
+    )
+    .fetch_all(sqlx_pool)
+    .await?;
+
+    Ok(table_rows)
+}
+
 pub async fn mk_lib_database_parallel_workers(
     sqlx_pool: &sqlx::PgPool,
 ) -> Result<String, sqlx::Error> {

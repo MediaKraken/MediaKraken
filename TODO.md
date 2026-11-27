@@ -1,44 +1,5 @@
 mkwebaxum
-    in admin, database page.  split out the record count and size into the 3 schemas
-        mediakraken, musicbrainz and covert_art_archive
-        then have a grand total of all three together at the bottom
 
-    remove hostip from server info in admin dashboard
-
-    admin dashboard, in active users....show data of users who are currently signed in.
-
-    admin dashboard, backups.....show available backups for cnpg
-
-    admin dashboadm reporting: break u into two seperate pages
-        known media - which is what displays now
-        unmatched media - files that are in mm_media but no metadata attached (ie, not id'd)
-
-    admin upc import
-        allow admin to add upc via scanner or pasting codes into textbox
-        allow admin to upload file with upc codes
-
-    admin page, settings, need to be able to save the settings to mm_options_and_status, mm_options_json
-
-    iradio page.....selecting new page shouldn't kill the playing station
-
-    iradio page...when selecting play from list....should autostart the stream playback
-
-    https://mk.mediakraken.media/user/search should default to all, and don't reset the type after each search
-
-    global search doesn't seem to return any values
-
-    https://mk.mediakraken.media/user/hardware
-        like the Philips Hue section add the following sections
-        add Chromecast
-        add HDHomeRun
-        add GlobalCache
-        add DNLA
-        add OnVif Cameras
-
-mk_lib_metadata
-    in upcmdb.rs add code to do all supported api calls for url in the file
-    in upcdiscdb.rs add code to submit ups and screen srape the results and return json
-    in ean-db.rs add code to do all the support api alls for url in the file
 
 ********** don't do  below this line**********
 kubectl -n mediakraken create secret generic db-password-admin \

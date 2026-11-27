@@ -197,6 +197,18 @@ async fn build_live_tv_response(
                 (stations, day_rows, program_list, date_range)
             }
             _ => {
+                if let Err(error) = &stations_result {
+                    tracing::error!(%error, "live tv station read failed");
+                }
+                if let Err(error) = &day_result {
+                    tracing::error!(%error, "live tv day read failed");
+                }
+                if let Err(error) = &programs_result {
+                    tracing::error!(%error, "live tv program read failed");
+                }
+                if let Err(error) = &range_result {
+                    tracing::error!(%error, "live tv schedule date range failed");
+                }
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Html("Internal server error".to_string()),

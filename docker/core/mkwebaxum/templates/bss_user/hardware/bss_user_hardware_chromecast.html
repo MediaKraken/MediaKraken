@@ -1,5 +1,69 @@
 {% extends "layouts/base_user.html" %}
 
+{#
+  Context (TemplateUserHardwareChromecastContext<'a>):
+    template_data_devices: &Vec<(String, String)>  (hostname, ip:port)
+    template_data_note: &String                    (error text, empty on success)
+    page_title: Option<String>
+
+  The handler performs a live mDNS scan with a fixed 15 second listen
+  window, so first page load can take up to ~15 seconds.
+#}
+
 {% block content %}
-<div></div>
+<section class="w-full px-0 py-4 text-zinc-900 dark:text-zinc-100">
+    <div class="rounded-3xl border border-zinc-200/80 bg-gradient-to-br from-white via-white to-zinc-100 p-6 shadow-sm dark:border-zinc-800 dark:from-zinc-950 dark:via-zinc-950 dark:to-zinc-900">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div class="space-y-2">
+                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-300">Hardware</p>
+                <h1 class="text-3xl font-bold tracking-tight">Chromecast</h1>
+                <p class="max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">
+                    This page scans your local network for Chromecast devices.
+                    The scan runs for up to 15 seconds, so the first load may take a moment.
+                    Reload the page to run the scan again.
+                </p>
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs text-zinc-500 dark:text-zinc-400">
+                <span class="rounded-full border border-zinc-300 px-3 py-1 dark:border-zinc-700">{{ template_data_devices.len() }} device(s)</span>
+            </div>
+        </div>
+    </div>
+
+    {% if template_data_note != "" %}
+    <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-300"
+         role="alert">
+        {{ template_data_note }}
+    </div>
+    {% endif %}
+
+    {% if template_data_devices.is_empty() %}
+    <div class="mt-4 rounded-xl border border-dashed border-zinc-300 bg-white/50 p-10 text-center shadow-sm dark:border-zinc-700 dark:bg-zinc-900/50">
+        <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">No Chromecast devices found.</p>
+        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            Make sure the devices are powered on and on the same network as MediaKraken.
+        </p>
+    </div>
+    {% else %}
+    <div class="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <table class="min-w-full text-sm text-zinc-700 dark:text-zinc-300">
+            <thead class="bg-zinc-50 dark:bg-zinc-950/60">
+                <tr class="text-left text-xs font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                    <th class="px-4 py-3">#</th>
+                    <th class="px-4 py-3">Hostname</th>
+                    <th class="px-4 py-3">Address</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+                {% for (hostname, address) in template_data_devices %}
+                <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-950/40">
+                    <td class="px-4 py-3">{{ loop.index }}</td>
+                    <td class="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">{{ hostname }}</td>
+                    <td class="px-4 py-3 font-mono text-xs">{{ address }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</section>
 {% endblock %}

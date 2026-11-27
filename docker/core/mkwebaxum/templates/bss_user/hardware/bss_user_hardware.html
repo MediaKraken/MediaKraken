@@ -5,8 +5,9 @@
     template_data_phue_exists: &bool
     page_title: Option<String>
 
-  The /user/hardware/phue route is not registered in main.rs yet;
-  the card below links to it for when it is wired up.
+  One card per hardware section. Each card links to its detail page:
+  /user/hardware/phue, /user/hardware/chromecast, /user/hardware/tvtuner,
+  /user/hardware/globalcache, /user/hardware/dlna, /user/hardware/onvif.
 #}
 
 {% block content %}
@@ -32,6 +33,61 @@
             <span class="min-w-0">
                 <span class="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">Philips Hue</span>
                 <span class="block text-xs text-zinc-500 dark:text-zinc-400">Manage your Hue lighting.</span>
+            </span>
+        </a>
+        <a href="/user/hardware/chromecast"
+            class="group flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+            aria-label="Open Chromecast devices">
+            <img src="/static/image/television.png?v=1" alt="Chromecast icon" width="96" height="96"
+                loading="lazy" decoding="async"
+                class="h-24 w-24 rounded-lg object-contain bg-zinc-100 p-2 transition-transform duration-300 group-hover:scale-105 dark:bg-zinc-800">
+            <span class="min-w-0">
+                <span class="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">Chromecast</span>
+                <span class="block text-xs text-zinc-500 dark:text-zinc-400">Scan your network for Chromecast devices.</span>
+            </span>
+        </a>
+        <a href="/user/hardware/tvtuner"
+            class="group flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+            aria-label="Open HDHomeRun TV tuners">
+            <img src="/static/image/television_live.png?v=1" alt="TV tuner icon" width="96" height="96"
+                loading="lazy" decoding="async"
+                class="h-24 w-24 rounded-lg object-contain bg-zinc-100 p-2 transition-transform duration-300 group-hover:scale-105 dark:bg-zinc-800">
+            <span class="min-w-0">
+                <span class="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">HDHomeRun</span>
+                <span class="block text-xs text-zinc-500 dark:text-zinc-400">Live TV tuners and their channel lineups.</span>
+            </span>
+        </a>
+        <a href="/user/hardware/globalcache"
+            class="group flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+            aria-label="Open the GlobalCache hardware database">
+            <img src="/static/image/circuit-board.png?v=1" alt="Circuit board icon" width="96" height="96"
+                loading="lazy" decoding="async"
+                class="h-24 w-24 rounded-lg object-contain bg-zinc-100 p-2 transition-transform duration-300 group-hover:scale-105 dark:bg-zinc-800">
+            <span class="min-w-0">
+                <span class="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">GlobalCache</span>
+                <span class="block text-xs text-zinc-500 dark:text-zinc-400">Imported IR controller hardware database.</span>
+            </span>
+        </a>
+        <a href="/user/hardware/dlna"
+            class="group flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+            aria-label="Open DLNA renderers">
+            <img src="/static/image/rectangles_black.png?v=1" alt="DLNA devices icon" width="96" height="96"
+                loading="lazy" decoding="async"
+                class="h-24 w-24 rounded-lg object-contain bg-zinc-100 p-2 transition-transform duration-300 group-hover:scale-105 dark:bg-zinc-800">
+            <span class="min-w-0">
+                <span class="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">DLNA</span>
+                <span class="block text-xs text-zinc-500 dark:text-zinc-400">DLNA media renderers on your network.</span>
+            </span>
+        </a>
+        <a href="/user/hardware/onvif"
+            class="group flex items-center gap-4 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+            aria-label="Open OnVif cameras">
+            <img src="/static/image/surveillance-cctv-symbol-in-rounded-triangle.png?v=1" alt="Surveillance camera icon" width="96" height="96"
+                loading="lazy" decoding="async"
+                class="h-24 w-24 rounded-lg object-contain bg-zinc-100 p-2 transition-transform duration-300 group-hover:scale-105 dark:bg-zinc-800">
+            <span class="min-w-0">
+                <span class="block text-sm font-semibold text-zinc-900 dark:text-zinc-100">OnVif Cameras</span>
+                <span class="block text-xs text-zinc-500 dark:text-zinc-400">OnVif IP cameras on your network.</span>
             </span>
         </a>
     </div>

@@ -62,36 +62,50 @@
           Database Record Count
         </h2>
 
-        <div class="overflow-x-auto">
-          <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
-            <thead class="bg-zinc-50 dark:bg-zinc-800">
-              <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
-                <th class="px-3 py-2">Table</th>
-                <th class="px-3 py-2">Record(s)</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
-              {% for row_data in template_data_db_count %}
-              <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                <td class="px-3 py-2">{{ row_data.table_name }}</td>
-                <td class="px-3 py-2">
-                  {% if row_data.table_rows != -1.0 %}
-                    {{ row_data.table_rows|number_format_locale(template_data_number_format_language) }}
-                  {% else %}
-                    0
-                  {% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-              <tr class="font-semibold bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100">
-                <td class="px-3 py-2">Total Rows</td>
-                <td class="px-3 py-2">
-                  {{ template_data_db_count_total|number_format_locale(template_data_number_format_language) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        {% for schema_data in template_data_db_schemas %}
+        <div class="mb-6">
+          <h3 class="text-base font-semibold mb-2 text-zinc-800 dark:text-zinc-200">
+            Schema: {{ schema_data.schema_name }}
+          </h3>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+              <thead class="bg-zinc-50 dark:bg-zinc-800">
+                <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
+                  <th class="px-3 py-2">Table</th>
+                  <th class="px-3 py-2">Record(s)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+                {% for row_data in schema_data.row_count_tables %}
+                <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                  <td class="px-3 py-2">{{ row_data.table_name }}</td>
+                  <td class="px-3 py-2">
+                    {% if row_data.table_rows != -1.0 %}
+                      {{ row_data.table_rows|number_format_locale(template_data_number_format_language) }}
+                    {% else %}
+                      0
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+                <tr class="font-semibold bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100">
+                  <td class="px-3 py-2">Schema Total</td>
+                  <td class="px-3 py-2">
+                    {{ schema_data.total_rows|number_format_locale(template_data_number_format_language) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+        {% endfor %}
+
+        <p class="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+          Grand Total (all schemas):
+          {{ template_data_db_count_total|number_format_locale(template_data_number_format_language) }}
+          rows
+        </p>
       </div>
 
       <!-- Table Size -->
@@ -100,32 +114,45 @@
           Database Table Size
         </h2>
 
-        <div class="overflow-x-auto">
-          <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
-            <thead class="bg-zinc-50 dark:bg-zinc-800">
-              <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
-                <th class="px-3 py-2">Table</th>
-                <th class="px-3 py-2">Size</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
-              {% for row_data in template_data_db_size %}
-              <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                <td class="px-3 py-2">{{ row_data.table_name }}</td>
-                <td class="px-3 py-2">
-                  {{ row_data.table_size|byte_format }}
-                </td>
-              </tr>
-              {% endfor %}
-              <tr class="font-semibold bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100">
-                <td class="px-3 py-2">Total Size</td>
-                <td class="px-3 py-2">
-                  {{ template_data_db_size_total|byte_format }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        {% for schema_data in template_data_db_schemas %}
+        <div class="mb-6">
+          <h3 class="text-base font-semibold mb-2 text-zinc-800 dark:text-zinc-200">
+            Schema: {{ schema_data.schema_name }}
+          </h3>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full border border-zinc-200 dark:border-zinc-800 text-sm text-zinc-700 dark:text-zinc-300">
+              <thead class="bg-zinc-50 dark:bg-zinc-800">
+                <tr class="text-left font-semibold text-zinc-700 dark:text-zinc-200">
+                  <th class="px-3 py-2">Table</th>
+                  <th class="px-3 py-2">Size</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+                {% for row_data in schema_data.size_tables %}
+                <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800">
+                  <td class="px-3 py-2">{{ row_data.table_name }}</td>
+                  <td class="px-3 py-2">
+                    {{ row_data.table_size|byte_format }}
+                  </td>
+                </tr>
+                {% endfor %}
+                <tr class="font-semibold bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100">
+                  <td class="px-3 py-2">Schema Total</td>
+                  <td class="px-3 py-2">
+                    {{ schema_data.total_size|byte_format }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+        {% endfor %}
+
+        <p class="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+          Grand Total (all schemas):
+          {{ template_data_db_size_total|byte_format }}
+        </p>
       </div>
 
       <!-- Available Extensions -->

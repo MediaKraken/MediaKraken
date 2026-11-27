@@ -93,7 +93,8 @@ pub async fn user_metadata_music(
             .await;
         let total_items = match total_items {
             Ok(total) => total,
-            Err(_) => {
+            Err(error) => {
+                tracing::error!(%error, "music metadata query failed");
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Html(String::from("Internal server error")).into_response(),
@@ -110,7 +111,8 @@ pub async fn user_metadata_music(
         .await
         {
             Ok(html) => html,
-            Err(_) => {
+            Err(error) => {
+                tracing::error!(%error, "music metadata query failed");
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Html(String::from("Internal server error")).into_response(),
@@ -126,7 +128,8 @@ pub async fn user_metadata_music(
         .await;
         let band_list = match band_list {
             Ok(list) => list,
-            Err(_) => {
+            Err(error) => {
+                tracing::error!(%error, "music metadata query failed");
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Html(String::from("Internal server error")).into_response(),
@@ -205,7 +208,8 @@ pub async fn user_metadata_music_band(
                         Html(String::from("Not found")).into_response(),
                     );
                 }
-                Err(_) => {
+                Err(error) => {
+                    tracing::error!(%error, "music metadata query failed");
                     return (
                         StatusCode::INTERNAL_SERVER_ERROR,
                         Html(String::from("Internal server error")).into_response(),
@@ -225,7 +229,8 @@ pub async fn user_metadata_music_band(
             .await;
         let total_items = match total_items {
             Ok(total) => total,
-            Err(_) => {
+            Err(error) => {
+                tracing::error!(%error, "music metadata query failed");
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Html(String::from("Internal server error")).into_response(),
@@ -242,7 +247,8 @@ pub async fn user_metadata_music_band(
         .await
         {
             Ok(html) => html,
-            Err(_) => {
+            Err(error) => {
+                tracing::error!(%error, "music metadata query failed");
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Html(String::from("Internal server error")).into_response(),
@@ -259,7 +265,8 @@ pub async fn user_metadata_music_band(
             .await;
         let album_list = match album_list {
             Ok(list) => list,
-            Err(_) => {
+            Err(error) => {
+                tracing::error!(%error, "music metadata query failed");
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Html(String::from("Internal server error")).into_response(),
@@ -370,7 +377,8 @@ pub async fn user_metadata_music_album(
                         Html(String::from("Not found")).into_response(),
                     );
                 }
-                Err(_) => {
+                Err(error) => {
+                    tracing::error!(%error, "music metadata query failed");
                     return (
                         StatusCode::INTERNAL_SERVER_ERROR,
                         Html(String::from("Internal server error")).into_response(),
@@ -385,7 +393,8 @@ pub async fn user_metadata_music_album(
             .await;
         let track_rows = match track_rows {
             Ok(rows) => rows,
-            Err(_) => {
+            Err(error) => {
+                tracing::error!(%error, "music metadata query failed");
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Html(String::from("Internal server error")).into_response(),

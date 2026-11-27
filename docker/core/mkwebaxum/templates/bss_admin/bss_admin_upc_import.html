@@ -11,29 +11,41 @@
 
         <!-- Main Content -->
         <main class="flex-grow p-4 max-w-3xl mx-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow rounded-lg mt-6">
-            <h2 class="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">Import Text File (Up to 500 Lines)</h2>
+            <h2 class="text-lg font-semibold mb-4 text-zinc-900 dark:text-zinc-100">UPC Import (Up to 500 Codes)</h2>
 
-            <!-- File Input -->
-            <input type="file" id="fileInput" accept=".txt"
-                   @change="handleFileUpload($event)"
-                   class="block w-full text-zinc-700 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded p-2 mb-4">
-
-            <!-- Textarea Preview -->
-            <textarea id="output"
-                      x-model="fileContent"
-                      placeholder="Imported lines will appear here..."
-                      rows="15"
-                      class="block w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 rounded p-2 mb-4 resize-none font-mono"></textarea>
-
-            <!-- Submit Button -->
-            <div class="flex justify-end">
-                <a href="/admin/bss_admin_upc_import_submit">
-                    <button type="button"
-                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                        Submit UPC(s)
-                    </button>
-                </a>
+            {% if template_import_message != "" %}
+            <div class="mb-4 rounded border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300"
+                 role="status">
+              {{ template_import_message }}
             </div>
+            {% endif %}
+
+            <form action="/admin/upc" method="post">
+              <p class="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
+                Paste scanned or typed UPC codes (one per line) or upload a .txt file.
+              </p>
+
+              <!-- File Input -->
+              <input type="file" id="fileInput" accept=".txt"
+                     @change="handleFileUpload($event)"
+                     class="block w-full text-zinc-700 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded p-2 mb-4">
+
+              <!-- Textarea Preview -->
+              <textarea id="output"
+                        name="upc_codes"
+                        x-model="fileContent"
+                        placeholder="Paste UPC codes here, one per line..."
+                        rows="15"
+                        class="block w-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 rounded p-2 mb-4 resize-none font-mono"></textarea>
+
+              <!-- Submit Button -->
+              <div class="flex justify-end">
+                  <button type="submit"
+                          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                      Submit UPC(s)
+                  </button>
+              </div>
+            </form>
         </main>
     </div>
 

@@ -1,8 +1,7 @@
 use crate::AppState;
 use crate::mk_lib_database;
 use askama::Template;
-use axum::extract::Query;
-use axum::extract::State;
+use axum::extract::{Query, State};
 use axum::{
     http::{Method, StatusCode},
     response::{Html, IntoResponse},
@@ -17,36 +16,27 @@ use sqlx::postgres::PgPool;
 #[template(path = "bss_error/bss_error_401.html")]
 struct TemplateError401Context {}
 
-#[derive(Template)]
-#[template(path = "bss_user/bss_user_media_search.html")]
-struct UserSearchTemplate {
-    page_title: Option<String>,
+/// One search result row.
+pub struct SearchHit {
+    pub name: String,
+    pub url: String,
+    pub similarity: String,
 }
 
-pub async fn user_search(
-    State(_state): State<AppState>,
-    method: Method,
-    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
-) -> impl IntoResponse {
-    let current_user = auth.current_user.clone().unwrap_or_default();
-    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
-        [Method::GET],
-        false,
-    )
-    .requires(Rights::any([Rights::permission("User::View")]))
-    .validate(&current_user, &method, None)
-    .await
-    {
-        let template = TemplateError401Context {};
-        let reply_html = template.render().unwrap();
-        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
-    } else {
-        let template = UserSearchTemplate {
-            page_title: Some("MediaKraken Search".to_string()),
-        };
-        let reply_html = template.render().unwrap();
-        (StatusCode::OK, Html(reply_html).into_response())
-    }
+/// One media type section of search results.
+pub struct SearchSection {
+    pub label: &'static str,
+    pub hits: Vec<SearchHit>,
+}
+
+#[derive(Template)]
+#[template(path = "bss_user/bss_user_media_search.html")]
+pub struct UserSearchTemplate<'a> {
+    pub page_title: Option<String>,
+    pub template_search_query: &'a String,
+    pub template_active_filters: &'a Vec<String>,
+    pub template_search_error: &'a String,
+    pub template_sections: &'a Vec<SearchSection>,
 }
 
 #[derive(Deserialize)]
@@ -75,199 +65,160 @@ where
     }
 }
 
-pub struct MyMediaType {
-    pub id: i64,
-    pub title: String,
-    pub year: i32,
-    pub poster_url: String,
+/// Map submitted filter values to the local media types to search. An empty
+/// filter, "all", or the legacy topnavbar "available" value searches every
+/// type; "video"/"audio" are accepted for compatibility with the old Python
+/// form values.
+fn filter_to_search_types(filters: &[String]) -> (bool, bool, bool, bool, bool) {
+    let has = |name: &str| filters.iter().any(|f| f.eq_ignore_ascii_case(name));
+    if filters.is_empty() || has("all") || has("available") {
+        return (true, true, true, true, true);
+    }
+    (
+        has("movie") || has("video"),
+        has("tv") || has("tvshow") || has("video"),
+        has("music") || has("album") || has("audio"),
+        has("publication") || has("book"),
+        has("game"),
+    )
 }
 
-#[derive(Template)]
-#[template(path = "bss_user/search.html")]
-pub struct SearchTemplate {
-    pub query: String,
-    pub filters: Vec<String>,
-    pub results: Vec<MyMediaType>,
-    pub page_title: Option<String>,
+/// Pull one section out of the search result map; None when the section is
+/// absent.
+fn extract_section(
+    label: &'static str,
+    detail_route: &str,
+    results: &serde_json::Map<String, serde_json::Value>,
+    section_key: &str,
+    guid_key: &str,
+    name_key: &str,
+) -> Option<SearchSection> {
+    let rows = results.get(section_key)?;
+    let arr = rows.as_array()?;
+    let hits: Vec<SearchHit> = arr
+        .iter()
+        .filter_map(|row| {
+            let guid = row.get(guid_key)?.as_str()?;
+            let name = row.get(name_key)?.as_str()?;
+            let sml = row
+                .get("sml")
+                .and_then(serde_json::Value::as_f64)
+                .unwrap_or(0.0);
+            Some(SearchHit {
+                name: name.to_string(),
+                url: format!("{detail_route}{guid}"),
+                similarity: format!("{:.0}%", sml * 100.0),
+            })
+        })
+        .collect();
+    Some(SearchSection { label, hits })
 }
 
-pub async fn search_handler(Query(params): Query<SearchParams>) -> Html<String> {
-    let results = Vec::new();
-    // If no filters are selected, maybe default to "all"
-    let active_filters = if params.filter.is_empty() {
-        vec!["all".to_string()]
+pub async fn user_search(
+    State(state): State<AppState>,
+    method: Method,
+    auth: AuthSession<mk_lib_database::mk_lib_database_user::User, i64, SessionPgPool, PgPool>,
+    Query(params): Query<SearchParams>,
+) -> impl IntoResponse {
+    let current_user = auth.current_user.clone().unwrap_or_default();
+    if !Auth::<mk_lib_database::mk_lib_database_user::User, i64, PgPool>::build(
+        [Method::GET],
+        false,
+    )
+    .requires(Rights::any([Rights::permission("User::View")]))
+    .validate(&current_user, &method, None)
+    .await
+    {
+        let template = TemplateError401Context {};
+        let reply_html = template.render().unwrap();
+        (StatusCode::UNAUTHORIZED, Html(reply_html).into_response())
     } else {
-        params.filter
-    };
-    // Logic to aggregate results based on active filters
-    for f in &active_filters {
-        let _ = f.as_str();
-        //"movie" => results.extend(fetch_movies(&params.q).await),
-        // "book" => results.extend(fetch_books(&params.q).await),
-        // "anime" => results.extend(fetch_anime(&params.q).await),
-        // "game" => results.extend(fetch_games(&params.q).await),
-        // "music" => results.extend(fetch_music(&params.q).await),
-        // "sports" => results.extend(fetch_sports(&params.q).await),
-        // "tv" => results.extend(fetch_tv(&params.q).await),
-        {} // Handle "all" or unknowns
+        // Don't reset the selected type after a search: echo the submitted
+        // filters back to the template so the checkboxes keep their state.
+        // No filter at all means "search everything".
+        let active_filters = if params.filter.is_empty() {
+            vec!["all".to_string()]
+        } else {
+            params.filter.clone()
+        };
+        let query = params.q.trim().to_string();
+
+        let mut search_error = String::new();
+        let mut sections: Vec<SearchSection> = Vec::new();
+        if !query.is_empty() {
+            let (movie, tvshow, album, publication, game) = filter_to_search_types(&params.filter);
+            match mk_lib_database::mk_lib_database_search::mk_lib_database_search(
+                &state.sqlx_pool_ro,
+                &query,
+                "Local",
+                movie,
+                tvshow,
+                album,
+                // image: the lib has no SQL for local image search yet
+                false,
+                publication,
+                game,
+            )
+            .await
+            {
+                Ok(results) => {
+                    sections.extend(extract_section(
+                        "Movies",
+                        "/user/media/movie_detail/",
+                        &results,
+                        "Movie",
+                        "mm_metadata_movie_guid",
+                        "mm_metadata_movie_name",
+                    ));
+                    sections.extend(extract_section(
+                        "TV Shows",
+                        "/user/media/tv_detail/",
+                        &results,
+                        "TVShow",
+                        "mm_metadata_tvshow_guid",
+                        "mm_metadata_tvshow_name",
+                    ));
+                    sections.extend(extract_section(
+                        "Music",
+                        "/user/media/music_detail/",
+                        &results,
+                        "Album",
+                        "mm_metadata_album_guid",
+                        "mm_metadata_album_name",
+                    ));
+                    sections.extend(extract_section(
+                        "Books",
+                        "/user/media/book_detail/",
+                        &results,
+                        "Publication",
+                        "mm_metadata_book_guid",
+                        "mm_metadata_book_name",
+                    ));
+                    sections.extend(extract_section(
+                        "Games",
+                        "/user/media/game_detail/",
+                        &results,
+                        "Game",
+                        "gi_game_info_id",
+                        "gi_game_info_name",
+                    ));
+                    sections.retain(|section| !section.hits.is_empty());
+                }
+                Err(error) => {
+                    eprintln!("Local search failed for {query:?}: {error}");
+                    search_error = "Search failed. Please try again.".to_string();
+                }
+            }
+        }
+
+        let template = UserSearchTemplate {
+            page_title: Some("MediaKraken Search".to_string()),
+            template_search_query: &query,
+            template_active_filters: &active_filters,
+            template_search_error: &search_error,
+            template_sections: &sections,
+        };
+        let reply_html = template.render().unwrap();
+        (StatusCode::OK, Html(reply_html).into_response())
     }
-    let template = SearchTemplate {
-        query: params.q,
-        filters: active_filters,
-        results,
-        page_title: Some("MediaKraken Search Results".to_string()),
-    };
-    Html(template.render().unwrap_or_else(|_e| "<!DOCTYPE html><html><head><title>Error</title></head><body><h1>Search Error</h1><p>Template rendering failed.</p></body></html>".to_string()))
 }
-
-/*
-
-@blueprint_user_search.route("/user_search", methods=["GET", "POST"])
-@common_global.jinja_template.template('bss_user/media/bss_user_media_search.html')
-@common_global.auth.login_required
-pub async fn url_bp_user_search_media(request):
-    """
-    Display search page
-    """
-    form = BSSSearchEditForm(request)
-    movie = []
-    tvshow = []
-    album = []
-    image = []
-    publication = []
-    game = []
-    movie_search = False
-    tvshow_search = False
-    album_search = False
-    image_search = False
-    publication_search = False
-    game_search = False
-    if request.method == 'POST':
-        if request.form['action_type'] == 'Search Local':
-            if request.form['search_media_type'] == 'any':
-                movie_search = True
-                tvshow_search = True
-                album_search = True
-                image_search = True
-                publication_search = True
-                game_search = True
-            else if request.form['search_media_type'] == 'video':
-                movie_search = True
-                tvshow_search = True
-            else if request.form['search_media_type'] == 'audio':
-                album_search = True
-            else if request.form['search_media_type'] == 'image':
-                image_search = True
-            else if request.form['search_media_type'] == 'publication':
-                publication_search = True
-            else if request.form['search_media_type'] == 'game':
-                game_search = True
-            db_connection = await request.app.db_pool.acquire()
-            json_data = await request.app.db_functions.db_metadata_search(
-                request.form['search_string'],
-                search_type='Local',
-                search_movie=movie_search,
-                search_tvshow=tvshow_search,
-                search_album=album_search,
-                search_image=image_search,
-                search_publication=publication_search,
-                search_game=game_search,
-                db_connection=db_connection)
-        await request.app.db_pool.release(db_connection)
-        if 'Movie' in json_data:
-            for search_item in json_data['Movie']:
-                movie.append(search_item)
-        if 'TVShow' in json_data:
-            for search_item in json_data['TVShow']:
-                tvshow.append(search_item)
-        if 'Album' in json_data:
-            for search_item in json_data['Album']:
-                album.append(search_item)
-        if 'Image' in json_data:
-            for search_item in json_data['Image']:
-                image.append(search_item)
-        if 'Publication' in json_data:
-            for search_item in json_data['Publication']:
-                publication.append(search_item)
-        if 'Game' in json_data:
-            for search_item in json_data['Game']:
-                game.append(search_item)
-    else if request.form['action_type'] == 'Search Metadata Providers':
-        pass
-    // TODO
-    # search_primary_language
-    # search_secondary_language
-    # search_resolution
-    # search_audio_channels
-    # search_audio_codec
-    return {
-        'media': movie,
-        'media_tvshow': tvshow,
-        'media_album': album,
-        'media_image': image,
-        'media_book': publication,
-        'media_game': game,
-        'form': form
-    }
-
-
-@blueprint_user_search.route("/user_search_nav", methods=["GET", "POST"])
-@common_global.auth.login_required
-pub async fn url_bp_user_search_nav_media(request):
-    """
-    determine what search results screen to show
-    """
-    request.ctx.session['search_text'] = request.form.get('nav_search').strip()
-    if request.ctx.session['search_page'] == 'media_3d':
-        return redirect(request.app.url_for('name_blueprint_user_media_3d.url_bp_user_media_3d'))
-    else if request.ctx.session['search_page'] == 'media_album':
-        return redirect(request.app.url_for('name_blueprint_user_music.url_bp_user_album_list'))
-    else if request.ctx.session['search_page'] == 'media_games':
-        return redirect(request.app.url_for('name_blueprint_user_game.url_bp_user_game'))
-    else if request.ctx.session['search_page'] == 'media_movie':
-        return redirect(
-            request.app.url_for('name_blueprint_user_media_genre.url_bp_user_media_genre',
-                                genre='All'))
-    else if request.ctx.session['search_page'] == 'media_music_video':
-        return redirect(
-            request.app.url_for('name_blueprint_user_music_video.url_bp_user_music_video_list'))
-    else if request.ctx.session['search_page'] == 'media_periodicals':
-        return redirect(
-            request.app.url_for('name_blueprint_user_periodical.url_bp_user_periodical_list'))
-    else if request.ctx.session['search_page'] == 'media_sports':
-        return redirect(request.app.url_for('name_blueprint_user_sports.url_bp_user_sports'))
-    else if request.ctx.session['search_page'] == 'media_tv':
-        return redirect(request.app.url_for('name_blueprint_user_tv.url_bp_user_tv'))
-    # begin metadata section
-    else if request.ctx.session['search_page'] == 'meta_album':
-        return redirect(request.app.url_for(
-            'name_blueprint_user_metadata_music.url_bp_user_metadata_music_album_list'))
-    else if request.ctx.session['search_page'] == 'meta_game':
-        return redirect(
-            request.app.url_for('name_blueprint_user_metadata_game.url_bp_user_metadata_game'))
-    else if request.ctx.session['search_page'] == 'meta_game_system':
-        return redirect(request.app.url_for(
-            'name_blueprint_user_metadata_game_system.url_bp_user_metadata_game_system'))
-    else if request.ctx.session['search_page'] == 'meta_movie':
-        return redirect(request.app.url_for(
-            'name_blueprint_user_metadata_movie.url_bp_user_metadata_movie_list'))
-    else if request.ctx.session['search_page'] == 'meta_movie_collection':
-        return redirect(request.app.url_for(
-            'name_blueprint_user_media_collection.url_bp_user_metadata_movie_collection'))
-    else if request.ctx.session['search_page'] == 'meta_music_video':
-        return redirect(request.app.url_for(
-            'name_blueprint_user_metadata_music_video.url_bp_user_metadata_music_video'))
-    else if request.ctx.session['search_page'] == 'meta_people':
-        return redirect(request.app.url_for(
-            'name_blueprint_user_metadata_people.url_bp_user_metadata_person_list'))
-    else if request.ctx.session['search_page'] == 'meta_periodical':
-        return redirect(request.app.url_for(
-            'name_blueprint_user_metadata_periodical.url_bp_user_metadata_periodical'))
-    else if request.ctx.session['search_page'] == 'meta_sports':
-        return redirect(request.app.url_for(
-            'name_blueprint_user_metadata_sports.url_bp_user_metadata_sports_list'))
-    else if request.ctx.session['search_page'] == 'meta_tv':
-        return redirect(
-            request.app.url_for('name_blueprint_user_metadata_tv.url_bp_user_metadata_tvshow_list'))
-
- */
