@@ -10,6 +10,13 @@ codegen-units = 1      # Forces the compiler to process the crate as a single un
 panic = "abort"        # Removes unwinding infrastructure, reducing binary size and sometimes improving performance
 strip = true           # Removes debug symbols from the binary to reduce size (optional)
 
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.dev.package."*"]
+opt-level = 2
+
 [dependencies]
 mk_lib_database = { version = "0.0.308", registry = "kellnr" }
 mk_lib_rabbitmq = { version = "0.0.277", registry = "kellnr" }

@@ -9,6 +9,13 @@ strip = "symbols"
 lto = true
 codegen-units = 1
 
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.dev.package."*"]
+opt-level = 2
+
 [dependencies]
 tesseract = "0.15.2"
 image = "0.25.10"

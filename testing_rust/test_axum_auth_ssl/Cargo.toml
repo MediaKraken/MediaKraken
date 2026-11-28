@@ -29,3 +29,16 @@ sqlx = { version = "0.8.3", features = [
 anyhow = "1.0.80"
 serde = "1.0.197"
 rcgen = "0.12.1"
+
+[profile.release]
+panic = 'abort'
+strip = "symbols"
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.dev.package."*"]
+opt-level = 2

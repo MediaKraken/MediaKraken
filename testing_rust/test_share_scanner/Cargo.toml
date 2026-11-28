@@ -9,6 +9,13 @@ strip = "symbols"
 lto = true
 codegen-units = 1
 
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.dev.package."*"]
+opt-level = 2
+
 [dependencies]
 mk_lib_file = { path = "../../src/mk_lib_file" }
 mk_lib_network = { path = "../../src/mk_lib_network" }

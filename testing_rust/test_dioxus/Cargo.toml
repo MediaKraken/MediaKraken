@@ -9,6 +9,13 @@ strip = "symbols"
 lto = true
 codegen-units = 1
 
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.dev.package."*"]
+opt-level = 2
+
 [dependencies]
 dioxus = "0.4.3"
 dioxus-desktop = {version="0.4.3", features = ["tokio_runtime"], default-features = false }

@@ -8,3 +8,10 @@ panic = 'abort'
 strip = "symbols"
 lto = true
 codegen-units = 1
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.dev.package."*"]
+opt-level = 2
