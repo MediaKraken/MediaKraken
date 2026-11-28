@@ -17,7 +17,9 @@ pub struct TorrentList {
     pub mm_torrent_percent_done: f32, // percent_done
 }
 
-const DEFAULT_TRANSMISSION_URL: &str = "http://mkstack-transmission:9091/transmission/rpc";
+// The k8s Service is named `mkstack-transmission-service`; the Deployment
+// name `mkstack-transmission` has no DNS record.
+const DEFAULT_TRANSMISSION_URL: &str = "http://mkstack-transmission-service:9091/transmission/rpc";
 
 // The mktransmission daemon is deployed with a fixed RPC user/password
 // (see the mktransmission Dockerfile: USERNAME/PASSWORD), so the client

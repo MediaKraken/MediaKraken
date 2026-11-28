@@ -23,7 +23,7 @@ mk_lib_database = { version = "0.0.308", registry = "kellnr" }
 mk_lib_hardware = { version = "0.0.278", registry = "kellnr" }
 mk_lib_logging = { version = "0.0.273", registry = "kellnr" }
 mk_lib_metadata = { version = "0.0.285", registry = "kellnr" }
-mk_lib_network = { version = "0.0.273", registry = "kellnr" }
+mk_lib_network = { version = "0.0.274", registry = "kellnr" }
 mk_lib_rabbitmq = { version = "0.0.277", registry = "kellnr" }
 mk_lib_share = { version = "0.0.281", registry = "kellnr" }
 
