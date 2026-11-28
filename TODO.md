@@ -1,6 +1,22 @@
 mkwebaxum
+    admin pages no longer show proper login status (shows login/signup when I'm signed in)
+    https://mk.mediakraken.media/admin/hardware needs a submit scan button and a text input that can accept the subnet to scan via a rabbitmq json to mkhardwarescanner with the subnet in "Subnet"
     metadata music still 500's
     this 500's nonsense needs to stop..catch freakn errors and send to loki with an actual debug message so actaul troubleshooting can happen without guessing nonstop and wasting time - all endpoints
+    admin page user page populate is admin using mm_axum_user_permissions
+        remove LANG column
+        true/false for active if they are signed in
+        code up the update user button
+        code up the delete user button
+    CloudNativePG Backups
+        Unable to load CloudNativePG backups: HTTP status client error (403 Forbidden) for url (https://kubernetes.default.svc/apis/postgresql.cnpg.io/v1/namespaces/cnpg-system/backups)
+    metadata movie detail page....if Backdrop is populated, show in the background
+    metadata movie filter by genre is very slow.....there is an index on the json..any thoughts on speeding it up
+
+mkhardwarescanner
+    need to get subnet to scan via "Subnet" in the rabbitmq json message
+    all hardware scans need to scan the above subnet
+    uncomment all hardware scans and compile
 
 ********** don't do  below this line**********
 kubectl -n mediakraken create secret generic db-password-admin \
