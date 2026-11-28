@@ -80,9 +80,36 @@ spec:
     spec:
       securityContext:
         fsGroup: 100
-        runAsGroup: 101
+        runAsGroup: 100
         runAsNonRoot: true
         runAsUser: 100
+      initContainers:
+        # Repair the config dir on the PVC before the daemon starts:
+        #  - a corrupted legacy state can leave a *directory* where
+        #    settings.json belongs; remove it so the start script can seed
+        #    a real file (this is also what breaks subPath file mounts)
+        #  - the dir may contain root-owned files from an earlier root run;
+        #    the non-root daemon needs to write them
+        # Best-effort throughout: on a volume where root cannot operate
+        # (NFS root-squash) the main container still starts, because the
+        # start script and the daemon only need write access to the
+        # directory itself (fsGroup: 100).
+        - name: chown-settings
+          image: mediakraken/mktransmission:dev
+          imagePullPolicy: Always
+          command:
+            - sh
+            - -c
+            - |
+              [ -d /etc/transmission-daemon/settings.json ] && rm -rf /etc/transmission-daemon/settings.json 2>/dev/null
+              chown -R 100:100 /etc/transmission-daemon 2>/dev/null
+              exit 0
+          securityContext:
+            runAsUser: 0
+            runAsNonRoot: false
+          volumeMounts:
+            - mountPath: /etc/transmission-daemon
+              name: mkstack-transmission-claim
       containers:
         - image: mediakraken/mktransmission:dev
           imagePullPolicy: Always
@@ -95,8 +122,7 @@ spec:
             - containerPort: 51413
               protocol: UDP
           volumeMounts:
-            - mountPath: /etc/transmission-daemon/settings.json
-              subPath: settings.json
+            - mountPath: /etc/transmission-daemon
               name: mkstack-transmission-claim
             - mountPath: /transmission/downloads
               name: mkstack-transmission-downloads-claim

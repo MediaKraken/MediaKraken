@@ -2,6 +2,10 @@ FROM alpine:3.24.4
 
 COPY src/ .
 
+# Keep an unmounted copy of the default settings so the start script can
+# seed a freshly provisioned (empty) settings volume.
+COPY src/etc/transmission-daemon/settings.json /etc/transmission-daemon-default.json
+
 RUN apk add --no-cache \
   busybox==1.37.0-r31 \
   transmission-daemon==4.1.2-r0 \

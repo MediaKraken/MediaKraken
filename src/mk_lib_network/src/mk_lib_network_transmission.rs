@@ -19,24 +19,25 @@ pub struct TorrentList {
 
 const DEFAULT_TRANSMISSION_URL: &str = "http://mkstack-transmission:9091/transmission/rpc";
 
+// The mktransmission daemon is deployed with a fixed RPC user/password
+// (see the mktransmission Dockerfile: USERNAME/PASSWORD), so the client
+// uses those same credentials directly.
+const TRANSMISSION_USER: &str = "admin";
+const TRANSMISSION_PASSWORD: &str = "metaman";
+
 /// Build a Transmission RPC client.
-///
-/// Reads `MK_TRANSMISSION_URL`, `MK_TRANSMISSION_USER`, and
-/// `MK_TRANSMISSION_PASSWORD` from the environment. The user and password are
-/// required; this returns an error if either is unset rather than baking
-/// credentials into the binary.
 pub async fn mk_network_transmission_login()
 -> std::result::Result<transmission_rpc::TransClient, Box<dyn std::error::Error + Send + Sync>> {
-    let url_str = std::env::var("MK_TRANSMISSION_URL")
-        .unwrap_or_else(|_| DEFAULT_TRANSMISSION_URL.to_string());
-    let url = url_str
+    let url = DEFAULT_TRANSMISSION_URL
         .parse()
-        .map_err(|e| format!("invalid MK_TRANSMISSION_URL {url_str:?}: {e}"))?;
-    let user = std::env::var("MK_TRANSMISSION_USER")
-        .map_err(|_| "MK_TRANSMISSION_USER env var not set")?;
-    let password = std::env::var("MK_TRANSMISSION_PASSWORD")
-        .map_err(|_| "MK_TRANSMISSION_PASSWORD env var not set")?;
-    Ok(TransClient::with_auth(url, BasicAuth { user, password }))
+        .map_err(|e| format!("invalid {DEFAULT_TRANSMISSION_URL:?}: {e}"))?;
+    Ok(TransClient::with_auth(
+        url,
+        BasicAuth {
+            user: TRANSMISSION_USER.to_string(),
+            password: TRANSMISSION_PASSWORD.to_string(),
+        },
+    ))
 }
 
 pub async fn mk_network_transmission_close(

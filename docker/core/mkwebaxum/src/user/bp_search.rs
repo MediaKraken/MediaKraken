@@ -162,9 +162,12 @@ pub async fn user_search(
             .await
             {
                 Ok(results) => {
+                    // Result links open the metadata detail pages, not the
+                    // media pages; the search keys are the same uuids both
+                    // sets of routes accept.
                     sections.extend(extract_section(
                         "Movies",
-                        "/user/media/movie_detail/",
+                        "/user/metadata/movie_detail/",
                         &results,
                         "Movie",
                         "mm_metadata_movie_guid",
@@ -172,12 +175,16 @@ pub async fn user_search(
                     ));
                     sections.extend(extract_section(
                         "TV Shows",
-                        "/user/media/tv_detail/",
+                        "/user/metadata/tv_detail/",
                         &results,
                         "TVShow",
                         "mm_metadata_tvshow_guid",
                         "mm_metadata_tvshow_name",
                     ));
+                    // Music keeps the media endpoint: the metadata album
+                    // route (/user/metadata/music_album/) is keyed by the
+                    // numeric musicbrainz release id, not the local guid
+                    // the search returns.
                     sections.extend(extract_section(
                         "Music",
                         "/user/media/music_detail/",
@@ -188,7 +195,7 @@ pub async fn user_search(
                     ));
                     sections.extend(extract_section(
                         "Books",
-                        "/user/media/book_detail/",
+                        "/user/metadata/book_detail/",
                         &results,
                         "Publication",
                         "mm_metadata_book_guid",
@@ -196,7 +203,7 @@ pub async fn user_search(
                     ));
                     sections.extend(extract_section(
                         "Games",
-                        "/user/media/game_detail/",
+                        "/user/metadata/game_detail/",
                         &results,
                         "Game",
                         "gi_game_info_id",

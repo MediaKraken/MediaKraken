@@ -1,5 +1,14 @@
 mkwebaxum
+    metadata music still 500's
+    this 500's nonsense needs to stop..catch freakn errors and send to loki with an actual debug message so actaul troubleshooting can happen without guessing nonstop and wasting time - all endpoints
 
+add the following profile.dev settings to ALL Cargo.toml files unless it's already in there
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.dev.package."*"]
+opt-level = 2
 
 ********** don't do  below this line**********
 kubectl -n mediakraken create secret generic db-password-admin \

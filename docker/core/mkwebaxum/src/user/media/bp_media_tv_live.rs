@@ -191,24 +191,25 @@ async fn build_live_tv_response(
             mk_lib_database_meta_tv_schedule_date_range(pool),
     );
 
+    if let Err(error) = &stations_result {
+        tracing::error!(%error, "live tv station read failed");
+    }
+    if let Err(error) = &day_result {
+        tracing::error!(%error, "live tv day read failed");
+    }
+    if let Err(error) = &programs_result {
+        tracing::error!(%error, "live tv program read failed");
+    }
+    if let Err(error) = &range_result {
+        tracing::error!(%error, "live tv schedule date range failed");
+    }
+
     let (stations, day_rows, program_list, date_range) =
         match (stations_result, day_result, programs_result, range_result) {
             (Ok(stations), Ok(day_rows), Ok(program_list), Ok(date_range)) => {
                 (stations, day_rows, program_list, date_range)
             }
             _ => {
-                if let Err(error) = &stations_result {
-                    tracing::error!(%error, "live tv station read failed");
-                }
-                if let Err(error) = &day_result {
-                    tracing::error!(%error, "live tv day read failed");
-                }
-                if let Err(error) = &programs_result {
-                    tracing::error!(%error, "live tv program read failed");
-                }
-                if let Err(error) = &range_result {
-                    tracing::error!(%error, "live tv schedule date range failed");
-                }
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Html("Internal server error".to_string()),

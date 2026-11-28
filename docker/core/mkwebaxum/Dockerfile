@@ -1,48 +1,56 @@
-# Pre-req: Use a consistent build arg for the base image
 ARG BRANCHTAG
 
-FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as planner-mkwebapp
+FROM mediakraken/mkbase_rust_alpine:${BRANCHTAG} AS planner
 WORKDIR /mediakraken
 
-# 1. Generate the recipe (Only happens if Cargo.toml/lock changes)
-COPY . .
+# Copy manifests, .cargo registry config, and source targets for cargo metadata
+COPY Cargo.toml Cargo.lock ./
+COPY .cargo ./.cargo
+COPY src ./src
 RUN cargo chef prepare --recipe-path recipe.json
 
 ################################################################################
-FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as cacher-mkwebapp
+FROM mediakraken/mkbase_rust_alpine:${BRANCHTAG} AS cacher
 WORKDIR /mediakraken
 
-# 2. Build dependencies only (This layer is cached heavily)
-COPY --from=planner-mkwebapp /mediakraken/recipe.json recipe.json
-RUN cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json
+ARG BRANCHTAG=dev
+COPY --from=planner /mediakraken/recipe.json recipe.json
+
+# Mount Cargo registry/git caches and the target directory across builds
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/mediakraken/target \
+    if [ "${BRANCHTAG}" = "prod" ]; then \
+        cargo chef cook --release --target x86_64-unknown-linux-musl --recipe-path recipe.json; \
+    else \
+        cargo chef cook --target x86_64-unknown-linux-musl --recipe-path recipe.json; \
+    fi
 
 ################################################################################
-FROM mediakraken/mkbase_rust_alpine:"${BRANCHTAG}" as builder-mkwebapp
+FROM mediakraken/mkbase_rust_alpine:${BRANCHTAG} AS builder
 WORKDIR /mediakraken
 
-# 3. Copy cached dependencies from cacher
-COPY --from=cacher-mkwebapp /mediakraken/target target
-COPY --from=cacher-mkwebapp /usr/local/cargo /usr/local/cargo
-
-# 4. Build actual source code
+ARG BRANCHTAG=dev
+COPY --from=planner /mediakraken/recipe.json recipe.json
 COPY . .
-RUN cargo build --release --target x86_64-unknown-linux-musl
 
-# Preparation for the final image
-RUN cp /mediakraken/target/x86_64-unknown-linux-musl/release/mkwebapp /mediakraken/mkwebapp
-
-# Dynamically gather shared library dependencies
-RUN mkdir -p /mediakraken/deps && \
-    ldd /mediakraken/mkwebapp | grep "=> /" | awk '{print $3}' | xargs -I % cp --parents % /mediakraken/deps
+# Reuse cached Cargo registry, git index, and target artifacts during compilation
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/usr/local/cargo/git \
+    --mount=type=cache,target=/mediakraken/target \
+    if [ "${BRANCHTAG}" = "prod" ]; then \
+        cargo build --release --target x86_64-unknown-linux-musl && \
+        cp /mediakraken/target/x86_64-unknown-linux-musl/release/mkwebapp /mediakraken/mkwebapp; \
+    else \
+        cargo build --target x86_64-unknown-linux-musl && \
+        cp /mediakraken/target/x86_64-unknown-linux-musl/debug/mkwebapp /mediakraken/mkwebapp; \
+    fi
 
 ################################################################################
-FROM alpine:latest
-# Use 'alpine' instead of 'scratch' + 'ADD tar.gz' for better layer management 
-# and built-in security updates.
-
+FROM alpine:latest AS runtime
 WORKDIR /mediakraken
 
-# Install runtime dependencies
+# Install runtime OS packages before copying changing application artifacts
 RUN apk add --no-cache \
     musl-locales \
     libssl3 \
@@ -52,18 +60,15 @@ RUN apk add --no-cache \
     libsmbclient \
     samba-client
 
-# Copy system files and certs
-COPY --from=builder-mkwebapp /etc/passwd /etc/passwd
-COPY --from=builder-mkwebapp /etc/group /etc/group
-COPY --from=builder-mkwebapp /wait /wait
-COPY --from=builder-mkwebapp /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# Copy static system metadata and CA bundle before volatile app files
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+COPY --from=builder /wait /wait
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 
-# Copy the binary and assets
-COPY --from=builder-mkwebapp /mediakraken/mkwebapp /mediakraken/mkwebapp
-COPY --from=builder-mkwebapp /mediakraken/templates ./templates
-COPY --from=builder-mkwebapp /mediakraken/static ./static
-
-# Copy the dynamically found libraries into the root
-COPY --from=builder-mkwebapp /mediakraken/deps/ /
+# Copy frequently changing application binary and static assets last
+COPY --from=builder /mediakraken/mkwebapp /mediakraken/mkwebapp
+COPY --from=builder /mediakraken/templates ./templates
+COPY --from=builder /mediakraken/static ./static
 
 USER mediakraken:mediakraken

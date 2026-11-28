@@ -178,7 +178,14 @@ pub async fn admin_report_unmatched_media(
         let parsed_report: Vec<UnmatchedMediaParsedRow> = report_list
             .into_iter()
             .map(|entry| {
-                let parsed = parse_torrent_title::parse(&entry.mm_media_path);
+                // The parser works on file names (see metadata_guessit);
+                // feed it the path's last component so directory names do
+                // not leak into the parsed fields.
+                let file_name = std::path::Path::new(&entry.mm_media_path)
+                    .file_name()
+                    .and_then(std::ffi::OsStr::to_str)
+                    .unwrap_or(&entry.mm_media_path);
+                let parsed = parse_torrent_title::parse(file_name);
                 UnmatchedMediaParsedRow {
                     mm_media_path: entry.mm_media_path,
                     parse_title: parsed.title().to_string(),

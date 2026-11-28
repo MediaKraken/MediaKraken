@@ -50,29 +50,44 @@ pub async fn admin_torrent(
     if !user_can_admin_torrent(&method, &auth).await {
         let template = TemplateError403Context { is_admin: true };
         let reply_html = template.render().unwrap();
-        (StatusCode::FORBIDDEN, Html(reply_html).into_response())
-    } else {
-        let transmission_client =
-            mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login()
-                .await
-                .unwrap();
-        let transmission_torrents =
-            mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
-                transmission_client,
-            )
-            .await
-            .unwrap();
-        let transmission_torrents_json = match serde_json::to_string(&transmission_torrents) {
-            Ok(value) => value,
-            Err(_) => "[]".to_string(),
-        };
-        let template = AdminTorrentTemplate {
-            template_data_json: &transmission_torrents_json,
-            page_title: Some("MediaKraken Admin Torrent".to_string()),
-        };
-        let reply_html = template.render().unwrap();
-        (StatusCode::OK, Html(reply_html).into_response())
+        return (StatusCode::FORBIDDEN, Html(reply_html).into_response());
     }
+    let transmission_client =
+        match mk_lib_network::mk_lib_network_transmission::mk_network_transmission_login().await {
+            Ok(client) => client,
+            Err(err) => {
+                tracing::warn!(error = %err, "transmission login failed");
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Unable to connect to transmission.".into_response(),
+                );
+            }
+        };
+    let transmission_torrents =
+        match mk_lib_network::mk_lib_network_transmission::mk_network_transmission_list_torrents(
+            transmission_client,
+        )
+        .await
+        {
+            Ok(torrents) => torrents,
+            Err(err) => {
+                tracing::warn!(error = %err, "transmission list torrents failed");
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Unable to list torrents.".into_response(),
+                );
+            }
+        };
+    let transmission_torrents_json = match serde_json::to_string(&transmission_torrents) {
+        Ok(value) => value,
+        Err(_) => "[]".to_string(),
+    };
+    let template = AdminTorrentTemplate {
+        template_data_json: &transmission_torrents_json,
+        page_title: Some("MediaKraken Admin Torrent".to_string()),
+    };
+    let reply_html = template.render().unwrap();
+    (StatusCode::OK, Html(reply_html).into_response())
 }
 
 pub async fn admin_torrent_add(
